@@ -4,7 +4,7 @@ class axiosBackend {
     initiate(){
         this.instance = axios.create({
             baseURL: `${import.meta.env.VITE_BACKEND_API_URL}/api/`,
-            timeout: 1000,
+            timeout: 30000,
         })
     }
 

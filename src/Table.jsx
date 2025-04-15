@@ -14,26 +14,26 @@ const BasicTable = (props) => {
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell align="right">Email</TableCell>
-            <TableCell align="right">Contact No.</TableCell>
-            <TableCell align="right">Company</TableCell>
-            <TableCell align="right">Balance&nbsp;($)</TableCell>
+            <TableCell>Title</TableCell>
+            <TableCell align="right">Genres</TableCell>
+            <TableCell align="right">Languages</TableCell>
+            <TableCell align="right">Year</TableCell>
+            <TableCell align="right">IMDB Rating</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {data.map((row) => (
             <TableRow
-              key={row.name}
+              key={row.title}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                {row.name}
+                {row.title}
               </TableCell>
-              <TableCell align="right">{row.email}</TableCell>
-              <TableCell align="right">{row.phone}</TableCell>
-              <TableCell align="right">{row.company}</TableCell>
-              <TableCell align="right">{row.balance}</TableCell>
+              <TableCell align="right">{(row.genres ?? []).join(", ")}</TableCell>
+              <TableCell align="right">{(row.languages ?? []).join(", ")}</TableCell>
+              <TableCell align="right">{row.year}</TableCell>
+              <TableCell align="right">{row.imdb?.rating}</TableCell>
             </TableRow>
           ))}
         </TableBody>
