@@ -3,7 +3,7 @@ import axios from "axios";
 class axiosBackend {
     initiate(){
         this.instance = axios.create({
-            baseURL: `http://localhost:3000/api/`,
+            baseURL: `${import.meta.env.VITE_BACKEND_API_URL}/api/`,
             timeout: 1000,
         })
     }
