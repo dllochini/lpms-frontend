@@ -14,26 +14,24 @@ const BasicTable = (props) => {
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell>Title</TableCell>
-            <TableCell align="right">Genres</TableCell>
-            <TableCell align="right">Languages</TableCell>
-            <TableCell align="right">Year</TableCell>
-            <TableCell align="right">IMDB Rating</TableCell>
+            <TableCell >ID</TableCell>
+            <TableCell align="right">FirstName</TableCell>
+            <TableCell align="right">Lastname</TableCell>
+            <TableCell align="right">Email</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {data.map((row) => (
             <TableRow
-              key={row.title}
+              key={row._id}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell component="th" scope="row">
-                {row.title}
+                {row._id}
               </TableCell>
-              <TableCell align="right">{(row.genres ?? []).join(", ")}</TableCell>
-              <TableCell align="right">{(row.languages ?? []).join(", ")}</TableCell>
-              <TableCell align="right">{row.year}</TableCell>
-              <TableCell align="right">{row.imdb?.rating}</TableCell>
+              <TableCell align="right">{row.firstName}</TableCell>
+              <TableCell align="right">{row.lastName}</TableCell>
+              <TableCell align="right">{row.email}</TableCell>
             </TableRow>
           ))}
         </TableBody>
