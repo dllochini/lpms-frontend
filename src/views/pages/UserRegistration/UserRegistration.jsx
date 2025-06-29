@@ -10,6 +10,7 @@ import axios from "axios";
 
 const UserRegistration = () => {
   const [responseData, setResponseData] = useState([]);
+  const [submitError, setSubmitError] = useState("");
 
   const fetchData = async function () {
     const response = await sampleGetAPI();
@@ -25,8 +26,9 @@ const UserRegistration = () => {
       firstName: yup.string().required("First name is required"),
       lastName: yup.string().required("Last name is required"),
       email: yup.string().email(),
-      nic: yup.string().matches(/^[0-9]{10}$/, 'Invalid NIC format. Must be with 12 digits or 12 digits with v or V')
-
+      nic: yup
+        .string()
+        .matches(/^[0-9]{10}$/,"Invalid NIC format. Must be with 12 digits or 12 digits with v or V"),
     })
     .required();
 
@@ -40,7 +42,7 @@ const UserRegistration = () => {
       firstName: "",
       lastName: "",
       email: "",
-      nic:"",
+      nic: "",
     },
     resolver: yupResolver(schema),
   });
@@ -54,13 +56,14 @@ const UserRegistration = () => {
         data
       );
 
-      console.log("✅ Full Response:", response);
-      console.log("✅ Response Data:", response.data); // should work
+      console.log("Full Response:", response);
+      console.log("Response Data:", response.data);
 
       fetchData();
       reset();
     } catch (error) {
       console.error("Error submitting data:", error);
+      setSubmitError(error.response?.data?.error || "Something went wrong");
     }
   };
 
@@ -146,6 +149,7 @@ const UserRegistration = () => {
         <Button type="submit" variant="contained" color="primary">
           Submit
         </Button>
+        {submitError && <p>{submitError}</p>}
       </Box>
 
       <Table data={responseData} />
