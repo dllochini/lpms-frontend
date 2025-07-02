@@ -1,0 +1,12 @@
+.firstNameInputField, .lastNameInputField, .emailInputField, .nicInputField{
+    /* border: 2px solid red; */
+    display:flex;
+    width: fit-content;
+    
+}
+
+.inputLabel{
+    /* border: 2px solid green; */
+    height: fit-content;
+    align-self: center;
+}
