@@ -33,12 +33,17 @@ const UserRegistration = () => {
     .object({
       firstName: yup.string().required("First name is required"),
       lastName: yup.string().required("Last name is required"),
+      fullName: yup.string().required("Full name is required"),
       email: yup.string().email(),
       nic: yup
         .string()
         .matches(
           /^[0-9]{10}$/,
           "Invalid NIC format. Must be with 12 digits or 12 digits with v or V"
+        ),
+        contact_no: yup.string().matches(
+          /^[0-9]{10}$/,
+          "Invalid format. Must be with 10 digits"
         ),
     })
     .required();
@@ -52,8 +57,10 @@ const UserRegistration = () => {
     defaultValues: {
       firstName: "",
       lastName: "",
+      fullName: "",
       email: "",
       nic: "",
+      contact_no: "",
     },
     resolver: yupResolver(schema),
   });
@@ -131,10 +138,15 @@ const UserRegistration = () => {
                   gap: 1,
                   // border: 1,
                   // borderColor: "red",
-                  width:"50%"
+                  width: "50%",
                 }}
               >
-                <InputLabel className="inputLabel" sx={{paddingBottom: 3, minWidth: 100 }}>First Name : </InputLabel>
+                <InputLabel
+                  className="inputLabel"
+                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                >
+                  First Name :{" "}
+                </InputLabel>
                 <Controller
                   name="firstName"
                   control={control}
@@ -160,10 +172,15 @@ const UserRegistration = () => {
                   gap: 1,
                   // border: 1,
                   // borderColor: "red",
-                  width:"50%"
+                  width: "50%",
                 }}
               >
-                <InputLabel className="inputLabel" sx={{paddingBottom: 3, minWidth: 100 }}>Last Name :</InputLabel>
+                <InputLabel
+                  className="inputLabel"
+                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                >
+                  Last Name :
+                </InputLabel>
                 <Controller
                   name="lastName"
                   control={control}
@@ -180,9 +197,10 @@ const UserRegistration = () => {
                   )}
                 />
               </Grid>
+
             </Grid>
 
-          {/* Email */}
+            {/* Full name */}
             <Grid
               sx={{
                 display: "flex",
@@ -192,9 +210,14 @@ const UserRegistration = () => {
                 // borderColor: "yellow",
               }}
             >
-              <InputLabel className="inputLabel" sx={{paddingBottom: 3, minWidth: 100 }}>Email :</InputLabel>
+              <InputLabel
+                className="inputLabel"
+                sx={{ paddingBottom: 3, minWidth: 100 }}
+              >
+                Full Name :
+              </InputLabel>
               <Controller
-                name="email"
+                name="fullName"
                 control={control}
                 render={({ field }) => (
                   <TextField
@@ -202,14 +225,15 @@ const UserRegistration = () => {
                     id="outlined-required"
                     size="small"
                     className="inputField"
-                    error={!!errors.email}
-                    helperText={errors.email?.message || " "}
+                    sx={{ width: "400px" }}
+                    error={!!errors.fullName}
+                    helperText={errors.fullName?.message || " "}
                   />
                 )}
               />
             </Grid>
 
-          {/* NIC */}
+            {/* NIC */}
             <Grid
               sx={{
                 display: "flex",
@@ -219,7 +243,12 @@ const UserRegistration = () => {
                 // borderColor: "yellow",
               }}
             >
-              <InputLabel className="inputLabel" sx={{paddingBottom: 3, minWidth: 100 }}>NIC :</InputLabel>
+              <InputLabel
+                className="inputLabel"
+                sx={{ paddingBottom: 3, minWidth: 100 }}
+              >
+                NIC :
+              </InputLabel>
               <Controller
                 name="nic"
                 control={control}
@@ -236,12 +265,76 @@ const UserRegistration = () => {
                 )}
               />
             </Grid>
-          
-          {/* Button */}
+
+            {/* Email */}
+            <Grid
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                // border: 1,
+                // borderColor: "yellow",
+              }}
+            >
+              <InputLabel
+                className="inputLabel"
+                sx={{ paddingBottom: 3, minWidth: 100 }}
+              >
+                Email :
+              </InputLabel>
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="outlined-required"
+                    size="small"
+                    className="inputField"
+                    error={!!errors.email}
+                    helperText={errors.email?.message || " "}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Contact */}
+            <Grid
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                // border: 1,
+                // borderColor: "yellow",
+              }}
+            >
+              <InputLabel
+                className="inputLabel"
+                sx={{ paddingBottom: 3, minWidth: 100 }}
+              >
+                Contact No :
+              </InputLabel>
+              <Controller
+                name="contact_no"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    id="outlined-required"
+                    size="small"
+                    className="inputField"
+                    error={!!errors.contact_no}
+                    helperText={errors.contact_no?.message || " "}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Button */}
             <Button type="submit" variant="contained" color="primary">
               Submit
             </Button>
-            {submitError && <p>{submitError}</p>}
+            {submitError && <p>{submitError}</p>} 
           </Grid>
         </Paper>
       </Box>

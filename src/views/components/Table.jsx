@@ -1,11 +1,11 @@
-import * as React from 'react';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
+import * as React from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 
 const BasicTable = (props) => {
   const { data } = props;
@@ -14,9 +14,10 @@ const BasicTable = (props) => {
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>
-            <TableCell >ID</TableCell>
+            <TableCell>ID</TableCell>
             <TableCell align="right">FirstName</TableCell>
             <TableCell align="right">Lastname</TableCell>
+            <TableCell align="right">FullName</TableCell>
             <TableCell align="right">Email</TableCell>
           </TableRow>
         </TableHead>
@@ -24,13 +25,14 @@ const BasicTable = (props) => {
           {data.map((row) => (
             <TableRow
               key={row._id}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
             >
               <TableCell component="th" scope="row">
                 {row._id}
               </TableCell>
               <TableCell align="right">{row.firstName}</TableCell>
               <TableCell align="right">{row.lastName}</TableCell>
+              <TableCell align="right">{row.fullName}</TableCell>
               <TableCell align="right">{row.email}</TableCell>
             </TableRow>
           ))}
@@ -38,6 +40,6 @@ const BasicTable = (props) => {
       </Table>
     </TableContainer>
   );
-}
+};
 
 export default BasicTable;
