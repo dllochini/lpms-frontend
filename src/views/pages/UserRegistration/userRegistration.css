@@ -1,12 +1,10 @@
-.firstNameInputField, .lastNameInputField, .emailInputField, .nicInputField{
-    /* border: 2px solid red; */
-    display:flex;
-    width: fit-content;
+*{
+    /* padding: 0%; */
+    margin: 0%;
     
 }
 
-.inputLabel{
-    /* border: 2px solid green; */
-    height: fit-content;
-    align-self: center;
+.body{
+    /* background-color: rgb(245, 245, 245); */
+    /* background-image: './images/sugar-cane.jpg'; */
 }
