@@ -90,24 +90,39 @@ const UserRegistration = () => {
         className="body"
         sx={{
           // minHeight: "50%",
-          height: "90vh",
+          height: "95vh",
           backgroundColor: "rgb(245, 245, 245)",
           // backgroundImage: "url('/images/sugar-cane.jpg')",
           // backgroundSize: "cover",
           // backgroundRepeat: "no-repeat",
           // backgroundPosition: "center",
           paddingTop: 3,
-          paddingLeft: 3,
         }}
       >
-        <Typography variant="h4" gutterBottom>
-          User Registration
-        </Typography>
+        <Box
+          sx={{
+            backgroundColor: 'rgba(255, 255, 255)',
+            // padding: 1,
+            // border: 1,
+            // margin: 0,
+            paddingTop: 2,
+            paddingBottom: 1,
+          }}
+        >
+          <Typography
+            variant="h4"
+            align="center"
+            color="rgb(82, 82, 82)"
+            gutterBottom
+          >
+            User Registration
+          </Typography>
+        </Box>
 
         <Box
           component="form"
           sx={{
-            // border: 1,
+            marginTop: 3,
             // borderColor: "red",
             justifyContent: "center",
             // ".inputField": { alignItems:"left", border: 1, marigin:3 },
