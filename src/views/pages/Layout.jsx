@@ -6,7 +6,7 @@ import {
   IconButton,
   Paper,
   Box,
-  Button
+  Button,
 } from "@mui/material";
 // import AdbIcon from '@mui/icons-material/Adb';
 // import IconButton from "@mui/material";
@@ -21,7 +21,7 @@ const Layout = () => {
           backgroundColor: "#fff",
           color: "#000",
           // boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)",
-          
+
           // marginBottom: 3,
         }}
       >
@@ -47,23 +47,21 @@ const Layout = () => {
       <Outlet />
 
       <Box
-      component="footer"
-      sx={{
-        backgroundColor: '#fff',
-        color: 'black',
-        textAlign: 'center',
-        py: 2,
-        position: 'relative',
-        bottom: 0,
-        width: '100%',
-        mt: 2, 
-      }}
-    >
-      <Typography variant="body2">
-        © {new Date().getFullYear()} Your Company Name. All rights reserved.
-      </Typography>
-    </Box>
-
+        component="footer"
+        sx={{
+          backgroundColor: "#fff",
+          color: "black",
+          textAlign: "center",
+          py: 3,
+          position: "relative",
+          width: "100%",
+          // mt: 2,
+        }}
+      >
+        <Typography variant="body2">
+          © {new Date().getFullYear()} Your Company Name. All rights reserved.
+        </Typography>
+      </Box>
     </>
   );
 };

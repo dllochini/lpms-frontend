@@ -9,6 +9,7 @@ import {
   Typography,
   Grid,
   Paper,
+  MenuItem,
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import "./userRegistration.css";
@@ -19,6 +20,44 @@ import axios from "axios";
 const UserRegistration = () => {
   const [responseData, setResponseData] = useState([]);
   const [submitError, setSubmitError] = useState("");
+
+  const designations = [
+    {
+      value: "Mr.",
+      label: "Mr.",
+    },
+    {
+      value: "Miss.",
+      label: "Miss.",
+    },
+    {
+      value: "Mrs.",
+      label: "Mrs.",
+    },
+    {
+      value: "Rev",
+      label: "Rev",
+    },
+  ];
+
+  const roles = [
+    {
+      value: "Manager",
+      label: "Manager",
+    },
+    {
+      value: "Farmer",
+      label: "Farmer",
+    },
+    {
+      value: "Admin",
+      label: "Admin",
+    },
+    {
+      value: "Accountant",
+      label: "Accountant",
+    },
+  ];
 
   const fetchData = async function () {
     const response = await sampleGetAPI();
@@ -31,6 +70,8 @@ const UserRegistration = () => {
 
   const schema = yup
     .object({
+      designation: yup.string().required("Choose a desgnation"),
+      role: yup.string().required("Choose a role"),
       firstName: yup.string().required("First name is required"),
       lastName: yup.string().required("Last name is required"),
       fullName: yup.string().required("Full name is required"),
@@ -54,6 +95,8 @@ const UserRegistration = () => {
     reset,
   } = useForm({
     defaultValues: {
+      designation: "",
+      role: "",
       firstName: "",
       lastName: "",
       fullName: "",
@@ -89,8 +132,7 @@ const UserRegistration = () => {
       <Box
         className="body"
         sx={{
-          // minHeight: "50%",
-          height: "95vh",
+          minHeight: "110vh",
           backgroundColor: "rgb(245, 245, 245)",
           // backgroundImage: "url('/images/sugar-cane.jpg')",
           // backgroundSize: "cover",
@@ -99,9 +141,10 @@ const UserRegistration = () => {
           paddingTop: 3,
         }}
       >
+        {/* Heading */}
         <Box
           sx={{
-            backgroundColor: 'rgba(255, 255, 255)',
+            backgroundColor: "rgba(255, 255, 255)",
             // padding: 1,
             // border: 1,
             // margin: 0,
@@ -119,10 +162,13 @@ const UserRegistration = () => {
           </Typography>
         </Box>
 
+        {/* form */}
         <Box
           component="form"
           sx={{
             marginTop: 3,
+            marginBottom: 3,
+            // border:1,
             // borderColor: "red",
             justifyContent: "center",
             // ".inputField": { alignItems:"left", border: 1, marigin:3 },
@@ -132,12 +178,14 @@ const UserRegistration = () => {
           onSubmit={handleSubmit(onSubmit)}
           autoComplete="off"
         >
+          {/* Box for form content */}
           <Paper
             sx={{
               width: "50%",
-              padding: 5,
+              padding: 2,
               alignItems: "center",
               boxShadow: 2,
+              // border:1,
             }}
           >
             {/* form content  */}
@@ -148,6 +196,88 @@ const UserRegistration = () => {
                 margin: 3,
               }}
             >
+              {/* designation */}
+              <Grid
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  // border: 1,
+                  // borderColor: "yellow",
+                }}
+              >
+                <InputLabel
+                  className="inputLabel"
+                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                >
+                  Designation :
+                </InputLabel>
+                <Controller
+                  name="designation"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      id="outlined-select-designations"
+                      select
+                      // label="Designation"
+                      size="small"
+                      className="inputField"
+                      sx={{ width: "80px" }}
+                      error={!!errors.designation}
+                      helperText={errors.designation?.message || " "}
+                    >
+                      {designations.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Grid>
+
+              {/* role */}
+              <Grid
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  // border: 1,
+                  // borderColor: "yellow",
+                }}
+              >
+                <InputLabel
+                  className="inputLabel"
+                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                >
+                  Role :
+                </InputLabel>
+                <Controller
+                  name="role"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      id="outlined-select-roles"
+                      select
+                      // label="role"
+                      size="small"
+                      className="inputField"
+                      sx={{ width: "100px" }}
+                      error={!!errors.role}
+                      helperText={errors.role?.message || " "}
+                    >
+                      {roles.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </TextField>
+                  )}
+                />
+              </Grid>
+
               {/* first name and last name container */}
               <Grid
                 sx={{
@@ -252,7 +382,7 @@ const UserRegistration = () => {
                       {...field}
                       id="outlined-required"
                       size="small"
-                      className="inputField"
+                      // className="inputField"
                       sx={{ width: "400px" }}
                       error={!!errors.fullName}
                       helperText={errors.fullName?.message || " "}
@@ -359,10 +489,27 @@ const UserRegistration = () => {
               </Grid>
 
               {/* Button */}
-              <Button type="submit" variant="contained" color="primary">
-                Submit
-              </Button>
-              {submitError && <p>{submitError}</p>}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  // mt: 2,
+                }}
+              >
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  sx={
+                    {
+                      // border: 1,
+                    }
+                  }
+                >
+                  Submit
+                </Button>
+                {submitError && <p>{submitError}</p>}
+              </Box>
             </Grid>
           </Paper>
         </Box>
