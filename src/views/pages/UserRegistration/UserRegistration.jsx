@@ -70,7 +70,7 @@ const UserRegistration = () => {
 
   const schema = yup
     .object({
-      designation: yup.string().required("Choose a desgnation"),
+      designation: yup.string().required("Choose a designation"),
       role: yup.string().required("Choose a role"),
       firstName: yup.string().required("First name is required"),
       lastName: yup.string().required("Last name is required"),
@@ -79,12 +79,27 @@ const UserRegistration = () => {
       nic: yup
         .string()
         .matches(
-          /^[0-9]{10}$/,
-          "Invalid NIC format. Must be with 12 digits or 12 digits with v or V"
+          /^([0-9]{9}[vV]|[0-9]{12})$/,
+          "Invalid NIC format. Must be 12 digits or 9 digits with 'V'/'v'"
         ),
       contact_no: yup
         .string()
-        .matches(/^[0-9]{10}$/, "Invalid format. Must be with 10 digits"),
+        .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits"),
+      newPassword: yup
+        .string()
+        .required("Password is required")
+        .min(8, "Password must be at least 8 characters")
+        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+        .matches(/[0-9]/, "Password must contain at least one number")
+        .matches(
+          /[@$!%*?&]/,
+          "Password must contain at least one special character"
+        ),
+      confirmPassword: yup
+        .string()
+        .required("Please confirm your password")
+        .oneOf([yup.ref("newPassword"), null], "Passwords must match"),
     })
     .required();
 
@@ -103,6 +118,8 @@ const UserRegistration = () => {
       email: "",
       nic: "",
       contact_no: "",
+      newPassword: "",
+      confirmPassword: "",
     },
     resolver: yupResolver(schema),
   });
@@ -132,7 +149,7 @@ const UserRegistration = () => {
       <Box
         className="body"
         sx={{
-          minHeight: "110vh",
+          minHeight: "125vh",
           backgroundColor: "rgb(245, 245, 245)",
           // backgroundImage: "url('/images/sugar-cane.jpg')",
           // backgroundSize: "cover",
@@ -181,7 +198,7 @@ const UserRegistration = () => {
           {/* Box for form content */}
           <Paper
             sx={{
-              width: "50%",
+              width: "62%",
               padding: 2,
               alignItems: "center",
               boxShadow: 2,
@@ -208,7 +225,7 @@ const UserRegistration = () => {
               >
                 <InputLabel
                   className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                  sx={{ paddingBottom: 3, minWidth: 130 }}
                 >
                   Designation :
                 </InputLabel>
@@ -223,7 +240,7 @@ const UserRegistration = () => {
                       // label="Designation"
                       size="small"
                       className="inputField"
-                      sx={{ width: "80px" }}
+                      sx={{ width: 100 }}
                       error={!!errors.designation}
                       helperText={errors.designation?.message || " "}
                     >
@@ -249,7 +266,7 @@ const UserRegistration = () => {
               >
                 <InputLabel
                   className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                  sx={{ paddingBottom: 3, minWidth: 130 }}
                 >
                   Role :
                 </InputLabel>
@@ -264,7 +281,7 @@ const UserRegistration = () => {
                       // label="role"
                       size="small"
                       className="inputField"
-                      sx={{ width: "100px" }}
+                      sx={{ width: 100 }}
                       error={!!errors.role}
                       helperText={errors.role?.message || " "}
                     >
@@ -297,14 +314,15 @@ const UserRegistration = () => {
                     gap: 1,
                     // border: 1,
                     // borderColor: "red",
-                    width: "50%",
+                    // width: "50%",
+                    marginRight: "3%",
                   }}
                 >
                   <InputLabel
                     className="inputLabel"
-                    sx={{ paddingBottom: 3, minWidth: 100 }}
+                    sx={{ paddingBottom: 3, minWidth: 130 }}
                   >
-                    First Name :{" "}
+                    First Name :
                   </InputLabel>
                   <Controller
                     name="firstName"
@@ -336,7 +354,7 @@ const UserRegistration = () => {
                 >
                   <InputLabel
                     className="inputLabel"
-                    sx={{ paddingBottom: 3, minWidth: 100 }}
+                    sx={{ paddingBottom: 3, minWidth: 130 }}
                   >
                     Last Name :
                   </InputLabel>
@@ -370,7 +388,7 @@ const UserRegistration = () => {
               >
                 <InputLabel
                   className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                  sx={{ paddingBottom: 3, minWidth: 130 }}
                 >
                   Full Name :
                 </InputLabel>
@@ -403,7 +421,7 @@ const UserRegistration = () => {
               >
                 <InputLabel
                   className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                  sx={{ paddingBottom: 3, minWidth: 130 }}
                 >
                   NIC :
                 </InputLabel>
@@ -436,7 +454,7 @@ const UserRegistration = () => {
               >
                 <InputLabel
                   className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                  sx={{ paddingBottom: 3, minWidth: 130 }}
                 >
                   Email :
                 </InputLabel>
@@ -468,7 +486,7 @@ const UserRegistration = () => {
               >
                 <InputLabel
                   className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 100 }}
+                  sx={{ paddingBottom: 3, minWidth: 130 }}
                 >
                   Contact No :
                 </InputLabel>
@@ -488,6 +506,93 @@ const UserRegistration = () => {
                 />
               </Grid>
 
+              {/* password and confirm password*/}
+              <Grid
+                sx={{
+                  // border: 1,
+                  // borderColor: "green",
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: 2,
+                }}
+              >
+
+                {/* Password */}
+                <Grid
+                  item
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    // border: 1,
+                    // borderColor: "red",
+                    // width: "50%",
+                    // marginRight: "2%"
+                  }}
+                >
+                  <InputLabel
+                    className="inputLabel"
+                    sx={{ paddingBottom: 3, minWidth: 130 }}
+                  >
+                    New Password :
+                  </InputLabel>
+                  <Controller
+                    name="newPassword"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        id="outlined-required"
+                        type="password"
+                        error={!!errors.newPassword}
+                        helperText={errors.newPassword?.message || " "}
+                        size="small"
+                        sx={{ width: 200 }}
+                        className="inputField"
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Confirm password */}
+                <Grid
+                  item
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    // border: 1,
+                    // borderColor: "red",
+                    // width: "50%",
+                  }}
+                >
+                  <InputLabel
+                    className="inputLabel"
+                    sx={{ paddingBottom: 3, minWidth: 130 }}
+                  >
+                    Confirm New Password :
+                  </InputLabel>
+                  <Controller
+                    name="confirmPassword"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        type="password"
+                        id="outlined-required"
+                        size="small"
+                        className="inputField"
+                        sx={{ width: 200 }}
+                        error={!!errors.confirmPassword}
+                        helperText={errors.confirmPassword?.message || " "}
+                        // fullWidth
+                      />
+                    )}
+                  />
+                </Grid>
+
+              </Grid>
+
               {/* Button */}
               <Box
                 sx={{
@@ -500,16 +605,12 @@ const UserRegistration = () => {
                   type="submit"
                   variant="contained"
                   color="primary"
-                  sx={
-                    {
-                      // border: 1,
-                    }
-                  }
                 >
                   Submit
                 </Button>
                 {submitError && <p>{submitError}</p>}
               </Box>
+
             </Grid>
           </Paper>
         </Box>
