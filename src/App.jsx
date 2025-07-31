@@ -1,27 +1,27 @@
-import { useState, useEffect } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import Table from './Table'
-import { sampleGetAPI } from './api/user'
+import { useState, useEffect } from "react";
+import "./App.css";
+// import Table from './views/components/Table'
+// import { sampleGetAPI } from './api/user'
+import Layout from "./views/pages/Layout";
+import Login from "./views/pages/Login";
+import Home from "./views/pages/Home";
+import NoPage from "./views/pages/NoPage";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 const App = () => {
-  const [count, setCount] = useState(0)
-  const [responseData, setResponseData] = useState([]);  
-
-  useEffect(() => {
-    async function fetchData() {
-      const response = await sampleGetAPI();
-      setResponseData(response?.data ?? []);
-    }
-    fetchData();
-  }, []);
-
   return (
     <>
-    
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="*" element={<NoPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;
