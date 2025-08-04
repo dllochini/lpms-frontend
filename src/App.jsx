@@ -4,6 +4,7 @@ import "./App.css";
 // import { sampleGetAPI } from './api/user'
 import Layout from "./views/pages/Layout";
 import Login from "./views/pages/Login";
+import FrogotPw from "./views/pages/FrogotPw";
 import Home from "./views/pages/Home";
 import NoPage from "./views/pages/NoPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -14,6 +15,7 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/frogotPw" element={<FrogotPw />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="*" element={<NoPage />} />
