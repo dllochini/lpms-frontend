@@ -1,38 +1,65 @@
 import { Outlet, Link } from "react-router-dom";
-// import {
-//   AppBar,
-//   Toolbar,
-//   Typography,
-//   IconButton,
-//   Paper,
-//   Box,
-//   Button,
-// } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Paper,
+  Avatar,
+  Box,
+  Button,
+} from "@mui/material";
 // import AdbIcon from '@mui/icons-material/Adb';
 // import IconButton from "@mui/material";
+import companyLogo from "/images/ceylon-sugar-industries.png";
 
 const Layout = () => {
   return (
-    <>  
-     
-      <Outlet />
+    <>
 
-      {/* <Box
+      {/* Header */}
+      <AppBar position="static" color="default" elevation={1}>
+        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Box
+            component="img"
+            src={companyLogo} // <-- replace with your logo path
+            // alt="Company Logo"
+            sx={{
+              height: 50, // adjust as needed
+              mr: 2,
+              my: 1.5, // margin-right for spacing
+              // border: "2px solid black",
+            }}
+          />
+          {/* <Avatar
+            alt="Land Avatar"
+            src="https://via.placeholder.com/40"
+            sx={{
+              width: 40,
+              height: 40,
+              // border: "2px solid black"
+            }}
+          /> */}
+        </Toolbar>
+      </AppBar>
+
+      <Box component="main" flex={1} p={3}>
+        <Outlet />
+      </Box>
+
+      {/* Footer */}
+      <Box
         component="footer"
-        sx={{
-          backgroundColor: "#fff",
-          color: "black",
-          textAlign: "center",
-          py: 3,
-          position: "relative",
-          width: "100%",
-          // mt: 2,
-        }}
+        py={2}
+        textAlign="center"
+        bgcolor="#f5f5f5"
+        sx={{ boxShadow: "0 -4px 6px rgba(0,0,0,0.1)" }}
       >
-        <Typography variant="body2">
-          © {new Date().getFullYear()} Your Company Name. All rights reserved.
+        <Typography variant="body2" color="textSecondary">
+          © 2025 Land Progress Management
         </Typography>
-      </Box> */}
+      </Box>
+
     </>
   );
 };
