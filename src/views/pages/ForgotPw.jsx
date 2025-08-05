@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useState } from "react";
 import {
   Box,
   Card,
@@ -6,10 +7,12 @@ import {
   TextField,
   Button,
   Typography,
+  CircularProgress,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useSearchParams } from "react-router-dom"; // <-- For token from URL
 import bgImage from "/images/sugar-cane.jpg";
 import companyLogo from "/images/ceylon-sugar-industries.png";
 
@@ -23,17 +26,53 @@ const resetPasswordSchema = yup.object().shape({
 });
 
 export default function ResetPasswordPage() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
+
   const {
     control,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm({
     resolver: yupResolver(resetPasswordSchema),
   });
 
-  const onSubmit = (data) => {
-    console.log("Reset password data:", data);
-    // TODO: Call your reset password API here
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setMessage("");
+    setError("");
+
+    try {
+      const response = await fetch("https://your-api-url.com/api/reset-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          password: data.newPassword,
+          token: token, // Include token from URL
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage(" Password reset successful!");
+        reset();
+      } else {
+        setError(result.message || "Something went wrong.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,24 +107,9 @@ export default function ResetPasswordPage() {
               component="img"
               src={companyLogo}
               alt="Company Logo"
-              sx={{
-                height: 60,
-                width: "auto",
-              }}
+              sx={{ height: 60, width: "auto" }}
             />
           </Box>
-
-          {/* Hello Message
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            textAlign="center"
-            mt={1}
-            mb={2}
-            color="primary"
-          >
-            Hello Alex!
-          </Typography> */}
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -97,7 +121,6 @@ export default function ResetPasswordPage() {
                   {...field}
                   label="Enter New Password"
                   type="password"
-                  variant="outlined"
                   fullWidth
                   margin="normal"
                   error={!!errors.newPassword}
@@ -114,7 +137,6 @@ export default function ResetPasswordPage() {
                   {...field}
                   label="Retype Password"
                   type="password"
-                  variant="outlined"
                   fullWidth
                   margin="normal"
                   error={!!errors.confirmPassword}
@@ -123,19 +145,27 @@ export default function ResetPasswordPage() {
               )}
             />
 
+            {/* Message */}
+            {message && (
+              <Typography sx={{ mt: 1, color: "green", fontWeight: 500 }}>
+                {message}
+              </Typography>
+            )}
+            {error && (
+              <Typography sx={{ mt: 1, color: "red", fontWeight: 500 }}>
+                {error}
+              </Typography>
+            )}
+
             <Button
               type="submit"
               variant="contained"
               color="primary"
               fullWidth
-              sx={{
-                mt: 2,
-                py: 1.2,
-                fontWeight: "bold",
-                textTransform: "uppercase",
-              }}
+              sx={{ mt: 2, py: 1.2, fontWeight: "bold", textTransform: "uppercase" }}
+              disabled={loading}
             >
-              Submit
+              {loading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
             </Button>
           </form>
         </CardContent>

@@ -46,15 +46,63 @@ export default function LoginPage() {
   });
 
   // Submit handlers
-  const onLogin = (data) => {
-    console.log("Login data:", data);
-    // TODO: Call your login API here
+  const onLogin = async (data) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data), // { username, password }
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        // Save token and role
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("role", result.role);
+  
+        // Redirect based on role
+        if (result.role === "admin") {
+          window.location.href = "/admin/dashboard";
+        } else if (result.role === "user") {
+          window.location.href = "/user/dashboard";
+        } else {
+          // default route
+          window.location.href = "/";
+        }
+      } else {
+        alert("Login failed: " + result.message);
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   };
+  
 
-  const onForgot = (data) => {
-    console.log("Forgot password data:", data);
-    // TODO: Call your password reset API here
+  const onForgot = async (data) => {
+    try {
+      const response = await fetch("http://localhost:5000/api/auth/forgot-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data), // { email }
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        alert(result.message); // "Password reset link sent to email."
+      } else {
+        alert("Error: " + result.message);
+      }
+    } catch (error) {
+      console.error("Forgot password error:", error);
+    }
   };
+  
 
   return (
     <Box
