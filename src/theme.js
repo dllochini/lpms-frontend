@@ -22,6 +22,9 @@ const theme = createTheme({
     button: {
       textTransform: 'none', // Prevent uppercase on buttons
     },
+    h5: {
+        color: 'green',
+    },
   },
   components: {
     // Example: override a component style

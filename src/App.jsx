@@ -6,6 +6,7 @@ import Layout from "./views/pages/Layout";
 import Login from "./views/pages/Login";
 import Home from "./views/pages/Home";
 import NoPage from "./views/pages/NoPage";
+import ExecutiveDashboard from "./views/pages/ExecutiveDashboard";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="*" element={<NoPage />} />
+            <Route path="/executive/dashboard" element={<ExecutiveDashboard />} />
           </Route>
         </Routes>
       </BrowserRouter>
