@@ -31,15 +31,15 @@ const Layout = () => {
               // border: "2px solid black",
             }}
           />
-          {/* <Avatar
+          <Avatar
             alt="Land Avatar"
-            src="https://via.placeholder.com/40"
+            // src="https://via.placeholder.com/40"
             sx={{
               width: 40,
               height: 40,
               // border: "2px solid black"
             }}
-          /> */}
+          />
         </Toolbar>
       </AppBar>
 
@@ -48,15 +48,9 @@ const Layout = () => {
       </Box>
 
       {/* Footer */}
-      <Box
-        component="footer"
-        py={2}
-        textAlign="center"
-        bgcolor="#f5f5f5"
-        sx={{ boxShadow: "0 -4px 6px rgba(0,0,0,0.1)" }}
-      >
-        <Typography variant="body2" color="textSecondary">
-          © 2025 Land Progress Management
+      <Box sx={{ bgcolor: 'black', color: 'white', p: 2, mt: 4, textAlign: 'center' }}>
+        <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
+          © 2025 Ceylon Sugar Industries – Land Preparation System. All Rights Reserved.
         </Typography>
       </Box>
 

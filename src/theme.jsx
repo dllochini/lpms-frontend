@@ -23,7 +23,8 @@ const theme = createTheme({
       textTransform: 'none', // Prevent uppercase on buttons
     },
     h5: {
-        color: 'green',
+        // color: 'black',
+        // textDecorationThickness: 10,
     },
   },
   components: {
