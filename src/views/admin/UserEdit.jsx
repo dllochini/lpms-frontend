@@ -23,7 +23,8 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
-import { getUserById, updateUserById } from "../../api/user"; // You should implement these API functions
+import { getUserById, updateUserById } from "../../api/user";
+import { getRoles } from "../../api/role";
 
 const schema = yup
   .object({
@@ -46,23 +47,6 @@ const schema = yup
       .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits")
       .nullable()
       .notRequired(),
-    // newPassword: yup
-    //   .string()
-    //   .min(8, "Password must be at least 8 characters")
-    //   .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-    //   .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-    //   .matches(/[0-9]/, "Password must contain at least one number")
-    //   .matches(
-    //     /[@$!%*?&]/,
-    //     "Password must contain at least one special character"
-    //   )
-    //   .nullable()
-    //   .notRequired(),
-    // // confirmPassword: yup
-    //   .string()
-    //   // .oneOf([yup.ref("newPassword"), null], "Passwords must match")
-    //   .nullable()
-    //   .notRequired(),
   })
   .required();
 
@@ -73,15 +57,8 @@ const designations = [
   { value: "Rev", label: "Rev" },
 ];
 
-const roles = [
-  { value: "Manager", label: "Manager" },
-  { value: "Farmer", label: "Farmer" },
-  { value: "Admin", label: "Admin" },
-  { value: "Accountant", label: "Accountant" },
-];
-
 const UserEdit = () => {
-  const { userId } = useParams(); // Assuming route like /admin/user/edit/:userId
+  const { userId } = useParams();
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(true);
@@ -90,6 +67,26 @@ const UserEdit = () => {
   const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
+  const [roles, setRoles] = useState([]);
+
+  const fetchRoles = async function () {
+    try {
+      const response = await getRoles();
+      console.log("Full Roles API response:", response);
+      setRoles(
+        Array.isArray(response.data)
+          ? response.data
+          : response.data?.roles || []
+      );
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      setRoles([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
   const {
     control,
@@ -101,41 +98,41 @@ const UserEdit = () => {
   });
 
   useEffect(() => {
-  const fetchUserData = async () => {
-    try {
-      console.log("Fetching user data for id:", userId);
-      const userResponse = await getUserById(userId);
-      const user = userResponse.data;
-      console.log("User data fetched:", user);
-  setSelectedUserName(user ? user.fullName : "");
-      reset({
-        designation: user.designation || "",
-        role: user.role || "",
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        fullName: user.fullName || "",
-        email: user.email || "",
-        nic: user.nic || "",
-        contact_no: user.contact_no || "",
-        // newPassword: "",
-        // confirmPassword: "",
-      });
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
-      setSubmitError("Failed to load user data.");
-    } finally {
+    const fetchUserData = async () => {
+      try {
+        console.log("Fetching user data for id:", userId);
+        const userResponse = await getUserById(userId);
+        const user = userResponse.data;
+        console.log("User data fetched:", user);
+        setSelectedUserName(user ? user.fullName : "");
+        reset({
+          designation: user.designation || "",
+          role:
+            typeof user.role === "object" && user.role !== null
+              ? user.role._id
+              : user.role || "",
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          fullName: user.fullName || "",
+          email: user.email || "",
+          nic: user.nic || "",
+          contact_no: user.contact_no || "",
+        });
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        setSubmitError("Failed to load user data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchUserData();
+    } else {
       setLoading(false);
+      setSubmitError("User ID is missing.");
     }
-  };
-
-  if (userId) {
-    fetchUserData();
-  } else {
-    setLoading(false);
-    setSubmitError("User ID is missing.");
-  }
-}, [userId, reset]);
-
+  }, [userId, reset]);
 
   const onSubmit = (data) => {
     setFormData(data);
@@ -167,7 +164,6 @@ const UserEdit = () => {
   return (
     <>
       <Box sx={{ minHeight: "125vh", margin: 0 }}>
-
         <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
           <Typography variant="h5" gutterBottom>
             Edit User, <strong>{selectedUserName}</strong>
@@ -224,8 +220,19 @@ const UserEdit = () => {
               </Grid>
 
               {/* Role */}
-              <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
+              <Grid
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  // border: 1,
+                  // borderColor: "yellow",
+                }}
+              >
+                <InputLabel
+                  className="inputLabel"
+                  sx={{ paddingBottom: 3, minWidth: 130 }}
+                >
                   Role :
                 </InputLabel>
                 <Controller
@@ -234,15 +241,18 @@ const UserEdit = () => {
                   render={({ field }) => (
                     <TextField
                       {...field}
+                      id="outlined-select-roles"
                       select
                       size="small"
+                      className="inputField"
                       sx={{ width: 100 }}
                       error={!!errors.role}
                       helperText={errors.role?.message || " "}
                     >
-                      {roles.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
+                      {roles.map((role) => (
+                        <MenuItem key={role._id} value={role._id}>
+                          {role.role}{" "}
+                          {/* or role.label depending on your Role schema */}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -381,8 +391,6 @@ const UserEdit = () => {
                 />
               </Grid>
 
-              {/* <Divider sx={{ mb: 2, p: 0 }} /> */}
-
               {/* <Button
                   type="button"
                   variant="contained"
@@ -391,51 +399,6 @@ const UserEdit = () => {
                 >
                   Change Password
                 </Button> */}
-
-              {/* Password and Confirm Password */}
-              {/* <Grid sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
-                <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                    New Password :
-                  </InputLabel>
-                  <Controller
-                    // name="newPassword"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        type="password"
-                        size="small"
-                        sx={{ width: 200 }}
-                        // error={!!errors.newPassword}
-                        // helperText={errors.newPassword?.message || " "}
-                      />
-                    )}
-                  />
-                </Grid>
-
-                <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                    Confirm New Password :
-                  </InputLabel>
-                  <Controller
-                    // name="confirmPassword"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        type="password"
-                        size="small"
-                        sx={{ width: 200 }}
-                        // error={!!errors.confirmPassword}
-                        // helperText={errors.confirmPassword?.message || " "}
-                      />
-                    )}
-                  />
-                </Grid>
-              </Grid> */}
-
-              {/* <Divider sx={{ m: 2, p: 0 }} /> */}
 
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
                 <Button
@@ -450,12 +413,6 @@ const UserEdit = () => {
                 <Button type="submit" variant="contained" color="primary">
                   Save Changes
                 </Button>
-
-                {submitError && (
-                  <Typography color="error" sx={{ alignSelf: "center" }}>
-                    {submitError}
-                  </Typography>
-                )}
               </Box>
             </Grid>
           </Paper>
@@ -466,7 +423,8 @@ const UserEdit = () => {
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirm Submission</DialogTitle>
         <DialogContent>
-          Are you sure you want to save the changes for <strong>{selectedUserName}</strong>?
+          Are you sure you want to save the changes for{" "}
+          <strong>{selectedUserName}</strong>?
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
@@ -489,6 +447,18 @@ const UserEdit = () => {
       >
         <Alert severity="success" onClose={() => setOpenSnackbar(false)}>
           User updated successfully! Redirecting...
+        </Alert>
+      </Snackbar>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!submitError}
+        autoHideDuration={4000}
+        onClose={() => setSubmitError("")}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setSubmitError("")}>
+          {submitError}
         </Alert>
       </Snackbar>
     </>

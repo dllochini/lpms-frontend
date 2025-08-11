@@ -8,22 +8,23 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
-import { deleteUserById } from "../api/user";
+import { deleteUserById } from "../../api/user";
+import { useState } from "react";
 
 const BasicDataGrid = ({ data, onDelete }) => {
   const navigate = useNavigate();
 
   // State for dialog open + user id to delete
-  const [openDialog, setOpenDialog] = React.useState(false);
-  const [selectedId, setSelectedId] = React.useState(null);
-  const [selectedUserName, setSelectedUserName] = React.useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedId, setSelectedId] = useState([]);
+  const [selectedUserName, setSelectedUserName] = useState("");
 
-const handleDeleteClick = (id) => {
-  const user = data.find((u) => u._id === id);
-  setSelectedUserName(user ? user.fullName : "");
-  setSelectedId(id);
-  setOpenDialog(true);
-};
+  const handleDeleteClick = (id) => {
+    const user = data.find((u) => u._id === id);
+    setSelectedUserName(user ? user.fullName : "");
+    setSelectedId(id);
+    setOpenDialog(true);
+  };
 
   // Confirm delete
   const handleConfirmDelete = async () => {
@@ -32,7 +33,6 @@ const handleDeleteClick = (id) => {
         await deleteUserById(selectedId);
         if (onDelete) {
           onDelete(selectedId);
-          
         }
       } catch (error) {
         console.error("Delete failed:", error);
@@ -85,13 +85,6 @@ const handleDeleteClick = (id) => {
       flex: 4,
     },
     {
-      field: "email",
-      headerName: "Email",
-      headerAlign: "left",
-      align: "left",
-      flex: 4,
-    },
-    {
       field: "actions",
       type: "actions",
       headerName: "Action",
@@ -117,10 +110,19 @@ const handleDeleteClick = (id) => {
     },
   ];
 
-  const rows = data.map((row) => ({
-    id: row._id,
-    ...row,
-  }));
+  // ...existing code...
+  const rows = Array.isArray(data)
+    ? data.map((row) => ({
+        id: row._id,
+        ...row,
+        // If role is an object, use its 'role' property; otherwise, use as is
+        role:
+          typeof row.role === "object" && row.role !== null
+            ? row.role.role
+            : row.role,
+      }))
+    : [];
+  // ...existing code...
 
   return (
     <>
@@ -145,7 +147,8 @@ const handleDeleteClick = (id) => {
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <strong>{selectedUserName}</strong> user?
+          Are you sure you want to delete <strong>{selectedUserName}</strong>{" "}
+          user?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">

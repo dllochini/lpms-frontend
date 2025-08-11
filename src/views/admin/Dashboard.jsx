@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
 import { getUsers } from "../../api/user";
 import { useState, useEffect } from "react";
-import BasicDataGrid from "../../components/BasicDataGrid";
+import BasicDataGrid from "../../components/admin/BasicDataGrid";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
@@ -13,6 +13,7 @@ export default function Dashboard() {
 
   const fetchData = async function () {
     const response = await getUsers();
+    // console.log("API users:", response.data);
     setResponseData(response?.data ?? []);
   };
 
@@ -20,8 +21,10 @@ export default function Dashboard() {
     fetchData();
   }, []);
 
-   const handleDelete = (deletedUserId) => {
-    setResponseData((prev) => prev.filter((user) => user._id !== deletedUserId));
+  const handleDelete = (deletedUserId) => {
+    setResponseData((prev) =>
+      prev.filter((user) => user._id !== deletedUserId)
+    );
   };
 
   return (
@@ -40,7 +43,7 @@ export default function Dashboard() {
         </Breadcrumbs>
       </Box>
 
-      {/* Table */}
+      {/* Main Content */}
       <Paper
         elevation={5}
         sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 5 }}
@@ -63,7 +66,7 @@ export default function Dashboard() {
             CREATE NEW USER
           </Button>
         </Box>
-        <BasicDataGrid data={responseData} onDelete={handleDelete}/>
+        <BasicDataGrid data={responseData} onDelete={handleDelete} />
       </Paper>
     </Box>
   );

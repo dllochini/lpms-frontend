@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -24,6 +24,7 @@ import * as yup from "yup";
 import HomeIcon from "@mui/icons-material/Home";
 import { createUser } from "../../api/user";
 import { useNavigate } from "react-router-dom";
+import { getRoles } from "../../api/role";
 
 const UserRegistration = () => {
   const [openConfirm, setOpenConfirm] = useState(false);
@@ -31,6 +32,27 @@ const UserRegistration = () => {
   const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState(null);
   const navigate = useNavigate();
+  const [roles, setRoles] = useState([]);
+
+  //Fetch roles from API
+  const fetchRoles = async function () {
+    try {
+      const response = await getRoles();
+      console.log("Full Roles API response:", response);
+      setRoles(
+        Array.isArray(response.data)
+          ? response.data
+          : response.data?.roles || []
+      );
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      setRoles([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
   const designations = [
     {
@@ -51,25 +73,7 @@ const UserRegistration = () => {
     },
   ];
 
-  const roles = [
-    {
-      value: "Manager",
-      label: "Manager",
-    },
-    {
-      value: "Farmer",
-      label: "Farmer",
-    },
-    {
-      value: "Admin",
-      label: "Admin",
-    },
-    {
-      value: "Accountant",
-      label: "Accountant",
-    },
-  ];
-
+  // Validation schema using Yup
   const schema = yup
     .object({
       designation: yup.string().required("Choose a designation"),
@@ -87,7 +91,7 @@ const UserRegistration = () => {
       contact_no: yup
         .string()
         .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits"),
-      newPassword: yup
+      password: yup
         .string()
         .required("Password is required")
         .min(8, "Password must be at least 8 characters")
@@ -101,7 +105,7 @@ const UserRegistration = () => {
       confirmPassword: yup
         .string()
         .required("Please confirm your password")
-        .oneOf([yup.ref("newPassword"), null], "Passwords must match"),
+        .oneOf([yup.ref("password"), null], "Passwords must match"),
     })
     .required();
 
@@ -120,12 +124,13 @@ const UserRegistration = () => {
       email: "",
       nic: "",
       contact_no: "",
-      newPassword: "",
+      password: "",
       confirmPassword: "",
     },
     resolver: yupResolver(schema),
   });
 
+  // Handle form submission
   const onSubmit = async (data) => {
     setFormData(data); // save form data for confirmed submit
     setOpenConfirm(true); // open confirm dialog
@@ -137,10 +142,9 @@ const UserRegistration = () => {
       const response = await createUser(formData);
       // show success message
       setOpenSnackbar(true);
-      reset(); // reset form
-      // redirect after short delay
+      reset();
       setTimeout(() => {
-        navigate("/admin/dashboard"); // or your home page route
+        navigate("/admin/dashboard");
       }, 2000);
     } catch (error) {
       setSubmitError(error.response?.data?.error || "Something went wrong");
@@ -259,16 +263,16 @@ const UserRegistration = () => {
                       {...field}
                       id="outlined-select-roles"
                       select
-                      // label="role"
                       size="small"
                       className="inputField"
                       sx={{ width: 100 }}
                       error={!!errors.role}
                       helperText={errors.role?.message || " "}
                     >
-                      {roles.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
+                      {roles.map((role) => (
+                        <MenuItem key={role._id} value={role._id}>
+                          {role.role}{" "}
+                          {/* or role.label depending on your Role schema */}
                         </MenuItem>
                       ))}
                     </TextField>
@@ -488,6 +492,7 @@ const UserRegistration = () => {
               </Grid>
 
               <Divider sx={{ mb: 2, p: 0 }} />
+
               {/* password and confirm password*/}
               <Grid
                 sx={{
@@ -518,15 +523,15 @@ const UserRegistration = () => {
                     New Password :
                   </InputLabel>
                   <Controller
-                    name="newPassword"
+                    name="password"
                     control={control}
                     render={({ field }) => (
                       <TextField
                         {...field}
                         id="outlined-required"
                         type="password"
-                        error={!!errors.newPassword}
-                        helperText={errors.newPassword?.message || " "}
+                        error={!!errors.password}
+                        helperText={errors.password?.message || " "}
                         size="small"
                         sx={{ width: 200 }}
                         className="inputField"
@@ -600,7 +605,6 @@ const UserRegistration = () => {
                 >
                   Submit
                 </Button>
-                {submitError && <p>{submitError}</p>}
               </Box>
             </Grid>
           </Paper>
@@ -634,6 +638,17 @@ const UserRegistration = () => {
       >
         <Alert severity="success" onClose={() => setOpenSnackbar(false)}>
           Submission successful! Redirecting...
+        </Alert>
+      </Snackbar>
+
+      <Snackbar
+        open={!!submitError}
+        autoHideDuration={4000}
+        onClose={() => setSubmitError("")}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setSubmitError("")}>
+          {submitError}
         </Alert>
       </Snackbar>
     </>
