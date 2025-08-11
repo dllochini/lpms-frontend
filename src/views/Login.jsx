@@ -73,7 +73,6 @@ export default function LoginPage() {
         alignItems: "center",
         p: 2,
         overflow: "hidden",
-        
       }}
     >
       {/* Login Card */}
@@ -199,7 +198,7 @@ export default function LoginPage() {
         color="white"
         sx={{ mt: 4, opacity: 0.8, textAlign: "center" }}
       >
-        © 2025 Your Company. All rights reserved.
+        © 2025 Land Progress Management
       </Typography>
     </Box>
   );
