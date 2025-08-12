@@ -10,6 +10,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminDashboard from "./views/admin/Dashboard";
 import UserRegistration from "./views/admin/UserRegistration";
 import UserEdit from "./views/admin/UserEdit";
+import ForgotPw from "./views/ForgotPw";
 
 const App = () => {
   return (

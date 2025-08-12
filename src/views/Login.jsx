@@ -8,7 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import bgImage from "/images/sugar-cane.jpg";
 import companyLogo from "/images/ceylon-sugar-industries.png";
-import { loginUser, forgotPassword } from "../../api/auth";
+import { loginUser, forgotPassword } from "../api/auth"; // Import your API functions
 
 
 const loginSchema = yup.object().shape({
