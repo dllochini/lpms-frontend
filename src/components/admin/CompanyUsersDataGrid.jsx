@@ -110,7 +110,6 @@ const BasicDataGrid = ({ data, onDelete }) => {
     },
   ];
 
-  // ...existing code...
   const rows = Array.isArray(data)
     ? data.map((row) => ({
         id: row._id,
@@ -122,7 +121,6 @@ const BasicDataGrid = ({ data, onDelete }) => {
             : row.role,
       }))
     : [];
-  // ...existing code...
 
   return (
     <>

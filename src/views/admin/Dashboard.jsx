@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
 import { getUsers } from "../../api/user";
 import { useState, useEffect } from "react";
-import BasicDataGrid from "../../components/admin/BasicDataGrid";
+import BasicDataGrid from "../../components/admin/CompanyUsersDataGrid";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
