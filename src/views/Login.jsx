@@ -21,67 +21,6 @@ const forgotSchema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email is required"),
 });
 
-// export default function LoginPage() {
-//   const [forgotOpen, setForgotOpen] = useState(false);
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState(null);
-//   const [success, setSuccess] = useState(null);
-
-//   const {
-//     control: loginControl,
-//     handleSubmit: handleLogin,
-//     formState: { errors: loginErrors },
-//   } = useForm({ resolver: yupResolver(loginSchema) });
-
-//   const {
-//     control: forgotControl,
-//     handleSubmit: handleForgot,
-//     formState: { errors: forgotErrors },
-//   } = useForm({ resolver: yupResolver(forgotSchema) });
-
-//   const onLogin = async (data) => {
-//     setLoading(true);
-//     setError(null);
-//     setSuccess(null);
-//     try {
-//       const response = await loginUser(data);
-//       const { token, role } = response.data;
-  
-//       // Save token and role in localStorage
-//       localStorage.setItem("token", token);
-//       localStorage.setItem("role", role);
-  
-//       setSuccess("Login successful!");
-  
-//       // Redirect user based on role
-//       if (role === "admin") {
-//         window.location.href = "/admin/dashboard";  // example admin dashboard URL
-//       } else if (role === "user") {
-//         window.location.href = "/user/dashboard";   // example user dashboard URL
-//       } else {
-//         window.location.href = "/"; // fallback
-//       }
-  
-//     } catch (err) {
-//       setError(err.response?.data?.message || "Login failed");
-//     }
-//     setLoading(false);
-//   };
-  
-
-//   const onForgot = async (data) => {
-//     setLoading(true);
-//     setError(null);
-//     setSuccess(null);
-//     try {
-//       const response = await forgotPassword(data);
-//       setSuccess("Password reset email sent!");
-//       console.log("Forgot password response:", response.data);
-//     } catch (err) {
-//       setError(err.response?.data?.message || "Request failed");
-//     }
-//     setLoading(false);
-//   };
 
 export default function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
