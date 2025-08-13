@@ -56,34 +56,34 @@ const BasicDataGrid = ({ data, onDelete }) => {
   };
 
   const columns = [
-    { field: "_id", headerName: "ID", flex: 3 },
+    { field: "_id", headerName: "Operation ID", flex: 2 },
     {
-      field: "designation",
-      headerName: "Designation",
+      field: "operationName",
+      headerName: "Operation Name",
       headerAlign: "left",
       align: "left",
-      flex: 1,
+      flex: 3,
     },
     {
-      field: "fullName",
-      headerName: "Full Name",
+      field: "relatedMachines",
+      headerName: "Related Machines",
       headerAlign: "left",
       align: "left",
-      flex: 4,
+      flex: 3,
     },
     {
-      field: "role",
-      headerName: "Role",
+      field: "relatedImplements",
+      headerName: "Related Implements",
       headerAlign: "left",
       align: "left",
-      flex: 2,
+      flex: 3,
     },
     {
-      field: "email",
-      headerName: "Email",
+      field: "note",
+      headerName: "Note",
       headerAlign: "left",
       align: "left",
-      flex: 4,
+      flex: 3,
     },
     {
       field: "actions",
