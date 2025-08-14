@@ -13,7 +13,7 @@ import { redirectByRole } from "../utils/redirectByRole";
 
 
 const loginSchema = yup.object().shape({
-  username: yup.string().required("Username is required"),
+  email: yup.string().required("email is required"),
   password: yup.string().required("Password is required"),
 });
 
@@ -129,17 +129,17 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin(onLogin)}>
             <Controller
-              name="username"
+              name="email"
               control={loginControl}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Username"
+                  label="email "
                   variant="outlined"
                   fullWidth
                   margin="normal"
-                  error={!!loginErrors.username}
-                  helperText={loginErrors.username?.message}
+                  error={!!loginErrors.email}
+                  helperText={loginErrors.email?.message}
                   disabled={loading}
                 />
               )}
