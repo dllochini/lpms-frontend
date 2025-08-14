@@ -12,6 +12,7 @@ import UserRegistration from "./views/admin/UserRegistration";
 import UserEdit from "./views/admin/UserEdit";
 import ForgotPw from "./views/ForgotPw";
 import Operation from "./views/fieldOfficer/Operation";
+import Resource from "./views/fieldOfficer/Resources";
 
 const App = () => {
   return (
@@ -25,6 +26,7 @@ const App = () => {
             {/* <Route path="/executive/dashboard" element={<ExecutiveDashboard />} /> */}
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/fieldOfficer/operation" element={<Operation />} />
+            <Route path="/fieldOfficer/resources" element={<Resource />} />
             <Route path="/user/register" element={<UserRegistration />} />
             <Route path="/user/edit/:userId" element={<UserEdit />} />
           </Route>
