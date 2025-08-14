@@ -30,8 +30,8 @@ const schema = yup
   .object({
     designation: yup.string().required("Choose a designation"),
     role: yup.string().required("Choose a role"),
-    firstName: yup.string().required("First name is required"),
-    lastName: yup.string().required("Last name is required"),
+    // firstName: yup.string().required("First name is required"),
+    // lastName: yup.string().required("Last name is required"),
     fullName: yup.string().required("Full name is required"),
     email: yup.string().email("Invalid email format"),
     nic: yup
@@ -111,8 +111,8 @@ const UserEdit = () => {
             typeof user.role === "object" && user.role !== null
               ? user.role._id
               : user.role || "",
-          firstName: user.firstName || "",
-          lastName: user.lastName || "",
+          // // firstName: user.firstName || "",
+          // // lastName: user.lastName || "",
           fullName: user.fullName || "",
           email: user.email || "",
           nic: user.nic || "",
@@ -262,7 +262,7 @@ const UserEdit = () => {
               </Grid>
 
               {/* First and Last Name */}
-              <Grid sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+              {/* <Grid sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
                 <Grid
                   sx={{
                     display: "flex",
@@ -275,14 +275,14 @@ const UserEdit = () => {
                     First Name :
                   </InputLabel>
                   <Controller
-                    name="firstName"
+                    // name="firstName"
                     control={control}
                     render={({ field }) => (
                       <TextField
                         {...field}
                         size="small"
-                        error={!!errors.firstName}
-                        helperText={errors.firstName?.message || " "}
+                        // error={!!errors.firstName}
+                        // helperText={errors.firstName?.message || " "}
                       />
                     )}
                   />
@@ -300,19 +300,19 @@ const UserEdit = () => {
                     Last Name :
                   </InputLabel>
                   <Controller
-                    name="lastName"
+                    // name="lastName"
                     control={control}
                     render={({ field }) => (
                       <TextField
                         {...field}
                         size="small"
-                        error={!!errors.lastName}
-                        helperText={errors.lastName?.message || " "}
+                        // error={!!errors.lastName}
+                        // helperText={errors.lastName?.message || " "}
                       />
                     )}
                   />
                 </Grid>
-              </Grid>
+              </Grid> */}
 
               {/* Full Name */}
               <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>

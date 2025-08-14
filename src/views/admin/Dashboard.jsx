@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
 import { getUsers } from "../../api/user";
 import { useState, useEffect } from "react";
-import BasicDataGrid from "../../components/admin/CompanyUsersDataGrid";
+import BasicDataGrid from "../../components/admin/UsersDataGrid";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
@@ -68,6 +68,7 @@ export default function Dashboard() {
         </Box>
         <BasicDataGrid data={responseData} onDelete={handleDelete} />
       </Paper>
+      
     </Box>
   );
 }
