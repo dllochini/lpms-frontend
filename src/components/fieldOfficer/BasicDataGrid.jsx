@@ -1,5 +1,7 @@
+// 
+
 import * as React from "react";
-import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
+import { DataGrid as MuiDataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Dialog from "@mui/material/Dialog";
@@ -7,19 +9,16 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import { useNavigate } from "react-router-dom";
 import { deleteUserById } from "../../api/user";
 import { useState } from "react";
 
-
-const BasicDataGrid = ({ data, onDelete }) => {
-  const navigate = useNavigate();
-
-  // State for dialog open + user id to delete
+const BasicDataGrid = ({ data, onDelete, onEdit }) => {
+  // Delete dialog state
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedId, setSelectedId] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
 
+  // Delete handlers
   const handleDeleteClick = (id) => {
     const user = data.find((u) => u._id === id);
     setSelectedUserName(user ? user.fullName : "");
@@ -27,7 +26,6 @@ const BasicDataGrid = ({ data, onDelete }) => {
     setOpenDialog(true);
   };
 
-  // Confirm delete
   const handleConfirmDelete = async () => {
     if (selectedId) {
       try {
@@ -37,52 +35,46 @@ const BasicDataGrid = ({ data, onDelete }) => {
         }
       } catch (error) {
         console.error("Delete failed:", error);
-        // optionally show a toast/snackbar for failure
       }
     }
     setOpenDialog(false);
     setSelectedId(null);
   };
 
-  // Cancel delete
   const handleCancelDelete = () => {
     setOpenDialog(false);
     setSelectedId(null);
   };
 
-  // Edit handler to redirect
+  // Edit handler
   const handleEditClick = (id) => {
-    navigate(`/user/edit/${id}`);
+    const row = data.find((u) => u._id === id);
+    if (onEdit && row) {
+      onEdit(row);
+    }
   };
 
+  // Columns config
   const columns = [
     { field: "_id", headerName: "Operation ID", flex: 2 },
     {
       field: "operationName",
       headerName: "Operation Name",
-      headerAlign: "left",
-      align: "left",
       flex: 3,
     },
     {
       field: "relatedMachines",
       headerName: "Related Machines",
-      headerAlign: "left",
-      align: "left",
       flex: 3,
     },
     {
       field: "relatedImplements",
       headerName: "Related Implements",
-      headerAlign: "left",
-      align: "left",
       flex: 3,
     },
     {
       field: "note",
       headerName: "Note",
-      headerAlign: "left",
-      align: "left",
       flex: 3,
     },
     {
@@ -95,14 +87,12 @@ const BasicDataGrid = ({ data, onDelete }) => {
           icon={<EditIcon />}
           label="Edit"
           onClick={() => handleEditClick(params.id)}
-          showInMenu={false}
           key="edit"
         />,
         <GridActionsCellItem
           icon={<DeleteIcon />}
           label="Delete"
           onClick={() => handleDeleteClick(params.id)}
-          showInMenu={false}
           key="delete"
         />,
       ],
@@ -111,24 +101,17 @@ const BasicDataGrid = ({ data, onDelete }) => {
     },
   ];
 
-  // ...existing code...
   const rows = Array.isArray(data)
     ? data.map((row) => ({
         id: row._id,
         ...row,
-        // If role is an object, use its 'role' property; otherwise, use as is
-        role:
-          typeof row.role === "object" && row.role !== null
-            ? row.role.role
-            : row.role,
       }))
     : [];
-  // ...existing code...
 
   return (
     <>
       <div style={{ width: "100%" }}>
-        <DataGrid
+        <MuiDataGrid
           autoHeight
           rows={rows}
           columns={columns}
@@ -144,12 +127,11 @@ const BasicDataGrid = ({ data, onDelete }) => {
         />
       </div>
 
-      {/* Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <strong>{selectedUserName}</strong>{" "}
-          user?
+          Are you sure you want to delete <strong>{selectedUserName}</strong>?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
