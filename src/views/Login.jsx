@@ -134,7 +134,7 @@ export default function LoginPage() {
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="email "
+                  label="Email "
                   variant="outlined"
                   fullWidth
                   margin="normal"

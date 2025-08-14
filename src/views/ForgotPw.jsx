@@ -15,10 +15,20 @@ import * as yup from "yup";
 import { useSearchParams } from "react-router-dom"; // <-- For token from URL
 import bgImage from "/images/sugar-cane.jpg";
 import companyLogo from "/images/ceylon-sugar-industries.png";
+import { resetPassword } from "../api/forgotPw";
+
+
 
 // ✅ Validation schema
 const resetPasswordSchema = yup.object().shape({
-  newPassword: yup.string().required("New password is required"),
+  newPassword: yup
+    .string()
+    .required("New password is required")
+    .min(8, "Password must be at least 8 characters long")
+    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/\d/, "Password must contain at least one number")
+    .matches(/[@$!%*?&#^()\-_=+{}[\]|;:'",.<>/~`]/, "Password must contain at least one special character"),
   confirmPassword: yup
     .string()
     .oneOf([yup.ref("newPassword"), null], "Passwords must match")
@@ -46,33 +56,25 @@ export default function ResetPasswordPage() {
     setLoading(true);
     setMessage("");
     setError("");
-
+  
     try {
-      const response = await fetch("https://your-api-url.com/api/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          password: data.newPassword,
-          token: token, // Include token from URL
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setMessage(" Password reset successful!");
+      const response = await resetPassword(token, data.newPassword);
+  
+      if (response.status === 200) {
+        setMessage("Password reset successful!");
         reset();
       } else {
-        setError(result.message || "Something went wrong.");
+        setError(response.data?.message || "Something went wrong.");
       }
     } catch (err) {
       console.error(err);
-      setError("Network error. Please try again.");
+      setError(err.response?.data?.message || "Network error. Please try again.");
     } finally {
       setLoading(false);
     }
+  
+  
+  
   };
 
   return (
