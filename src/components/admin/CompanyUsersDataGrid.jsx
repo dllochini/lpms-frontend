@@ -111,15 +111,21 @@ const BasicDataGrid = ({ data, onDelete }) => {
   ];
 
   const rows = Array.isArray(data)
-    ? data.map((row) => ({
-        id: row._id,
-        ...row,
-        // If role is an object, use its 'role' property; otherwise, use as is
-        role:
-          typeof row.role === "object" && row.role !== null
-            ? row.role.role
-            : row.role,
-      }))
+    ? data
+        .filter(
+          (row) =>
+            typeof row.role === "object" &&
+            row.role !== null &&
+            row.role.name?.toLowerCase() !== "farmer" //filters out farmers
+        )
+        .map((row) => ({
+          id: row._id,
+          ...row,
+          role:
+            typeof row.role === "object" && row.role !== null
+              ? row.role.name
+              : row.role,
+        }))
     : [];
 
   return (

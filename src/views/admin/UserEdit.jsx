@@ -249,12 +249,13 @@ const UserEdit = () => {
                       error={!!errors.role}
                       helperText={errors.role?.message || " "}
                     >
-                      {roles.map((role) => (
-                        <MenuItem key={role._id} value={role._id}>
-                          {role.role}{" "}
-                          {/* or role.label depending on your Role schema */}
-                        </MenuItem>
-                      ))}
+                      {roles
+                        .filter((role) => role.name?.toLowerCase() !== "farmer")
+                        .map((role) => (
+                          <MenuItem key={role._id} value={role._id}>
+                            {role.name}{" "}
+                          </MenuItem>
+                        ))}
                     </TextField>
                   )}
                 />
