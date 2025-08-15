@@ -27,6 +27,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const { setError: setFieldError } = useForm();
 
   const {
     control: loginControl,
@@ -42,26 +43,34 @@ export default function LoginPage() {
 
   const onLogin = async (data) => {
     setLoading(true);
-    setError(null);
     setSuccess(null);
-
+  
     try {
       const response = await loginUser(data);
       const { token, role } = response.data;
-
+  
       // Save auth data
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
-
+  
       setSuccess("Login successful!");
-
-      // 🔹 Use centralized redirect logic
+  
+      // Redirect
       const path = redirectByRole(role);
       window.location.href = path;
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      const backendMessage = err.response?.data?.message || "Login failed";
+  
+      if (backendMessage.toLowerCase().includes("email")) {
+        setFieldError("email", { type: "manual", message: backendMessage });
+      } else if (backendMessage.toLowerCase().includes("password")) {
+        setFieldError("password", { type: "manual", message: backendMessage });
+      } else {
+        // Optional: show generic error somewhere else
+        alert(backendMessage);
+      }
     }
-
+  
     setLoading(false);
   };
 
@@ -128,13 +137,13 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleLogin(onLogin)}>
-            <Controller
+          <Controller
               name="email"
               control={loginControl}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Email "
+                  label="Email"
                   variant="outlined"
                   fullWidth
                   margin="normal"
@@ -144,6 +153,7 @@ export default function LoginPage() {
                 />
               )}
             />
+
             <Controller
               name="password"
               control={loginControl}
@@ -161,6 +171,7 @@ export default function LoginPage() {
                 />
               )}
             />
+
 
             <Button
               type="submit"
