@@ -5,6 +5,14 @@ export function redirectByRole(role) {
         return "/admin/dashboard";
       case "user":
         return "/user/dashboard";
+      case "fieldOfficer":
+       return "/fieldOfficer/dashboard";
+      case "manager":
+       return "/manager/dashboard";
+      case "higherManager":
+       return "/higherManager/dashboard";
+      case "accountant":
+       return "/accountant/dashboard";
       default:
         return "/";
     }
