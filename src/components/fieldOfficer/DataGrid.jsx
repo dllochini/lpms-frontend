@@ -21,8 +21,8 @@ const BasicDataGrid = ({ data, onDelete }) => {
   const [selectedUserName, setSelectedUserName] = useState("");
 
   const handleDeleteClick = (id) => {
-    const resource = data.find((u) => u._id === id);
-    setSelectedUserName(resource? resource.resourceName : "");
+    const user = data.find((u) => u._id === id);
+    setSelectedUserName(user ? user.fullName : "");
     setSelectedId(id);
     setOpenDialog(true);
   };
@@ -52,13 +52,13 @@ const BasicDataGrid = ({ data, onDelete }) => {
 
   // Edit handler to redirect
   const handleEditClick = (id) => {
-    navigate(`/resource/edit/${id}`);
+    // navigate(`/user/edit/${id}`);
   };
 
   const columns = [
     { field: "_id", headerName: "Resource ID", flex: 2 },
     {
-      field: "catogory",
+      field: "category",
       headerName: "Category",
       headerAlign: "left",
       align: "left",
@@ -71,13 +71,6 @@ const BasicDataGrid = ({ data, onDelete }) => {
       align: "left",
       flex: 3,
     },
-    // {
-    //   field: "relatedOperations",
-    //   headerName: "Related Operations",
-    //   headerAlign: "left",
-    //   align: "left",
-    //   flex: 3,
-    // },
     {
       field: "note",
       headerName: "Note",
@@ -149,7 +142,7 @@ const BasicDataGrid = ({ data, onDelete }) => {
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
           Are you sure you want to delete <strong>{selectedUserName}</strong>{" "}
-          resource?
+          user?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">

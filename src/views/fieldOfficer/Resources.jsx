@@ -68,7 +68,7 @@ import {
         {/* Greeting & Breadcrumb */}
         <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
           <Typography variant="h5" gutterBottom>
-            Resource
+            Resources
           </Typography>
   
           {/* <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
@@ -99,7 +99,7 @@ import {
               onClick={handleOpenDialog}
               startIcon={<AddIcon />}
             >
-            CREATE NEW RESOURCE
+              ADD NEW RESOURCE
             </Button>
           </Box>
   
@@ -130,7 +130,7 @@ import {
           </DialogTitle>
 
           <DialogContent sx={{ px: 4, pb: 2 }}>
-            {/* Name of resource */}
+            {/* Name of Resource */}
             <InputLabel sx={{ mb: 0.5 }}>Name of Resource :</InputLabel>
             <Controller
               name="resourceName"
@@ -141,10 +141,10 @@ import {
               )}
             />
 
-            {/* Catogory */}
-            <InputLabel sx={{ mb: 0.5 }}> Category :</InputLabel>
+            {/* Category */}
+            <InputLabel sx={{ mb: 0.5 }}>Category :</InputLabel>
             <Controller
-              name="catogory"
+              name="category"
               control={control}
               defaultValue=""
               render={({ field }) => (
@@ -158,11 +158,22 @@ import {
                 </FormControl>
               )}
             />
-            
+            {/* <Button
+              variant="contained"
+              sx={{
+                borderRadius: "20px",
+                textTransform: "none",
+                fontWeight: "bold",
+                mb: 2,
+              }}
+            >
+              Add New Machine
+            </Button> */}
+
             {/* Unit of Measure */}
-            <InputLabel sx={{ mb: 0.5 }}>Unit of Measure :</InputLabel>
+            <InputLabel sx={{ mb: 0.5 }}>Unit Of Measure :</InputLabel>
             <Controller
-              name="unitOfMesure"
+              name="unitOfMeasure"
               control={control}
               defaultValue=""
               render={({ field }) => (
@@ -170,31 +181,12 @@ import {
                   <Select {...field} displayEmpty>
                     {/* <MenuItem value="">Select</MenuItem> */}
                     <MenuItem value="Per acres">Per acres</MenuItem>
-                    <MenuItem value="Per hour">Per hours</MenuItem>
-                    <MenuItem value="Per Square metres">Per square metres</MenuItem>
+                    <MenuItem value="Per hour">Per hour</MenuItem>
+                    <MenuItem value="Per Square metres">Per Square metres</MenuItem>
                   </Select>
                 </FormControl>
               )}
             />
-
-             {/* Related Operation */}
-            {/* <InputLabel sx={{ mb: 0.5 }}>Related Operations :</InputLabel> */}
-            {/* <Controller
-              name="relatedOperations"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-                  <Select {...field} displayEmpty>
-                    <MenuItem value="">Select</MenuItem>
-                    <MenuItem value="bushClearing">Bush Clearing</MenuItem>
-                    <MenuItem value="ploughing">Ploughing</MenuItem>
-                    <MenuItem value="harrowing">Harrowing</MenuItem>
-                  </Select>
-                </FormControl>
-              )}
-            /> */}
-
 
             {/* Note */}
             <InputLabel sx={{ mb: 0.5 }}>Note :</InputLabel>
@@ -213,7 +205,7 @@ import {
                 />
               )}
             />
-          </DialogContent>n
+          </DialogContent>
 
           <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
             <Box sx={{ display: "flex", gap: 2 }}>
@@ -251,4 +243,3 @@ import {
       </Box>
     );
   }
-  
