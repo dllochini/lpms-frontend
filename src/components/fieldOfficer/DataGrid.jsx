@@ -13,6 +13,7 @@ import { useState } from "react";
 
 
 const BasicDataGrid = ({ data, onDelete }) => {
+  // Redirect to edit page
   const navigate = useNavigate();
 
   // State for dialog open + user id to delete
@@ -88,6 +89,7 @@ const BasicDataGrid = ({ data, onDelete }) => {
           icon={<EditIcon />}
           label="Edit"
           onClick={() => handleEditClick(params.id)}
+          // onClick={() => handleOpenDialog(resource)} //change to open dialog* 
           showInMenu={false}
           key="edit"
         />,
@@ -156,5 +158,7 @@ const BasicDataGrid = ({ data, onDelete }) => {
     </>
   );
 };
+
+
 
 export default BasicDataGrid;
