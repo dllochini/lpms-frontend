@@ -9,8 +9,11 @@ import NoPage from "./views/NoPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AdminDashboard from "./views/admin/Dashboard";
 import UserRegistration from "./views/admin/UserRegistration";
+import Manager from "./views/manager/Manager";
+import Accountant from "./views/accountant/Accountant";
 import UserEdit from "./views/admin/UserEdit";
 import ForgotPw from "./views/ForgotPw";
+import HigherManager from "./views/higherManager/HigherManager";
 
 const App = () => {
   return (
@@ -25,6 +28,9 @@ const App = () => {
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/user/register" element={<UserRegistration />} />
             <Route path="/user/edit/:userId" element={<UserEdit />} />
+            <Route path="/manager" element={<Manager/>} />
+            <Route path="/accountant" element={<Accountant/>} />
+            <Route path="/higherManager" element={<HigherManager/>} />
           </Route>
         </Routes>
       </BrowserRouter>

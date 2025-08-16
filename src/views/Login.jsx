@@ -39,6 +39,7 @@ export default function LoginPage() {
     control: forgotControl,
     handleSubmit: handleForgot,
     formState: { errors: forgotErrors },
+    setError: setForgotFieldError
   } = useForm({ resolver: yupResolver(forgotSchema) });
 
   const onLogin = async (data) => {
@@ -81,11 +82,15 @@ export default function LoginPage() {
     try {
       const response = await forgotPassword(data);
       setSuccess("Password reset email sent!");
-      console.log("Forgot password response:", response.data);
     } catch (err) {
-      setError(err.response?.data?.message || "Request failed");
+      const backendMessage = err.response?.data?.message || "Request failed";
+    
+      if (backendMessage.toLowerCase().includes("email")) {
+        setForgotFieldError("email", { type: "manual", message: backendMessage });
+      } else {
+        setError(backendMessage);
+      }
     }
-    setLoading(false);
   };
 
   return (
