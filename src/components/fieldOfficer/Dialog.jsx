@@ -7,7 +7,9 @@ import {
   DialogActions,
   TextField,
   Button,
+  Input,
 } from "@mui/material";
+import InputLabel from "@mui/material/InputLabel";
 
 export default function ResourceDialog({
   open,
@@ -45,35 +47,54 @@ export default function ResourceDialog({
       <DialogContent
         style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}
       >
-        <TextField
-          name="id"
-          label="Resource ID"
-          value={formData?.id || ""}
-          onChange={handleChange}
-        />
+         <InputLabel sx={{ mb: 0.5 }}>Resource ID :</InputLabel>
+          <TextField
+              name="id"
+              value={formData?.id || ""}
+              onChange={handleChange}
+              fullWidth
+              size="small"
+              sx={{ mb: 2 }}
+            />
+    
+        
+        <InputLabel sx={{ mb: 0.5 }}>Category :</InputLabel>
         <TextField
           name="category"
-          label="Category"
           value={formData?.category || "" }
           onChange={handleChange}
+          fullWidth
+          size="small"
+          sx={{ mb: 2 }}
         />
+        
+        <InputLabel sx={{ mb: 0.5 }}>Unit Of Measure:</InputLabel>
         <TextField
           name="unitOfMeasure"
-          label="Unit of Measure"
           value={formData?.unitOfMeasure || ""}
           onChange={handleChange}
+          fullWidth
+          size="small"
+          sx={{ mb: 2 }}
         />
+
+        <InputLabel sx={{ mb: 0.5 }}>Note:</InputLabel>
         <TextField
           name="note"
-          label="Note"
           value={formData?.note || ""}
           onChange={handleChange}
+          fullWidth
+          size="small"
+          multiline
+          rows={4}
+          placeholder="Enter any additional notes or details"
+          sx={{ mb: 2 }}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}variant= "contained" color= "primary">Cancel</Button>
         <Button onClick={onSave} variant="contained" color="primary">
-          Save
+          Create
         </Button>
       </DialogActions>
     </Dialog>
