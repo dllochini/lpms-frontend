@@ -10,20 +10,22 @@ import Button from "@mui/material/Button";
 import { useNavigate } from "react-router-dom";
 import { deleteUserById } from "../../api/user";
 import { useState } from "react";
+import ResourceDialog from "./Dialog"; // Assuming you have a Dialog component
 
 
-const BasicDataGrid = ({ data, onDelete }) => {
+const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   // Redirect to edit page
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // State for dialog open + user id to delete
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState([]);
-  const [selectedUserName, setSelectedUserName] = useState("");
+  const [EditData, setEditData] = useState(null);
+  // const [selectedUserName, setSelectedUserName] = useState("");
 
   const handleDeleteClick = (id) => {
     const user = data.find((u) => u._id === id);
-    setSelectedUserName(user ? user.fullName : "");
+    // setSelectedUserName(user ? user.fullName : "");
     setSelectedId(id);
     setOpenDialog(true);
   };
@@ -53,7 +55,8 @@ const BasicDataGrid = ({ data, onDelete }) => {
 
   // Edit handler to redirect
   const handleEditClick = (id) => {
-    // navigate(`/user/edit/${id}`);
+   const resource = data.find((r) => r._id === id);
+        if (onEdit) onEdit(resource);
   };
 
   const columns = [
@@ -143,7 +146,7 @@ const BasicDataGrid = ({ data, onDelete }) => {
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <strong>{selectedUserName}</strong>{" "}
+          Are you sure you want to delete <strong>{selectedId}</strong>{" "}
           user?
         </DialogContent>
         <DialogActions>

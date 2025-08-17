@@ -3,35 +3,30 @@ import {
     Box,
     Paper,
     Button,
-    Breadcrumbs,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    Grid,
-    InputLabel
   } from "@mui/material";
-  import AddIcon from "@mui/icons-material/Add";
-  import HomeIcon from "@mui/icons-material/Home";
   import { getUsers } from "../../api/user";
   import { useState, useEffect } from "react";
-//   import { useNavigate } from "react-router-dom";
+  import { useNavigate } from "react-router-dom";
   import * as React from "react";
   import DataGrid from "../../components/fieldOfficer/DataGrid";
-  import { Controller, set, useForm } from "react-hook-form";
-  import { FormControl, Select, MenuItem } from "@mui/material";
+  import ResourceDialog from "../../components/fieldOfficer/Dialog";
+  import AddIcon from "@mui/icons-material/Add";
+  import { useForm } from "react-hook-form";
 
-  
+
   export default function Resource() {
     // const navigate = useNavigate();
     const [responseData, setResponseData] = useState([]);
+    const [formData, setFormData] = useState({}); // State for form data
     // const [editResource, setEditResource] = useState(null);
 
   
     // ✅ Dialog state
     const [openDialog, setOpenDialog] = useState(false);
-    const handleOpenDialog = () => setOpenDialog(true);
+    const handleOpenDialog = () => {
+      setOpenDialog(true);
+      setFormData({}); // Reset form data when opening dialog
+    }
     const handleCloseDialog = () => setOpenDialog(false);
   
     // ✅ react-hook-form setup
@@ -58,13 +53,19 @@ import {
       // Add the new task locally (mock example)
       setResponseData((prev) => [
         ...prev,
-        { _id: Date.now().toString(), name: data.operationName }
+        { _id: Date.now().toString(), ...formData } // Mock ID generation
       ]);
   
       reset(); // clear form
       handleCloseDialog();
     };
-  
+    const handleEditResource = (resource) => {
+      setFormData(resource);  // Fill form with selected resource data      
+      setOpenDialog(true);    // Open the dialog for editing
+    }
+
+
+
     return (
       <Box>
         {/* Greeting & Breadcrumb */}
@@ -105,141 +106,16 @@ import {
             </Button>
           </Box>
   
-          <DataGrid data={responseData} onDelete={handleDelete} />
+          <DataGrid data={responseData} onDelete={handleDelete}  onEdit={handleEditResource} />
   
-          {/* Dialog */}
-          <Dialog
-          open={openDialog}
-          onClose={handleCloseDialog}
-          fullWidth
-          maxWidth="sm"
-          PaperProps={{
-            sx: {
-              borderRadius: "20px", // rounded corners
-              overflow: "hidden",
-            },
-          }}
-        >
-          <DialogTitle
-            sx={{
-              fontWeight: "bold",
-              textAlign: "center",
-              fontSize: "1.25rem",
-              py: 2,
-            }}
-          >
-            Add New Resource
-          </DialogTitle>
-
-          <DialogContent sx={{ px: 4, pb: 2 }}>
-            {/* Name of Resource */}
-            <InputLabel sx={{ mb: 0.5 }}>Name of Resource :</InputLabel>
-            <Controller
-              name="resourceName"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField {...field} fullWidth size="small" sx={{ mb: 2 }} />
-              )}
-            />
-
-            {/* Category */}
-            <InputLabel sx={{ mb: 0.5 }}>Category :</InputLabel>
-            <Controller
-              name="category"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-                  <Select {...field} displayEmpty>
-                    {/* <MenuItem value="">Select</MenuItem> */}
-                    <MenuItem value="Machine">Machine</MenuItem>
-                    <MenuItem value="Manual">Manual</MenuItem>
-                    <MenuItem value="Vehicle">Vehicle</MenuItem>
-                  </Select>
-                </FormControl>
-              )}
-            />
-            {/* <Button
-              variant="contained"
-              sx={{
-                borderRadius: "20px",
-                textTransform: "none",
-                fontWeight: "bold",
-                mb: 2,
-              }}
-            >
-              Add New Machine
-            </Button> */}
-
-            {/* Unit of Measure */}
-            <InputLabel sx={{ mb: 0.5 }}>Unit Of Measure :</InputLabel>
-            <Controller
-              name="unitOfMeasure"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-                  <Select {...field} displayEmpty>
-                    {/* <MenuItem value="">Select</MenuItem> */}
-                    <MenuItem value="Per acres">Per acres</MenuItem>
-                    <MenuItem value="Per hour">Per hour</MenuItem>
-                    <MenuItem value="Per Square metres">Per Square metres</MenuItem>
-                  </Select>
-                </FormControl>
-              )}
-            />
-
-            {/* Note */}
-            <InputLabel sx={{ mb: 0.5 }}>Note :</InputLabel>
-            <Controller
-              name="note"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  multiline
-                  minRows={3}
-                  sx={{ mb: 1 }}
-                />
-              )}
-            />
-          </DialogContent>
-
-          <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Button
-                onClick={handleCloseDialog}
-                variant="contained"
-                sx={{
-                  borderRadius: "20px",
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  px: 4,
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit(onSubmit)}
-                sx={{
-                  borderRadius: "20px",
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  px: 4,
-                }}
-              >
-                Create
-              </Button>
-            </Box>
-          </DialogActions>
-        </Dialog>
-
+          {/* Dialog for adding/editing resources */}
+          <ResourceDialog
+            open={openDialog}
+            onClose={handleCloseDialog}
+            onSave={handleSubmit(onSubmit)}
+            formData={formData} // Pass empty object for new resource
+            setFormData={setFormData} // Placeholder, not used in this example
+          />
 
         </Paper>
       </Box>
