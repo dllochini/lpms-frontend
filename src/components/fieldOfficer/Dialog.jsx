@@ -8,8 +8,12 @@ import {
   TextField,
   Button,
   Input,
+  FormControl,
+  Select,
+  MenuItem
 } from "@mui/material";
 import InputLabel from "@mui/material/InputLabel";
+import { Form } from "react-router-dom";
 
 export default function ResourceDialog({
   open,
@@ -47,36 +51,51 @@ export default function ResourceDialog({
       <DialogContent
         style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}
       >
-         <InputLabel sx={{ mb: 0.5 }}>Resource ID :</InputLabel>
+         <InputLabel sx={{ mb: 0.2 }}>Resource ID :</InputLabel>
           <TextField
               name="id"
               value={formData?.id || ""}
               onChange={handleChange}
               fullWidth
               size="small"
-              sx={{ mb: 2 }}
+              sx={{ mb: 1 }}
             />
     
         
-        <InputLabel sx={{ mb: 0.5 }}>Category :</InputLabel>
-        <TextField
+        {/* Category Dropdown */}
+        <InputLabel sx={{mb:0.5}}>Category</InputLabel>
+        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+        <Select
           name="category"
-          value={formData?.category || "" }
+          value={formData?.category || ""}
           onChange={handleChange}
-          fullWidth
-          size="small"
-          sx={{ mb: 2 }}
-        />
+        >
+          <MenuItem value="Machine">Machine</MenuItem>
+          <MenuItem value="Vehicle">Vehicle</MenuItem>
+          <MenuItem value="Manual">Manual</MenuItem>
+        </Select>
+      </FormControl>
         
         <InputLabel sx={{ mb: 0.5 }}>Unit Of Measure:</InputLabel>
-        <TextField
+        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+          <Select
+            name="unitOfMeasure"
+            value={formData?.unitOfMeasure || ""}
+            onChange={handleChange}
+          >
+             <MenuItem value="Per acers">Per acers</MenuItem>
+          <MenuItem value="Per hour">Per hour</MenuItem>
+          <MenuItem value="Per square metres">Per square metres</MenuItem>
+          </Select>
+        </FormControl>
+        {/* <TextField
           name="unitOfMeasure"
           value={formData?.unitOfMeasure || ""}
           onChange={handleChange}
           fullWidth
           size="small"
           sx={{ mb: 2 }}
-        />
+        /> */}
 
         <InputLabel sx={{ mb: 0.5 }}>Note:</InputLabel>
         <TextField
