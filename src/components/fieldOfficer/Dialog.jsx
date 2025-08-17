@@ -51,10 +51,10 @@ export default function ResourceDialog({
       <DialogContent
         style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}
       >
-         <InputLabel sx={{ mb: 0.2 }}>Resource ID :</InputLabel>
+         <InputLabel sx={{ mb: 0.2 }}>Resource Name :</InputLabel>
           <TextField
-              name="id"
-              value={formData?.id || ""}
+              name="resourceName"
+              value={formData?.resourceName || ""}
               onChange={handleChange}
               fullWidth
               size="small"

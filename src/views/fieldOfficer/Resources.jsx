@@ -47,15 +47,24 @@ import {
     };
   
     /// ✅ Form submit handler
-    const onSubmit = (data) => {
-      console.log("Form Data:", data);
-  
-      // Add the new task locally (mock example)
-      setResponseData((prev) => [
-        ...prev,
-        { _id: Date.now().toString(), ...formData } // Mock ID generation
-      ]);
-  
+    const onSubmit = () => {
+      if (formData._id) {
+        // Edit mode: update existing resource
+        setResponseData(prev =>
+          prev.map(item =>
+           item._id === formData._id ? { ...formData } : item 
+          )
+        );
+      } else {
+        // Create mode: Add new resource
+        const exists = responseData.some(item => item._id === formData._id)
+        if (!exists) {
+          setResponseData((prev) => [
+            ...prev,
+            {...formData, _id: Date.now().toString()} // Mock ID generation
+          ]);
+        }
+      }
       reset(); // clear form
       handleCloseDialog();
     };
