@@ -1,17 +1,14 @@
-// src/utils/redirectByRole.js
 export function redirectByRole(role) {
     switch (role) {
-      case "admin":
+      case "Admin":
         return "/admin/dashboard";
-      case "user":
-        return "/user/dashboard";
-      case "fieldOfficer":
+      case "Field Officer":
        return "/fieldOfficer/dashboard";
-      case "manager":
+      case "Manager":
        return "/manager/dashboard";
-      case "higherManager":
+      case "Higher Management":
        return "/higherManager/dashboard";
-      case "accountant":
+      case "Accountant":
        return "/accountant/dashboard";
       default:
         return "/";

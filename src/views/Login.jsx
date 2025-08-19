@@ -1,7 +1,13 @@
 import React, { useState } from "react";
 import {
-  Box, Card, CardContent, TextField, Button,
-  Typography, Link, Collapse,
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  Link,
+  Collapse,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -10,7 +16,7 @@ import bgImage from "/images/sugar-cane.jpg";
 import companyLogo from "/images/ceylon-sugar-industries.png";
 import { loginUser, forgotPassword } from "../api/auth"; // Import your API functions
 import { redirectByRole } from "../utils/redirectByRole";
-
+import { useNavigate } from "react-router-dom";
 
 const loginSchema = yup.object().shape({
   email: yup.string().required("email is required"),
@@ -21,13 +27,13 @@ const forgotSchema = yup.object().shape({
   email: yup.string().email("Invalid email").required("Email is required"),
 });
 
-
 export default function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-  const { setError: setFieldError } = useForm();
+  // const { setError: setFieldError } = useForm();
+  const navigate = useNavigate();
 
   const {
     control: loginControl,
@@ -39,39 +45,34 @@ export default function LoginPage() {
     control: forgotControl,
     handleSubmit: handleForgot,
     formState: { errors: forgotErrors },
-    setError: setForgotFieldError
+    setError: setForgotFieldError,
   } = useForm({ resolver: yupResolver(forgotSchema) });
 
   const onLogin = async (data) => {
     setLoading(true);
     setSuccess(null);
-  
+
     try {
       const response = await loginUser(data);
-      const { token, role } = response.data;
-  
+      // console.log("Login response message:", response.data.message);
+      // const { token, role } = response.data;
+      const role = response.data.role;
       // Save auth data
-      localStorage.setItem("token", token);
+      // localStorage.setItem("token", token);
       localStorage.setItem("role", role);
-  
+
       setSuccess("Login successful!");
-  
+
       // Redirect
       const path = redirectByRole(role);
-      window.location.href = path;
+      console.log(role);
+      console.log("Redirecting to:", path);
+      navigate(path);
     } catch (err) {
-      const backendMessage = err.response?.data?.message || "Login failed";
-  
-      if (backendMessage.toLowerCase().includes("email")) {
-        setFieldError("email", { type: "manual", message: backendMessage });
-      } else if (backendMessage.toLowerCase().includes("password")) {
-        setFieldError("password", { type: "manual", message: backendMessage });
-      } else {
-        // Optional: show generic error somewhere else
-        alert(backendMessage);
-      }
+      // const backendMessage = err.response?.data?.error || "Login failed";
+      setError(err.response?.data?.error || "Login failed");
     }
-  
+
     setLoading(false);
   };
 
@@ -83,10 +84,13 @@ export default function LoginPage() {
       const response = await forgotPassword(data);
       setSuccess("Password reset email sent!");
     } catch (err) {
-      const backendMessage = err.response?.data?.message || "Request failed";
-    
+      const backendMessage = err.response?.data?.error || "Request failed";
+
       if (backendMessage.toLowerCase().includes("email")) {
-        setForgotFieldError("email", { type: "manual", message: backendMessage });
+        setForgotFieldError("email", {
+          type: "manual",
+          message: backendMessage,
+        });
       } else {
         setError(backendMessage);
       }
@@ -130,19 +134,8 @@ export default function LoginPage() {
             />
           </Box>
 
-          {error && (
-            <Typography color="error" textAlign="center" mb={1}>
-              {error}
-            </Typography>
-          )}
-          {success && (
-            <Typography color="success.main" textAlign="center" mb={1}>
-              {success}
-            </Typography>
-          )}
-
-          <form onSubmit={handleLogin(onLogin)}>
-          <Controller
+          <form onSubmit={handleLogin(onLogin)} style={{ marginBottom: 1 }}>
+            <Controller
               name="email"
               control={loginControl}
               render={({ field }) => (
@@ -177,13 +170,23 @@ export default function LoginPage() {
               )}
             />
 
+            {error && (
+              <Typography color="error" textAlign="center" mb={1}>
+                {error}
+              </Typography>
+            )}
+            {success && (
+              <Typography color="success.main" textAlign="center" mb={1}>
+                {success}
+              </Typography>
+            )}
 
             <Button
               type="submit"
               variant="contained"
               color="primary"
               fullWidth
-              sx={{ mt: 2, py: 1.2, fontWeight: "bold" }}
+              sx={{ mt: 1, py: 1.2, fontWeight: "bold" }}
               disabled={loading}
             >
               {loading ? "Logging in..." : "Log In"}
