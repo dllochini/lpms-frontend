@@ -8,6 +8,7 @@ import {
   Typography,
   Link,
   Collapse,
+  Alert,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -171,14 +172,9 @@ export default function LoginPage() {
             />
 
             {error && (
-              <Typography color="error" textAlign="center" mb={1}>
+              <Alert severity="error" sx={{ mb: 1 }}>
                 {error}
-              </Typography>
-            )}
-            {success && (
-              <Typography color="success.main" textAlign="center" mb={1}>
-                {success}
-              </Typography>
+              </Alert>
             )}
 
             <Button
