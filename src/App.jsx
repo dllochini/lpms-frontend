@@ -12,7 +12,7 @@ import UserRegistration from "./views/admin/UserRegistration";
 import Manager from "./views/manager/Manager";
 import Accountant from "./views/accountant/Accountant";
 import UserEdit from "./views/admin/UserEdit";
-import ForgotPw from "./views/ForgotPw";
+import ResetPw from "./views/ResetPw";
 import HigherManager from "./views/higherManager/HigherManager";
 
 const App = () => {
@@ -20,7 +20,7 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/forgotPw" element={<ForgotPw />} />
+          <Route path="/resetPassword" element={<ResetPw />} />
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="*" element={<NoPage />} />

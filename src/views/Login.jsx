@@ -15,12 +15,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import bgImage from "/images/sugar-cane.jpg";
 import companyLogo from "/images/ceylon-sugar-industries.png";
-import { loginUser, forgotPassword } from "../api/auth"; // Import your API functions
+import { loginUser, forgotPassword } from "../api/auth";
 import { redirectByRole } from "../utils/redirectByRole";
 import { useNavigate } from "react-router-dom";
 
 const loginSchema = yup.object().shape({
-  email: yup.string().required("email is required"),
+  email: yup.string().required("Email is required"),
   password: yup.string().required("Password is required"),
 });
 
@@ -30,10 +30,16 @@ const forgotSchema = yup.object().shape({
 
 export default function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
-  // const { setError: setFieldError } = useForm();
+
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+
+  const [loginError, setLoginError] = useState(null);
+  const [loginSuccess, setLoginSuccess] = useState(null);
+
+  const [forgotError, setForgotError] = useState(null);
+  const [forgotSuccess, setForgotSuccess] = useState(null);
+
   const navigate = useNavigate();
 
   const {
@@ -46,55 +52,52 @@ export default function LoginPage() {
     control: forgotControl,
     handleSubmit: handleForgot,
     formState: { errors: forgotErrors },
-    setError: setForgotFieldError,
+    reset: resetForgotForm,
   } = useForm({ resolver: yupResolver(forgotSchema) });
 
+  // Login handler
   const onLogin = async (data) => {
-    setLoading(true);
-    setSuccess(null);
+    setLoginLoading(true);
+    setLoginError(null);
+    setLoginSuccess(null);
 
     try {
       const response = await loginUser(data);
-      // console.log("Login response message:", response.data.message);
-      // const { token, role } = response.data;
-      const role = response.data.role;
-      // Save auth data
-      // localStorage.setItem("token", token);
+      const role = response.data?.role;
+
+      if (!role) {
+        setLoginError("Login failed: Role not found");
+        return;
+      }
+
       localStorage.setItem("role", role);
+      setLoginSuccess("Login successful!");
 
-      setSuccess("Login successful!");
-
-      // Redirect
       const path = redirectByRole(role);
-      console.log(role);
-      console.log("Redirecting to:", path);
       navigate(path);
     } catch (err) {
-      // const backendMessage = err.response?.data?.error || "Login failed";
-      setError(err.response?.data?.error || "Login failed");
+      setLoginError(err.response?.data?.error || "Login failed");
+    } finally {
+      setLoginLoading(false);
     }
-
-    setLoading(false);
   };
 
+  // Forgot password handler
   const onForgot = async (data) => {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+    setForgotLoading(true);
+    setForgotError(null);
+    setForgotSuccess(null);
+
     try {
       const response = await forgotPassword(data);
-      setSuccess("Password reset email sent!");
+      setForgotSuccess(response.data.message);
+      resetForgotForm();
+      setTimeout(() => setForgotSuccess(null), 5000);
+      setTimeout(() => setForgotOpen(false), 5000);
     } catch (err) {
-      const backendMessage = err.response?.data?.error || "Request failed";
-
-      if (backendMessage.toLowerCase().includes("email")) {
-        setForgotFieldError("email", {
-          type: "manual",
-          message: backendMessage,
-        });
-      } else {
-        setError(backendMessage);
-      }
+      setForgotError(err.response?.data?.error || "Request failed");
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -107,13 +110,11 @@ export default function LoginPage() {
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "bottom",
-        overflowX: "hidden",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         p: 2,
-        overflow: "hidden",
       }}
     >
       <Card
@@ -135,6 +136,7 @@ export default function LoginPage() {
             />
           </Box>
 
+          {/* Login Form */}
           <form onSubmit={handleLogin(onLogin)} style={{ marginBottom: 1 }}>
             <Controller
               name="email"
@@ -148,7 +150,7 @@ export default function LoginPage() {
                   margin="normal"
                   error={!!loginErrors.email}
                   helperText={loginErrors.email?.message}
-                  disabled={loading}
+                  disabled={loginLoading}
                 />
               )}
             />
@@ -166,14 +168,19 @@ export default function LoginPage() {
                   margin="normal"
                   error={!!loginErrors.password}
                   helperText={loginErrors.password?.message}
-                  disabled={loading}
+                  disabled={loginLoading}
                 />
               )}
             />
 
-            {error && (
+            {loginError && (
               <Alert severity="error" sx={{ mb: 1 }}>
-                {error}
+                {loginError}
+              </Alert>
+            )}
+            {loginSuccess && (
+              <Alert severity="success" sx={{ mb: 1 }}>
+                {loginSuccess}
               </Alert>
             )}
 
@@ -183,12 +190,13 @@ export default function LoginPage() {
               color="primary"
               fullWidth
               sx={{ mt: 1, py: 1.2, fontWeight: "bold" }}
-              disabled={loading}
+              disabled={loginLoading}
             >
-              {loading ? "Logging in..." : "Log In"}
+              {loginLoading ? "Logging in..." : "Log In"}
             </Button>
           </form>
 
+          {/* Forgot password link */}
           <Typography textAlign="center" mt={2}>
             <Link
               component="button"
@@ -201,6 +209,7 @@ export default function LoginPage() {
           </Typography>
         </CardContent>
 
+        {/* Forgot Password Form */}
         <Collapse in={forgotOpen} timeout={400} unmountOnExit>
           <Box px={4} pb={3}>
             <form onSubmit={handleForgot(onForgot)}>
@@ -216,19 +225,34 @@ export default function LoginPage() {
                     margin="normal"
                     error={!!forgotErrors.email}
                     helperText={forgotErrors.email?.message}
-                    disabled={loading}
+                    disabled={forgotLoading}
                   />
                 )}
               />
+
+              {forgotError && (
+                <Alert severity="error" sx={{ mb: 1 }}>
+                  {forgotError}
+                </Alert>
+              )}
+              {forgotSuccess && (
+                <Alert
+                  severity="success"
+                  sx={{ mb: 1 }}
+                >
+                  {forgotSuccess}
+                </Alert>
+              )}
+
               <Button
                 type="submit"
                 variant="outlined"
                 color="primary"
                 fullWidth
                 sx={{ mt: 1, py: 1.2, fontWeight: "bold" }}
-                disabled={loading}
+                disabled={forgotLoading}
               >
-                {loading ? "Submitting..." : "Submit"}
+                {forgotLoading ? "Submitting..." : "Submit"}
               </Button>
             </form>
           </Box>
