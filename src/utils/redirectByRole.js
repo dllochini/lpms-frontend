@@ -3,13 +3,13 @@ export function redirectByRole(role) {
       case "Admin":
         return "/admin/dashboard";
       case "Field Officer":
-       return "/fieldOfficer/dashboard";
+       return "/fieldOfficer";
       case "Manager":
-       return "/manager/dashboard";
+       return "/manager";
       case "Higher Management":
-       return "/higherManager/dashboard";
+       return "/higherManager";
       case "Accountant":
-       return "/accountant/dashboard";
+       return "/accountant";
       default:
         return "/";
     }
