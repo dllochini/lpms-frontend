@@ -13,6 +13,7 @@ import ResetPw from "./views/ResetPw";
 import HigherManager from "./views/higherManager/HigherManager";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
+import Operation from "./views/fieldOfficer/Operation";
 
 // A wrapper component so we can use hooks like useNavigate
 const AppWrapper = () => {
@@ -44,6 +45,7 @@ const AppWrapper = () => {
         <Route path="/accountant" element={<Accountant />} />
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
+        <Route path="/fieldOfficer/operation" element={<Operation />} />
       </Route>
     </Routes>
   );
