@@ -43,6 +43,7 @@ const AppWrapper = () => {
         <Route path="/manager" element={<Manager />} />
         <Route path="/accountant" element={<Accountant />} />
         <Route path="/higherManager" element={<HigherManager />} />
+        <Route path="/fieldOfficer" element={<FieldOfficer />} />
       </Route>
     </Routes>
   );
