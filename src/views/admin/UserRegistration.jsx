@@ -78,8 +78,8 @@ const UserRegistration = () => {
     .object({
       designation: yup.string().required("Choose a designation"),
       role: yup.string().required("Choose a role"),
-      firstName: yup.string().required("First name is required"),
-      lastName: yup.string().required("Last name is required"),
+      // firstName: yup.string().required("First name is required"),
+      // lastName: yup.string().required("Last name is required"),
       fullName: yup.string().required("Full name is required"),
       email: yup.string().email(),
       nic: yup
@@ -118,8 +118,8 @@ const UserRegistration = () => {
     defaultValues: {
       designation: "",
       role: "",
-      firstName: "",
-      lastName: "",
+      // firstName: "",
+      // lastName: "",
       fullName: "",
       email: "",
       nic: "",
@@ -269,19 +269,20 @@ const UserRegistration = () => {
                       error={!!errors.role}
                       helperText={errors.role?.message || " "}
                     >
-                      {roles.map((role) => (
-                        <MenuItem key={role._id} value={role._id}>
-                          {role.role}{" "}
-                          {/* or role.label depending on your Role schema */}
-                        </MenuItem>
-                      ))}
+                      {roles
+                        .filter((role) => role.name?.toLowerCase() !== "farmer")
+                        .map((role) => (
+                          <MenuItem key={role._id} value={role._id}>
+                            {role.name}
+                          </MenuItem>
+                        ))}
                     </TextField>
                   )}
                 />
               </Grid>
 
               {/* first name and last name container */}
-              <Grid
+              {/* <Grid
                 sx={{
                   // border: 1,
                   // borderColor: "green",
@@ -290,7 +291,7 @@ const UserRegistration = () => {
                   gap: 2,
                 }}
               >
-                {/* firstName */}
+                // {/* firstName
                 <Grid
                   item
                   sx={{
@@ -310,14 +311,14 @@ const UserRegistration = () => {
                     First Name :
                   </InputLabel>
                   <Controller
-                    name="firstName"
+                    // name="firstName"
                     control={control}
                     render={({ field }) => (
                       <TextField
                         {...field}
                         id="outlined-required"
-                        error={!!errors.firstName}
-                        helperText={errors.firstName?.message || " "}
+                        // error={!!errors.firstName}
+                        // helperText={errors.firstName?.message || " "}
                         size="small"
                         className="inputField"
                       />
@@ -325,7 +326,7 @@ const UserRegistration = () => {
                   />
                 </Grid>
 
-                {/* lastName */}
+                // {/* lastName
                 <Grid
                   item
                   sx={{
@@ -344,7 +345,7 @@ const UserRegistration = () => {
                     Last Name :
                   </InputLabel>
                   <Controller
-                    name="lastName"
+                    // name="lastName"
                     control={control}
                     render={({ field }) => (
                       <TextField
@@ -352,14 +353,14 @@ const UserRegistration = () => {
                         id="outlined-required"
                         size="small"
                         className="inputField"
-                        error={!!errors.lastName}
-                        helperText={errors.lastName?.message || " "}
+                        // error={!!errors.lastName}
+                        // helperText={errors.lastName?.message || " "}
                         // fullWidth
                       />
                     )}
                   />
                 </Grid>
-              </Grid>
+              </Grid> */}
 
               {/* Full name */}
               <Grid
