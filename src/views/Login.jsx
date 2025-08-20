@@ -1,3 +1,4 @@
+import setAuthToken from "../utils/setAuthToken"; // see next snippet
 import React, { useState } from "react";
 import {
   Box,
@@ -55,34 +56,42 @@ export default function LoginPage() {
     reset: resetForgotForm,
   } = useForm({ resolver: yupResolver(forgotSchema) });
 
-  // Login handler
+  // ✅ Fixed Login handler
   const onLogin = async (data) => {
     setLoginLoading(true);
     setLoginError(null);
     setLoginSuccess(null);
 
     try {
-      const response = await loginUser(data);
-      const role = response.data?.role;
+      const response = await loginUser(data); // axios POST /auth/login
+      const { role, token } = response.data;
 
-      if (!role) {
-        setLoginError("Login failed: Role not found");
+      if (!token || !role) {
+        setLoginError("Login failed: missing token or role");
         return;
       }
 
+      // Save role + token
       localStorage.setItem("role", role);
+      localStorage.setItem("token", token);
+
+      // set default Authorization header for axios
+      setAuthToken(token);
+
       setLoginSuccess("Login successful!");
 
+      // redirect user
       const path = redirectByRole(role);
-      navigate(path);
+      navigate(path, { replace: true }); // replace so user can’t go back to login
     } catch (err) {
       setLoginError(err.response?.data?.error || "Login failed");
     } finally {
+      // ✅ always stop loading
       setLoginLoading(false);
     }
   };
 
-  // Forgot password handler
+  // Forgot password handler (unchanged except proper finally already present)
   const onForgot = async (data) => {
     setForgotLoading(true);
     setForgotError(null);
@@ -92,6 +101,7 @@ export default function LoginPage() {
       const response = await forgotPassword(data);
       setForgotSuccess(response.data.message);
       resetForgotForm();
+
       setTimeout(() => setForgotSuccess(null), 5000);
       setTimeout(() => setForgotOpen(false), 5000);
     } catch (err) {

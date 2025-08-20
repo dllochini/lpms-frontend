@@ -1,4 +1,6 @@
-import { Outlet, Link } from "react-router-dom";
+// views/Layout.jsx
+import React from "react";
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -9,37 +11,45 @@ import {
   Box,
   Button,
 } from "@mui/material";
-// import AdbIcon from '@mui/icons-material/Adb';
-// import IconButton from "@mui/material";
 import companyLogo from "/images/ceylon-sugar-industries.png";
+import { clearAuth } from "../utils/auth"; // <-- make sure this path is correct
 
 const Layout = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    clearAuth(); // clears token/role and axios header
+    navigate("/login", { replace: true }); // prevent back navigation
+  };
+
   return (
     <>
-
       {/* Header */}
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Box
             component="img"
-            src={companyLogo} // <-- replace with your logo path
-            // alt="Company Logo"
+            src={companyLogo}
             sx={{
-              height: 50, // adjust as needed
+              height: 50,
               mr: 2,
-              my: 1.5, // margin-right for spacing
-              // border: "2px solid black",
+              my: 1.5,
             }}
           />
-          <Avatar
-            alt="Land Avatar"
-            // src="https://via.placeholder.com/40"
-            sx={{
-              width: 40,
-              height: 40,
-              // border: "2px solid black"
-            }}
-          />
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* optional: replace Avatar with user initials or image */}
+            <Avatar sx={{ width: 40, height: 40 }} />
+
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={handleLogout}
+              sx={{ textTransform: "none", fontWeight: 600, mx: 2 }}
+            >
+              Logout
+            </Button>
+          </Box>
         </Toolbar>
       </AppBar>
 
@@ -48,12 +58,20 @@ const Layout = () => {
       </Box>
 
       {/* Footer */}
-      <Box sx={{ bgcolor: 'black', color: 'white', p: 2, mt: 4, textAlign: 'center' }}>
-        <Typography variant="caption" sx={{ fontSize: '0.75rem' }}>
-          © 2025 Ceylon Sugar Industries – Land Preparation System. All Rights Reserved.
+      <Box
+        sx={{
+          bgcolor: "black",
+          color: "white",
+          p: 2,
+          mt: 4,
+          textAlign: "center",
+        }}
+      >
+        <Typography variant="caption" sx={{ fontSize: "0.75rem" }}>
+          © 2025 Ceylon Sugar Industries – Land Preparation System. All Rights
+          Reserved.
         </Typography>
       </Box>
-
     </>
   );
 };

@@ -1,3 +1,4 @@
+// src/pages/ResetPw.jsx
 import React, { useState } from "react";
 import {
   Box,
@@ -18,7 +19,7 @@ import bgImage from "/images/sugar-cane.jpg";
 import companyLogo from "/images/ceylon-sugar-industries.png";
 import { resetPassword } from "../api/auth";
 
-// ✅ Validation schema
+// Validation schema (fixed regex; escaped slash & backslash)
 const resetPasswordSchema = yup.object().shape({
   password: yup
     .string()
@@ -28,7 +29,7 @@ const resetPasswordSchema = yup.object().shape({
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
     .matches(/\d/, "Password must contain at least one number")
     .matches(
-      /[@$!%*?&#^()\-_=+{}[\]|;:'",.<>/~`]/,
+      /[!@#$%^&*()_\-+=\[\]{};:'",.<>\/\\?|`~]/,
       "Password must contain at least one special character"
     ),
   confirmPassword: yup
@@ -36,6 +37,32 @@ const resetPasswordSchema = yup.object().shape({
     .oneOf([yup.ref("password"), null], "Passwords must match")
     .required("Confirm password is required"),
 });
+
+// Local error mapper — no external utils file needed
+function getFriendlyErrorMessage(serverError, fallback = "Something went wrong. Please try again.") {
+  if (!serverError) return fallback;
+  const msg = String(serverError || "").toLowerCase();
+
+  // Email service / SMTP temporary failure -> friendly message
+  if (msg.includes("gsmtp") || msg.includes("421") || msg.includes("smtp") || msg.includes("email")) {
+    return "We couldn't send or process the request right now. Please try again in a few minutes.";
+  }
+
+  // Token expired / invalid
+  if (msg.includes("invalid or expired token") || msg.includes("invalid token") || msg.includes("expired token")) {
+    return "The password reset link is invalid or has expired. Request a new link.";
+  }
+
+  // User not found / do not leak user existence
+  if (msg.includes("user not found") || msg.includes("no user")) {
+    return "If an account exists for that email, a reset link has been sent.";
+  }
+
+  // If server provided a short, safe message show it
+  if (msg.length > 0 && msg.length < 200) return serverError;
+
+  return fallback;
+}
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -48,32 +75,56 @@ export default function ResetPasswordPage() {
     reset,
   } = useForm({
     resolver: yupResolver(resetPasswordSchema),
+    defaultValues: { password: "", confirmPassword: "" },
   });
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false); // <-- ✅ track success
+  const [success, setSuccess] = useState(false);
+
+  const extractServerMessage = (err) => {
+    return err?.response?.data?.error || err?.response?.data?.message || err?.message || null;
+  };
 
   const onSubmit = async (data) => {
     setLoading(true);
     setMessage("");
     setError("");
 
-    console.log("token:", token);
+    // Frontend token sanity check
+    if (!token) {
+      setLoading(false);
+      setError("Reset token missing. Please use the link from your email.");
+      if (process.env.NODE_ENV === "development") console.error("Reset token missing in URL (searchParams).");
+      return;
+    }
+
+    if (!data.password) {
+      setLoading(false);
+      setError("Please enter a new password.");
+      return;
+    }
 
     try {
+      if (process.env.NODE_ENV === "development") console.log("Submitting reset with token:", token);
+
       const response = await resetPassword(token, data.password);
 
-      if (response.status === 200) {
-        setSuccess(true); // ✅ indicate success
-        setMessage("Password reset successful! Please log in again.");
-        reset(); // Clear the form
+      if (response?.status === 200 || response?.status === 204) {
+        setSuccess(true);
+        setMessage(response.data?.message || "Password reset successful! Please log in again.");
+        reset();
       } else {
-        setError(response.data?.message || "Something went wrong.");
+        const serverMsg = response?.data?.message || response?.data?.error || "Something went wrong.";
+        setError(getFriendlyErrorMessage(serverMsg));
       }
     } catch (err) {
-      setError(err.response?.data?.error || "Network error. Please try again.");
+      // Log full error only in dev
+      if (process.env.NODE_ENV === "development") console.error("resetPassword error (full):", err);
+
+      const serverMsg = extractServerMessage(err);
+      setError(getFriendlyErrorMessage(serverMsg));
     } finally {
       setLoading(false);
     }
@@ -107,12 +158,7 @@ export default function ResetPasswordPage() {
         <CardContent sx={{ px: 4, py: 4 }}>
           {/* Logo */}
           <Box sx={{ display: "flex", justifyContent: "center", mb: 2 }}>
-            <Box
-              component="img"
-              src={companyLogo}
-              alt="Company Logo"
-              sx={{ height: 60, width: "auto" }}
-            />
+            <Box component="img" src={companyLogo} alt="Company Logo" sx={{ height: 60, width: "auto" }} />
           </Box>
 
           {/* Success message OR form */}
@@ -173,11 +219,7 @@ export default function ResetPasswordPage() {
                 }}
                 disabled={loading}
               >
-                {loading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  "Submit"
-                )}
+                {loading ? <CircularProgress size={24} color="inherit" /> : "Submit"}
               </Button>
             </form>
           )}
@@ -185,13 +227,8 @@ export default function ResetPasswordPage() {
       </Card>
 
       {/* Footer */}
-      <Typography
-        variant="body2"
-        color="white"
-        sx={{ mt: 4, opacity: 0.8, textAlign: "center" }}
-      >
-        © 2025 Ceylon Sugar Industries – Land Preparation System. All Rights
-        Reserved.
+      <Typography variant="body2" color="white" sx={{ mt: 4, opacity: 0.8, textAlign: "center" }}>
+        © 2025 Ceylon Sugar Industries – Land Preparation System. All Rights Reserved.
       </Typography>
     </Box>
   );
