@@ -1,6 +1,15 @@
-import axiosBackend from "../configs/axios-config"; // your configured axios instance
+import axiosBackend from "../configs/axios-config";
 
-export const loginUser = (data) => axiosBackend.post("/login", data);
+export const loginUser = (data) => {
+//   console.log("response:", data);
+  return axiosBackend.post("/auth/login", data);
+};
 
-export const forgotPassword = (data) => axiosBackend.post("/auth/forgot-password", data);
- 
+export const forgotPassword = (data) => {
+  return axiosBackend.post("/auth/forgot-password", data);
+};
+
+export const resetPassword = (token, password) => {
+//   console.log("response:", password);
+  return axiosBackend.post("/auth/reset-password", { token, password });
+};

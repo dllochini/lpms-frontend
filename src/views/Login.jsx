@@ -1,18 +1,27 @@
+import setAuthToken from "../utils/setAuthToken"; // see next snippet
 import React, { useState } from "react";
 import {
-  Box, Card, CardContent, TextField, Button,
-  Typography, Link, Collapse,
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  Link,
+  Collapse,
+  Alert,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import bgImage from "/images/sugar-cane.jpg";
 import companyLogo from "/images/ceylon-sugar-industries.png";
-import { loginUser, forgotPassword } from "../api/auth"; // Import your API functions
-
+import { loginUser, forgotPassword } from "../api/auth";
+import { redirectByRole } from "../utils/redirectByRole";
+import { useNavigate } from "react-router-dom";
 
 const loginSchema = yup.object().shape({
-  username: yup.string().required("Username is required"),
+  email: yup.string().required("Email is required"),
   password: yup.string().required("Password is required"),
 });
 
@@ -22,9 +31,17 @@ const forgotSchema = yup.object().shape({
 
 export default function LoginPage() {
   const [forgotOpen, setForgotOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
+
+  const [loginError, setLoginError] = useState(null);
+  const [loginSuccess, setLoginSuccess] = useState(null);
+
+  const [forgotError, setForgotError] = useState(null);
+  const [forgotSuccess, setForgotSuccess] = useState(null);
+
+  const navigate = useNavigate();
 
   const {
     control: loginControl,
@@ -36,50 +53,62 @@ export default function LoginPage() {
     control: forgotControl,
     handleSubmit: handleForgot,
     formState: { errors: forgotErrors },
+    reset: resetForgotForm,
   } = useForm({ resolver: yupResolver(forgotSchema) });
 
+  // ✅ Fixed Login handler
   const onLogin = async (data) => {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-    try {
-      const response = await loginUser(data);
-      const { token, role } = response.data;
-  
-      // Save token and role in localStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", role);
-  
-      setSuccess("Login successful!");
-  
-      // Redirect user based on role
-      if (role === "admin") {
-        window.location.href = "/admin/dashboard";  // example admin dashboard URL
-      } else if (role === "user") {
-        window.location.href = "/user/dashboard";   // example user dashboard URL
-      } else {
-        window.location.href = "/"; // fallback
-      }
-  
-    } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
-    }
-    setLoading(false);
-  };
-  
+    setLoginLoading(true);
+    setLoginError(null);
+    setLoginSuccess(null);
 
+    try {
+      const response = await loginUser(data); // axios POST /auth/login
+      const { role, token } = response.data;
+
+      if (!token || !role) {
+        setLoginError("Login failed: missing token or role");
+        return;
+      }
+
+      // Save role + token
+      localStorage.setItem("role", role);
+      localStorage.setItem("token", token);
+
+      // set default Authorization header for axios
+      setAuthToken(token);
+
+      setLoginSuccess("Login successful!");
+
+      // redirect user
+      const path = redirectByRole(role);
+      navigate(path, { replace: true }); // replace so user can’t go back to login
+    } catch (err) {
+      setLoginError(err.response?.data?.error || "Login failed");
+    } finally {
+      // ✅ always stop loading
+      setLoginLoading(false);
+    }
+  };
+
+  // Forgot password handler (unchanged except proper finally already present)
   const onForgot = async (data) => {
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
+    setForgotLoading(true);
+    setForgotError(null);
+    setForgotSuccess(null);
+
     try {
       const response = await forgotPassword(data);
-      setSuccess("Password reset email sent!");
-      console.log("Forgot password response:", response.data);
+      setForgotSuccess(response.data.message);
+      resetForgotForm();
+
+      setTimeout(() => setForgotSuccess(null), 5000);
+      setTimeout(() => setForgotOpen(false), 5000);
     } catch (err) {
-      setError(err.response?.data?.message || "Request failed");
+      setForgotError(err.response?.data?.error || "Request failed");
+    } finally {
+      setForgotLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -91,13 +120,11 @@ export default function LoginPage() {
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "bottom",
-        overflowX: "hidden",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
         p: 2,
-        overflow: "hidden",
       }}
     >
       <Card
@@ -119,34 +146,25 @@ export default function LoginPage() {
             />
           </Box>
 
-          {error && (
-            <Typography color="error" textAlign="center" mb={1}>
-              {error}
-            </Typography>
-          )}
-          {success && (
-            <Typography color="success.main" textAlign="center" mb={1}>
-              {success}
-            </Typography>
-          )}
-
-          <form onSubmit={handleLogin(onLogin)}>
+          {/* Login Form */}
+          <form onSubmit={handleLogin(onLogin)} style={{ marginBottom: 1 }}>
             <Controller
-              name="username"
+              name="email"
               control={loginControl}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Username"
+                  label="Email"
                   variant="outlined"
                   fullWidth
                   margin="normal"
-                  error={!!loginErrors.username}
-                  helperText={loginErrors.username?.message}
-                  disabled={loading}
+                  error={!!loginErrors.email}
+                  helperText={loginErrors.email?.message}
+                  disabled={loginLoading}
                 />
               )}
             />
+
             <Controller
               name="password"
               control={loginControl}
@@ -160,23 +178,35 @@ export default function LoginPage() {
                   margin="normal"
                   error={!!loginErrors.password}
                   helperText={loginErrors.password?.message}
-                  disabled={loading}
+                  disabled={loginLoading}
                 />
               )}
             />
+
+            {loginError && (
+              <Alert severity="error" sx={{ mb: 1 }}>
+                {loginError}
+              </Alert>
+            )}
+            {loginSuccess && (
+              <Alert severity="success" sx={{ mb: 1 }}>
+                {loginSuccess}
+              </Alert>
+            )}
 
             <Button
               type="submit"
               variant="contained"
               color="primary"
               fullWidth
-              sx={{ mt: 2, py: 1.2, fontWeight: "bold" }}
-              disabled={loading}
+              sx={{ mt: 1, py: 1.2, fontWeight: "bold" }}
+              disabled={loginLoading}
             >
-              {loading ? "Logging in..." : "Log In"}
+              {loginLoading ? "Logging in..." : "Log In"}
             </Button>
           </form>
 
+          {/* Forgot password link */}
           <Typography textAlign="center" mt={2}>
             <Link
               component="button"
@@ -189,6 +219,7 @@ export default function LoginPage() {
           </Typography>
         </CardContent>
 
+        {/* Forgot Password Form */}
         <Collapse in={forgotOpen} timeout={400} unmountOnExit>
           <Box px={4} pb={3}>
             <form onSubmit={handleForgot(onForgot)}>
@@ -204,19 +235,34 @@ export default function LoginPage() {
                     margin="normal"
                     error={!!forgotErrors.email}
                     helperText={forgotErrors.email?.message}
-                    disabled={loading}
+                    disabled={forgotLoading}
                   />
                 )}
               />
+
+              {forgotError && (
+                <Alert severity="error" sx={{ mb: 1 }}>
+                  {forgotError}
+                </Alert>
+              )}
+              {forgotSuccess && (
+                <Alert
+                  severity="success"
+                  sx={{ mb: 1 }}
+                >
+                  {forgotSuccess}
+                </Alert>
+              )}
+
               <Button
                 type="submit"
                 variant="outlined"
                 color="primary"
                 fullWidth
                 sx={{ mt: 1, py: 1.2, fontWeight: "bold" }}
-                disabled={loading}
+                disabled={forgotLoading}
               >
-                {loading ? "Submitting..." : "Submit"}
+                {forgotLoading ? "Submitting..." : "Submit"}
               </Button>
             </form>
           </Box>
