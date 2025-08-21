@@ -11,6 +11,7 @@ import Accountant from "./views/accountant/Accountant";
 import UserEdit from "./views/admin/UserEdit";
 import ResetPw from "./views/ResetPw";
 import HigherManager from "./views/higherManager/HigherManager";
+import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
@@ -20,15 +21,23 @@ const AppWrapper = () => {
   const location = useLocation();
 
   useEffect(() => {
-  const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token");
+    const publicPaths = ["/login", "/reset-password"];
 
-  // allow login and reset-password routes without JWT
-  const publicPaths = ["/login", "/reset-password"];
-  if ((!token || isTokenExpired(token)) && !publicPaths.includes(location.pathname)) {
-    clearAuth();
-    navigate("/login");
-  }
-}, [navigate, location]);
+    // ✅ Read toggle flag from .env
+    const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
+
+    // ✅ Skip auth check completely if bypass flag is on
+    if (bypassAuth) {
+      return;
+    }
+
+    // ✅ Enforce auth check if bypass is off
+    if ((!token || isTokenExpired(token)) && !publicPaths.includes(location.pathname)) {
+      clearAuth();
+      navigate("/login");
+    }
+  }, [navigate, location]);
 
   return (
     <Routes>
