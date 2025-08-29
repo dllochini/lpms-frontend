@@ -14,6 +14,7 @@ import HigherManager from "./views/higherManager/HigherManager";
 import Operation from "./views/fieldOfficer/Operation";
 import Resource from "./views/fieldOfficer/Resources";
 import { useEffect } from "react";
+import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
 // A wrapper component so we can use hooks like useNavigate
