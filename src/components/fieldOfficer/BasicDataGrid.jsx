@@ -1,4 +1,4 @@
-// 
+
 
 import * as React from "react";
 import { DataGrid as MuiDataGrid, GridActionsCellItem } from "@mui/x-data-grid";
@@ -147,3 +147,4 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
 };
 
 export default BasicDataGrid;
+
