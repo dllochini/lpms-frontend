@@ -185,26 +185,25 @@ export default function Resource() {
     setOpenDialog(true);
   };
 
-  const onSubmit = () => {
+  const onSubmit = (data) => {
     if (formData._id) {
       // Edit
       setResponseData((prev) =>
-        prev.map((item) => (item._id === formData._id ? { ...formData } : item))
+        prev.map((item) =>
+          item._id === formData._id ? { ...item, ...data } : item
+        )
       );
     } else {
       // Create
-      const exists = responseData.some((item) => item._id === formData._id);
-      if (!exists) {
-        setResponseData((prev) => [
-          ...prev,
-          { ...formData, _id: Date.now().toString() },
-        ]);
-      }
+      setResponseData((prev) => [
+        ...prev,
+        { ...data, _id: Date.now().toString() },
+      ]);
     }
+  
     reset();
     handleCloseDialog();
   };
-
   return (
     <Box>
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
