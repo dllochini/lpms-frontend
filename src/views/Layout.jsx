@@ -1,29 +1,33 @@
 // views/Layout.jsx
 import React from "react";
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
   Typography,
-  IconButton,
-  Paper,
   Avatar,
   Box,
   Button,
 } from "@mui/material";
 import companyLogo from "/images/ceylon-sugar-industries.png";
-import { clearAuth } from "../utils/auth"; // <-- make sure this path is correct
+import { clearAuth } from "../utils/auth";
 
 const Layout = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    clearAuth(); // clears token/role and axios header
-    navigate("/login", { replace: true }); // prevent back navigation
+    clearAuth();
+    navigate("/login", { replace: true });
   };
 
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh", // full viewport height
+      }}
+    >
       {/* Header */}
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -38,9 +42,7 @@ const Layout = () => {
           />
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {/* optional: replace Avatar with user initials or image */}
             <Avatar sx={{ width: 40, height: 40 }} />
-
             <Button
               variant="outlined"
               color="primary"
@@ -53,17 +55,18 @@ const Layout = () => {
         </Toolbar>
       </AppBar>
 
-      <Box component="main" flex={1} p={3}>
+      {/* Main content */}
+      <Box component="main" sx={{ flex: 1, p: 3 }}>
         <Outlet />
       </Box>
 
       {/* Footer */}
       <Box
+        component="footer"
         sx={{
           bgcolor: "black",
           color: "white",
           p: 2,
-          mt: 4,
           textAlign: "center",
         }}
       >
@@ -72,7 +75,7 @@ const Layout = () => {
           Reserved.
         </Typography>
       </Box>
-    </>
+    </Box>
   );
 };
 
