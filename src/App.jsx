@@ -12,6 +12,7 @@ import UserEdit from "./views/admin/UserEdit";
 import ResetPw from "./views/ResetPw";
 import HigherManager from "./views/higherManager/HigherManager";
 import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
+import LandProgressTracking from "./views/fieldOfficer/LandProgressTable";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
@@ -52,6 +53,7 @@ const AppWrapper = () => {
         <Route path="/manager" element={<Manager />} />
         <Route path="/accountant" element={<Accountant />} />
         <Route path="/higherManager" element={<HigherManager />} />
+        <Route path="/fieldOfficer/land-progress-tracking" element={<LandProgressTracking />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
       </Route>
     </Routes>
