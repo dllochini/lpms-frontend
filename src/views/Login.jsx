@@ -56,7 +56,7 @@ export default function LoginPage() {
     reset: resetForgotForm,
   } = useForm({ resolver: yupResolver(forgotSchema) });
 
-  // ✅ Fixed Login handler
+  // Fixed Login handler
   const onLogin = async (data) => {
     setLoginLoading(true);
     setLoginError(null);
@@ -86,7 +86,7 @@ export default function LoginPage() {
     } catch (err) {
       setLoginError(err.response?.data?.error || "Login failed");
     } finally {
-      // ✅ always stop loading
+      // always stop loading
       setLoginLoading(false);
     }
   };
@@ -246,10 +246,7 @@ export default function LoginPage() {
                 </Alert>
               )}
               {forgotSuccess && (
-                <Alert
-                  severity="success"
-                  sx={{ mb: 1 }}
-                >
+                <Alert severity="success" sx={{ mb: 1 }}>
                   {forgotSuccess}
                 </Alert>
               )}

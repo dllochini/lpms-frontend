@@ -28,7 +28,7 @@ export default function Dashboard() {
   };
 
   return (
-    <Box>
+    <Box sx={{ mb: 1.8 }}>
       {/* Greeting & Breadcrumb */}
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
         <Typography variant="h5" gutterBottom>
@@ -68,7 +68,6 @@ export default function Dashboard() {
         </Box>
         <BasicDataGrid data={responseData} onDelete={handleDelete} />
       </Paper>
-      
     </Box>
   );
 }

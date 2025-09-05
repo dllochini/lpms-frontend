@@ -56,7 +56,6 @@ const AppWrapper = () => {
         <Route path="/accountant" element={<Accountant />} />
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
-        <Route path="/fieldOfficer/operation" element={<Operation />} />
       </Route>
     </Routes>
   );
@@ -68,4 +67,4 @@ const App = () => (
   </BrowserRouter>
 );
 
-export default App
+export default App;
