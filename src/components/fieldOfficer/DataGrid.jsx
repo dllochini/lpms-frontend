@@ -84,14 +84,16 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     },
   ];
 
-const rows = Array.isArray(data)
-  ? data.map((row) => ({
-      id: row._id,
-      ...row,
-      unit: row.unitID?.name || row.unitID || 'N/A', // fallback if name not populated
-    }))
-  : [];
-
+  const rows = Array.isArray(data)
+    ? data.map((row) => ({
+        id: row._id,
+        ...row,
+        unit:
+          typeof row.unit === "object" && row.unit !== null
+            ? row.unit.name
+            : row.unit,
+      }))
+    : [];
 
   return (
     <>
@@ -115,7 +117,8 @@ const rows = Array.isArray(data)
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete resource <strong>{selectedId}</strong>?
+          Are you sure you want to delete resource <strong>{selectedId}</strong>
+          ?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
