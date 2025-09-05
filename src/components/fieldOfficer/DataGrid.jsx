@@ -35,6 +35,8 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     if (selectedId) {
       try {
         await deleteUserById(selectedId);
+        gridSortedRowIdsSelector((prev) => prev.filter((user) => user._id !== selectedId));
+        // If there's a callback, call it to notify parent
         if (onDelete) {
           onDelete(selectedId);
         }
