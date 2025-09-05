@@ -9,7 +9,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import { deleteUserById } from "../../api/user";
+
 import { useState } from "react";
 
 const BasicDataGrid = ({ data, onDelete, onEdit }) => {
@@ -29,7 +29,7 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   const handleConfirmDelete = async () => {
     if (selectedId) {
       try {
-        await deleteUserById(selectedId);
+        // await deleteOperationById(selectedId);
         if (onDelete) {
           onDelete(selectedId);
         }
@@ -56,22 +56,22 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
 
   // Columns config
   const columns = [
-    { field: "_id", headerName: "Operation ID", flex: 2 },
+    { field: "_id", headerName: "Operation ID", flex: 4 },
     {
-      field: "operationName",
+      field: "name",
       headerName: "Operation Name",
       flex: 3,
     },
-    {
-      field: "relatedMachines",
-      headerName: "Related Machines",
-      flex: 3,
-    },
-    {
-      field: "relatedImplements",
-      headerName: "Related Implements",
-      flex: 3,
-    },
+    // {
+    //   field: "relatedMachines",
+    //   headerName: "Related Machines",
+    //   flex: 3,
+    // },
+    // {
+    //   field: "relatedImplements",
+    //   headerName: "Related Implements",
+    //   flex: 3,
+    // },
     {
       field: "note",
       headerName: "Note",

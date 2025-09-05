@@ -33,6 +33,7 @@ export default function Operation() {
   // Fetch operations from backend
   const fetchData = async () => {
     const response = await getOperations();
+    console.log("response :", response);
     setResponseData(response?.data ?? []);
   };
 
@@ -42,10 +43,25 @@ export default function Operation() {
 
   // Delete handler
   const handleDelete = async (deletedOperationId) => {
-    await deleteOperationById(deletedOperationId);
-    setResponseData((prev) =>
-      prev.filter((op) => op._id !== deletedOperationId)
-    );
+    try {
+      await deleteOperationById(deletedOperationId); // only call once (parent)
+      console.log("Deleted operation ID:", deletedOperationId);
+      setResponseData((prev) =>
+        prev.filter((op) => op._id !== deletedOperationId)
+      );
+    } catch (error) {
+      console.error("Delete failed in parent:", error);
+      // optional user feedback
+      if (error.response?.status === 404) {
+        alert("Operation not found (already deleted).");
+        // still remove it locally to keep UI consistent
+        setResponseData((prev) =>
+          prev.filter((op) => op._id !== deletedOperationId)
+        );
+      } else {
+        alert("Failed to delete operation. See console for details.");
+      }
+    }
   };
 
   // Open dialog in Add mode
@@ -135,10 +151,10 @@ export default function Operation() {
         </Box>
 
         <DataGrid
-          data={responseData}
-          onDelete={handleDelete}
-          onEdit={handleOpenEditDialog}
-        />
+        data={responseData}
+        onDelete={handleDelete}
+        onEdit={handleOpenEditDialog}
+      />
       </Paper>
 
       {/* Add/Edit Dialog (imported) */}

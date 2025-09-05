@@ -76,7 +76,7 @@ export default function OperationDialog({
           )}
         />
 
-        {/* Related Machines */}
+        {/* Related Machines
         <InputLabel sx={{ mb: 0.5, fontWeight: 500 }}>
           Related Machines :
         </InputLabel>
@@ -90,9 +90,9 @@ export default function OperationDialog({
               <MenuItem value="sprayer">Sprayer</MenuItem>
             </TextField>
           )}
-        />
+        /> */}
 
-        {/* Add New Machine Button (optional) */}
+        {/* Add New Machine Button (optional)
         <Button
           variant="contained"
           color="primary"
@@ -109,7 +109,7 @@ export default function OperationDialog({
         </Button>
 
         {/* Related Implements */}
-        <InputLabel sx={{ mb: 0.5, fontWeight: 500 }}>
+        {/* <InputLabel sx={{ mb: 0.5, fontWeight: 500 }}>
           Related Implements :
         </InputLabel>
         <Controller
@@ -118,7 +118,7 @@ export default function OperationDialog({
           render={({ field }) => (
             <TextField {...field} fullWidth size="small" sx={{ mb: 2 }} />
           )}
-        />
+        /> */}
 
         {/* Note */}
         <InputLabel sx={{ mb: 0.5, fontWeight: 500 }}>Note :</InputLabel>
