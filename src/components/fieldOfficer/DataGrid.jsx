@@ -7,46 +7,37 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import { useNavigate } from "react-router-dom";
-import { deleteUserById } from "../../api/user";
 import { useState } from "react";
-import ResourceDialog from "./Dialog"; // Assuming you have a Dialog component
 
+// Replace this with your actual resources API
+// import { deleteResourceById } from "../../api/resources";
 
 const BasicDataGrid = ({ data, onDelete, onEdit }) => {
-  // Redirect to edit page
-  // const navigate = useNavigate();
-
-  // State for dialog open + user id to delete
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedId, setSelectedId] = useState([]);
-  const [EditData, setEditData] = useState(null);
-  // const [selectedUserName, setSelectedUserName] = useState("");
+  const [selectedId, setSelectedId] = useState(null);
 
+  // Open confirmation dialog
   const handleDeleteClick = (id) => {
-    const user = data.find((u) => u._id === id);
-    // setSelectedUserName(user ? user.fullName : "");
     setSelectedId(id);
     setOpenDialog(true);
   };
 
   // Confirm delete
   const handleConfirmDelete = async () => {
-    if (selectedId) {
-      try {
-        await deleteUserById(selectedId);
-        gridSortedRowIdsSelector((prev) => prev.filter((user) => user._id !== selectedId));
-        // If there's a callback, call it to notify parent
-        if (onDelete) {
-          onDelete(selectedId);
-        }
-      } catch (error) {
-        console.error("Delete failed:", error);
-        // optionally show a toast/snackbar for failure
-      }
+    if (!selectedId) return;
+
+    try {
+      // Call your API to delete the resource
+      // await deleteResourceById(selectedId);
+
+      // Update parent state
+      if (onDelete) onDelete(selectedId);
+    } catch (error) {
+      console.error("Delete failed:", error);
+    } finally {
+      setOpenDialog(false);
+      setSelectedId(null);
     }
-    setOpenDialog(false);
-    setSelectedId(null);
   };
 
   // Cancel delete
@@ -55,35 +46,18 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     setSelectedId(null);
   };
 
-  // Edit handler to redirect
+  // Edit resource
   const handleEditClick = (id) => {
-   const resource = data.find((r) => r._id === id);
-        if (onEdit) onEdit(resource);
+    const resource = data.find((r) => r._id === id);
+    if (onEdit) onEdit(resource);
   };
 
   const columns = [
     { field: "_id", headerName: "Resource ID", flex: 2 },
-    {
-      field: "category",
-      headerName: "Category",
-      headerAlign: "left",
-      align: "left",
-      flex: 3,
-    },
-    {
-      field: "unitOfMeasure",
-      headerName: "Unit of Measure",
-      headerAlign: "left",
-      align: "left",
-      flex: 3,
-    },
-    {
-      field: "note",
-      headerName: "Note",
-      headerAlign: "left",
-      align: "left",
-      flex: 3,
-    },
+    { field: "resource", headerName: "Resource_Name", flex: 3 },
+    { field: "category", headerName: "Category", flex: 1.5 },
+    { field: "unit", headerName: "Unit of Measure", flex: 1.5 },
+    { field: "description", headerName: "Description", flex: 3 },
     {
       field: "actions",
       type: "actions",
@@ -94,7 +68,6 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
           icon={<EditIcon />}
           label="Edit"
           onClick={() => handleEditClick(params.id)}
-          // onClick={() => handleOpenDialog(resource)} //change to open dialog* 
           showInMenu={false}
           key="edit"
         />,
@@ -111,19 +84,14 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     },
   ];
 
-  // ...existing code...
-  const rows = Array.isArray(data)
-    ? data.map((row) => ({
-        id: row._id,
-        ...row,
-        // If role is an object, use its 'role' property; otherwise, use as is
-        role:
-          typeof row.role === "object" && row.role !== null
-            ? row.role.role
-            : row.role,
-      }))
-    : [];
-  // ...existing code...
+const rows = Array.isArray(data)
+  ? data.map((row) => ({
+      id: row._id,
+      ...row,
+      unit: row.unitID?.name || row.unitID || 'N/A', // fallback if name not populated
+    }))
+  : [];
+
 
   return (
     <>
@@ -138,18 +106,16 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
           }
-          disableColumnResize
           checkboxSelection={false}
           disableRowSelectionOnClick
         />
       </div>
 
-      {/* Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <strong>{selectedId}</strong>{" "}
-          user?
+          Are you sure you want to delete resource <strong>{selectedId}</strong>?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
@@ -163,7 +129,5 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     </>
   );
 };
-
-
 
 export default BasicDataGrid;
