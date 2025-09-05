@@ -5,6 +5,9 @@ import Home from "./views/Home";
 import NoPage from "./views/NoPage";
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import AdminDashboard from "./views/admin/Dashboard";
+import FieldOfficerDashboard  from "./views/fieldOfficer/Dashboard";
+import LandRegistration from "./views/fieldOfficer/LandRegistration";
+import LandRegistrationPage2 from "./views/fieldOfficer/LandRegistration2";
 import UserRegistration from "./views/admin/UserRegistration";
 import Manager from "./views/manager/Manager";
 import Accountant from "./views/accountant/Accountant";
@@ -47,12 +50,16 @@ const AppWrapper = () => {
         <Route index element={<Home />} />
         <Route path="*" element={<NoPage />} />
         <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/fieldOfficer/Dashboard" element={<FieldOfficerDashboard />} />
+        <Route path="/fieldOfficer/LandRegistration" element={<LandRegistration />} />
+        <Route path="/fieldOfficer/LandRegistration2" element={<LandRegistrationPage2 />} />
         <Route path="/user/register" element={<UserRegistration />} />
         <Route path="/user/edit/:userId" element={<UserEdit />} />
         <Route path="/manager" element={<Manager />} />
         <Route path="/accountant" element={<Accountant />} />
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
+
       </Route>
     </Routes>
   );
