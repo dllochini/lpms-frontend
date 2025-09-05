@@ -77,8 +77,11 @@ import UserEdit from "./views/admin/UserEdit";
 import ResetPw from "./views/ResetPw";
 import HigherManager from "./views/higherManager/HigherManager";
 import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
+import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
+import Operation from "./views/fieldOfficer/Operation";
+import Resources from "./views/fieldOfficer/Resources";
 import Operation from "./views/fieldOfficer/Operation";
 import Resources from "./views/fieldOfficer/Resources";
 
@@ -88,6 +91,23 @@ const AppWrapper = () => {
   const location = useLocation();
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    const publicPaths = ["/login", "/reset-password"];
+
+    // ✅ Read toggle flag from .env
+    const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
+
+    // ✅ Skip auth check completely if bypass flag is on
+    if (bypassAuth) {
+      return;
+    }
+
+    // ✅ Enforce auth check if bypass is off
+    if ((!token || isTokenExpired(token)) && !publicPaths.includes(location.pathname)) {
+      clearAuth();
+      navigate("/login");
+    }
+  }, [navigate, location]);
     const token = localStorage.getItem("token");
     const publicPaths = ["/login", "/reset-password"];
 

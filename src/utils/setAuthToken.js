@@ -1,6 +1,6 @@
 import axiosBackend from "../configs/axios-config";
 
-const setAuthToken = (token) => {
+export const setAuthToken = (token) => {
   if (token) {
     axiosBackend.defaults.headers.common["Authorization"] = `Bearer ${token}`;
   } else {
