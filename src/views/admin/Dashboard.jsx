@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
 import { getUsers } from "../../api/user";
 import { useState, useEffect } from "react";
-import BasicDataGrid from "../../components/admin/BasicDataGrid";
+import BasicDataGrid from "../../components/admin/UsersDataGrid";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
@@ -28,7 +28,7 @@ export default function Dashboard() {
   };
 
   return (
-    <Box>
+    <Box sx={{ mb: 1.8 }}>
       {/* Greeting & Breadcrumb */}
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
         <Typography variant="h5" gutterBottom>

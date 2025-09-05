@@ -7,6 +7,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { useNavigate } from "react-router-dom";
 import { deleteUserById } from "../../api/user";
 import { useState } from "react";
@@ -14,10 +16,15 @@ import { useState } from "react";
 const BasicDataGrid = ({ data, onDelete }) => {
   const navigate = useNavigate();
 
-  // State for dialog open + user id to delete
+  // Dialog state
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedId, setSelectedId] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
+
+  // Snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const handleDeleteClick = (id) => {
     const user = data.find((u) => u._id === id);
@@ -26,7 +33,6 @@ const BasicDataGrid = ({ data, onDelete }) => {
     setOpenDialog(true);
   };
 
-  // Confirm delete
   const handleConfirmDelete = async () => {
     if (selectedId) {
       try {
@@ -34,24 +40,31 @@ const BasicDataGrid = ({ data, onDelete }) => {
         if (onDelete) {
           onDelete(selectedId);
         }
+        setSnackbarMessage(`User "${selectedUserName}" deleted successfully`);
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
       } catch (error) {
         console.error("Delete failed:", error);
-        // optionally show a toast/snackbar for failure
+        setSnackbarMessage("Failed to delete user");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       }
     }
     setOpenDialog(false);
     setSelectedId(null);
   };
 
-  // Cancel delete
   const handleCancelDelete = () => {
     setOpenDialog(false);
     setSelectedId(null);
   };
 
-  // Edit handler to redirect
   const handleEditClick = (id) => {
     navigate(`/user/edit/${id}`);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   const columns = [
@@ -94,14 +107,12 @@ const BasicDataGrid = ({ data, onDelete }) => {
           icon={<EditIcon />}
           label="Edit"
           onClick={() => handleEditClick(params.id)}
-          showInMenu={false}
           key="edit"
         />,
         <GridActionsCellItem
           icon={<DeleteIcon />}
           label="Delete"
           onClick={() => handleDeleteClick(params.id)}
-          showInMenu={false}
           key="delete"
         />,
       ],
@@ -110,19 +121,23 @@ const BasicDataGrid = ({ data, onDelete }) => {
     },
   ];
 
-  // ...existing code...
   const rows = Array.isArray(data)
-    ? data.map((row) => ({
-        id: row._id,
-        ...row,
-        // If role is an object, use its 'role' property; otherwise, use as is
-        role:
-          typeof row.role === "object" && row.role !== null
-            ? row.role.role
-            : row.role,
-      }))
+    ? data
+        .filter(
+          (row) =>
+            typeof row.role === "object" &&
+            row.role !== null &&
+            row.role.name?.toLowerCase() !== "farmer"
+        )
+        .map((row) => ({
+          id: row._id,
+          ...row,
+          role:
+            typeof row.role === "object" && row.role !== null
+              ? row.role.name
+              : row.role,
+        }))
     : [];
-  // ...existing code...
 
   return (
     <>
@@ -159,6 +174,22 @@ const BasicDataGrid = ({ data, onDelete }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Snackbar to show the deletion success */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
