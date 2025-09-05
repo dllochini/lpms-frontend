@@ -21,8 +21,8 @@ export default function OperationDialog({
   const { control, handleSubmit, reset } = useForm({
     defaultValues: initialData || {
       operationName: "",
-      relatedMachine: "",
-      relatedImplement: "",
+      // relatedMachine: "",
+      // relatedImplement: "",
       note: "",
     },
   });
@@ -31,8 +31,8 @@ export default function OperationDialog({
   React.useEffect(() => {
     reset(initialData || {
       operationName: "",
-      relatedMachine: "",
-      relatedImplement: "",
+      // relatedMachine: "",
+      // relatedImplement: "",
       note: "",
     });
   }, [initialData, reset]);
@@ -69,12 +69,19 @@ export default function OperationDialog({
           Name of Operation :
         </InputLabel>
         <Controller
-          name="operationName"
+          name="name"
           control={control}
           render={({ field }) => (
-            <TextField {...field} fullWidth size="small" sx={{ mb: 2 }} />
+            <TextField
+              {...field}
+              fullWidth
+              size="small"
+              sx={{ mb: 2 }}
+              value={field.value || ""} // ensure always a string
+            />
           )}
         />
+
 
         {/* Related Machines
         <InputLabel sx={{ mb: 0.5, fontWeight: 500 }}>
@@ -109,7 +116,7 @@ export default function OperationDialog({
         </Button>
 
         {/* Related Implements */}
-        {/* <InputLabel sx={{ mb: 0.5, fontWeight: 500 }}>
+        <InputLabel sx={{ mb: 0.5, fontWeight: 500 }}>
           Related Implements :
         </InputLabel>
         <Controller
@@ -118,7 +125,7 @@ export default function OperationDialog({
           render={({ field }) => (
             <TextField {...field} fullWidth size="small" sx={{ mb: 2 }} />
           )}
-        /> */}
+        />
 
         {/* Note */}
         <InputLabel sx={{ mb: 0.5, fontWeight: 500 }}>Note :</InputLabel>
@@ -133,9 +140,11 @@ export default function OperationDialog({
               multiline
               minRows={3}
               sx={{ mb: 2 }}
+              value={field.value || ""} // ensure controlled input
             />
           )}
         />
+
       </DialogContent>
 
       {/* Action Buttons */}
@@ -171,4 +180,5 @@ export default function OperationDialog({
     </Dialog>
   );
 }
+
 

@@ -1,4 +1,3 @@
-
 import {
   Typography,
   Box,
@@ -15,26 +14,31 @@ import { Link as RouterLink } from "react-router-dom";
 import Link from "@mui/material/Link";
 
 import {
-  getOperations,
+  getOperationById,
   createOperation,
   updateOperationById,
   deleteOperationById,
 } from "../../api/operation";
 
-import OperationDialog from "../../components/fieldOfficer/OperationDialog"; // <-- import dialog
+import { getImplementsByOperation } from "../../api/implement";
+
+import OperationDialog from "../../components/fieldOfficer/OperationDialog";
 
 export default function Operation() {
   const [responseData, setResponseData] = useState([]);
 
   // Dialog state
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null); // for edit mode
+  const [selectedRow, setSelectedRow] = useState(null);
 
-  // Fetch operations from backend
+  // Fetch operations (already includes implements)
   const fetchData = async () => {
-    const response = await getOperations();
-    console.log("response :", response);
-    setResponseData(response?.data ?? []);
+    try {
+      const response = await getImplementsByOperation();
+      setResponseData(response?.data ?? []);
+    } catch (err) {
+      console.error("Failed to fetch operations:", err);
+    }
   };
 
   useEffect(() => {
@@ -44,17 +48,14 @@ export default function Operation() {
   // Delete handler
   const handleDelete = async (deletedOperationId) => {
     try {
-      await deleteOperationById(deletedOperationId); // only call once (parent)
-      console.log("Deleted operation ID:", deletedOperationId);
+      await deleteOperationById(deletedOperationId);
       setResponseData((prev) =>
         prev.filter((op) => op._id !== deletedOperationId)
       );
     } catch (error) {
-      console.error("Delete failed in parent:", error);
-      // optional user feedback
+      console.error("Delete failed:", error);
       if (error.response?.status === 404) {
         alert("Operation not found (already deleted).");
-        // still remove it locally to keep UI consistent
         setResponseData((prev) =>
           prev.filter((op) => op._id !== deletedOperationId)
         );
@@ -64,29 +65,30 @@ export default function Operation() {
     }
   };
 
-  // Open dialog in Add mode
   const handleOpenAddDialog = () => {
     setSelectedRow(null);
     setOpenDialog(true);
   };
 
-  // Open dialog in Edit mode
-  const handleOpenEditDialog = (row) => {
-    setSelectedRow(row);
-    setOpenDialog(true);
+  const handleOpenEditDialog = async (row) => {
+    try {
+      const res = await getOperationById(row._id);
+      setSelectedRow(res.data);
+      setOpenDialog(true);
+    } catch (err) {
+      console.error("Failed to fetch operation:", err);
+      alert("Failed to load operation data.");
+    }
   };
 
-  // Close dialog
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedRow(null);
   };
 
-  // Submit form handler (Create or Update)
   const handleSubmitDialog = async (data) => {
     try {
       if (selectedRow) {
-        // Update existing
         const res = await updateOperationById(selectedRow._id, data);
         setResponseData((prev) =>
           prev.map((item) =>
@@ -94,7 +96,6 @@ export default function Operation() {
           )
         );
       } else {
-        // Create new
         const res = await createOperation(data);
         setResponseData((prev) => [...prev, res.data]);
       }
@@ -151,13 +152,12 @@ export default function Operation() {
         </Box>
 
         <DataGrid
-        data={responseData}
-        onDelete={handleDelete}
-        onEdit={handleOpenEditDialog}
-      />
+          data={responseData}
+          onDelete={handleDelete}
+          onEdit={handleOpenEditDialog}
+        />
       </Paper>
 
-      {/* Add/Edit Dialog (imported) */}
       <OperationDialog
         open={openDialog}
         onClose={handleCloseDialog}
@@ -167,5 +167,3 @@ export default function Operation() {
     </Box>
   );
 }
-
-

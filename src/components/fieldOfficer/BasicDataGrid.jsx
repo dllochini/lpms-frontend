@@ -67,11 +67,11 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     //   headerName: "Related Machines",
     //   flex: 3,
     // },
-    // {
-    //   field: "relatedImplements",
-    //   headerName: "Related Implements",
-    //   flex: 3,
-    // },
+    {
+      field: "relatedImplements",
+      headerName: "Related Implements",
+      flex: 3,
+    },
     {
       field: "note",
       headerName: "Note",
@@ -147,4 +147,5 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
 };
 
 export default BasicDataGrid;
+
 
