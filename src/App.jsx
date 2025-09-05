@@ -17,6 +17,7 @@ import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 import Operation from "./views/fieldOfficer/Operation";
+import ManagerDashboard from "./views/manager/Dashboard";
 
 // A wrapper component so we can use hooks like useNavigate
 const AppWrapper = () => {
@@ -57,6 +58,7 @@ const AppWrapper = () => {
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
         <Route path="/fieldOfficer/operation" element={<Operation />} />
+        <Route path="manager/dashboard" element={<ManagerDashboard/>}/>
       </Route>
     </Routes>
   );
