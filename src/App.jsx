@@ -12,6 +12,7 @@ import UserEdit from "./views/admin/UserEdit";
 import ResetPw from "./views/ResetPw";
 import HigherManager from "./views/higherManager/HigherManager";
 import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
+import OperationApproval from "./views/manager/OperationApprovel";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
@@ -50,6 +51,7 @@ const AppWrapper = () => {
         <Route path="/user/register" element={<UserRegistration />} />
         <Route path="/user/edit/:userId" element={<UserEdit />} />
         <Route path="/manager" element={<Manager />} />
+        <Route path="/manager/operation/" element={<OperationApproval />} />
         <Route path="/accountant" element={<Accountant />} />
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
