@@ -14,9 +14,11 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import FormStepper from "../components/FormStepper.jsx"; // import the stepper
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+
 
 const LandRegistration = () => {
   const [file, setFile] = useState(null);
@@ -68,12 +70,15 @@ const LandRegistration = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", margin: 0, backgroundColor: "#f9f9f9" }}>
-      <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
+    <Box sx={{ minHeight: "100vh", margin: 0,  }}>
+      <Box sx={{ maxWidth: 1100, mx: "auto", p: 3, }}>
         {/* Header */}
         <Typography variant="h5" gutterBottom>
           Farmer and Land Registration
         </Typography>
+       
+       {/* Stepper */}
+        <FormStepper activeStep={0} />
 
         {/* Breadcrumbs */}
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
@@ -92,20 +97,24 @@ const LandRegistration = () => {
         noValidate
         autoComplete="off"
         onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: "flex", justifyContent: "center", mb: 3 }}
+        sx={{ display: "flex", justifyContent: "center", mb: 3, direction:"column" }}
       >
         <Paper
           elevation={5}
-          sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 5 }}
+          sx={{ maxWidth: "70%", mx: "auto", px: 10,py:5, borderRadius: 5 }}
         >
           <Typography variant="h6" gutterBottom>
             Farmer Details
           </Typography>
           <Divider sx={{ mb: 2 }} />
 
-          <Grid container spacing={2}>
+
+          <Grid container spacing={2} >
             {/* Farmer search */}
-            <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 }}>
+           
+            <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 ,
+              // border:"2px solid blue",
+              }}>
               <InputLabel sx={{ minWidth: 200 }}>
                 Farmer already registered?
               </InputLabel>
@@ -115,9 +124,12 @@ const LandRegistration = () => {
                 sx={{ flex: 1 }}
               />
               <Button variant="contained">Search</Button>
+              {/* <Typography><Divider sx={{ mb: 2 }} /></Typography> */}
               
             </Grid>
-                ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+          
+            
+            
             {/* Designation */}
             <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Designation :</InputLabel>
@@ -330,7 +342,10 @@ const LandRegistration = () => {
 
             {/* Next button */}
             <Grid size={{ xs: 12 }} sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button variant="contained" type="submit">
+              <Button 
+               variant="contained"
+               type="submit" 
+               onClick={() => navigate("./fieldOfficer/LandRegistration2")} >
                 Next
               </Button>
             </Grid>

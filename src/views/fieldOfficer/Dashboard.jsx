@@ -13,6 +13,7 @@ export default function LandsDashboard() {
 
   const fetchData = async () => {
     const response = await getLands();
+    console.log("infetch data",response);
     setLands(response?.data ?? []);
   };
 
@@ -58,7 +59,7 @@ export default function LandsDashboard() {
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => navigate("/lands/register")}
+            onClick={() => navigate("/fieldOfficer/LandRegistration")}
           >
             ADD NEW LAND
           </Button>

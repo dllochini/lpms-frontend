@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import FormStepper from "../components/FormStepper.jsx";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -66,12 +67,15 @@ const LandRegistration2 = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", margin: 0, backgroundColor: "#f9f9f9" }}>
+    <Box sx={{ minHeight: "100vh", }}>
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
         {/* Header */}
         <Typography variant="h5" gutterBottom>
           Farmer and Land Registration
         </Typography>
+        
+         {/* Stepper */}
+        <FormStepper activeStep={1} />
 
         {/* Breadcrumbs */}
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
@@ -103,7 +107,7 @@ const LandRegistration2 = () => {
 
           <Grid container spacing={2}>
             {/* Division */}
-            <Grid item xs={12} md={6} sx={{ display: "flex", gap: 1 }}>
+            <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Division :</InputLabel>
               <Controller
                 name="division"
@@ -128,7 +132,7 @@ const LandRegistration2 = () => {
             </Grid>
 
             {/* Address */}
-            <Grid item xs={12} sx={{ display: "flex", gap: 1 }}>
+            <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Address :</InputLabel>
               <Controller
                 name="address"
@@ -145,42 +149,26 @@ const LandRegistration2 = () => {
               />
             </Grid>
 
-            {/* Location */}
-            <Grid item xs={12} md={6} sx={{ display: "flex", gap: 1 }}>
-              <InputLabel sx={{ minWidth: 130 }}>Longitude :</InputLabel>
+            {/* Language */}
+            <Grid size={{ xs: 12, md: 7 }} sx={{ display: "flex", gap: 1 }}>
+              <InputLabel sx={{ minWidth: 130 }}>Language :</InputLabel>
               <Controller
-                name="longitude"
+                name="language"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     size="small"
                     sx={{ flex: 1 }}
-                    error={!!errors.longitude}
-                    helperText={errors.longitude?.message || " "}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12} md={6} sx={{ display: "flex", gap: 1 }}>
-              <InputLabel sx={{ minWidth: 130 }}>Latitude :</InputLabel>
-              <Controller
-                name="latitude"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    size="small"
-                    sx={{ flex: 1 }}
-                    error={!!errors.latitude}
-                    helperText={errors.latitude?.message || " "}
+                    error={!!errors.language}
+                    helperText={errors.language?.message || " "}
                   />
                 )}
               />
             </Grid>
 
-            {/* Land Size */}
-            <Grid item xs={12} md={6} sx={{ display: "flex", gap: 1 }}>
+            {/* Land Size + Unit */}
+            <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Extent of Land :</InputLabel>
               <Controller
                 name="landSize"
@@ -217,9 +205,10 @@ const LandRegistration2 = () => {
                 )}
               />
             </Grid>
+            
 
             {/* Date */}
-            <Grid item xs={12} md={6} sx={{ display: "flex", gap: 1 }}>
+            <Grid size={{ xs: 12, md: 7 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>
                 Date of Registration :
               </InputLabel>
@@ -241,7 +230,7 @@ const LandRegistration2 = () => {
             </Grid>
 
             {/* File upload */}
-            <Grid item xs={12} sx={{ display: "flex", gap: 1 }}>
+            <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Image :</InputLabel>
               <Button
                 component="label"
@@ -260,13 +249,9 @@ const LandRegistration2 = () => {
             </Grid>
 
             {/* Back and Next buttons */}
-            <Grid
-              item
-              xs={12}
-              sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}
-            >
-              <Button variant="outlined">Back</Button>
-              <Button variant="contained" type="submit">
+            <Grid size={{ xs: 12 }} sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
+              <Button variant="outlined" onClick={() => navigate("./fieldOfficer/LandRegistration")}>Back</Button>
+              <Button variant="contained" type="submit" onClick={() => navigate("./fieldOfficer/LandRegistration3")}>
                 Next
               </Button>
             </Grid>

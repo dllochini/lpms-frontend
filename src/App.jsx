@@ -8,6 +8,8 @@ import AdminDashboard from "./views/admin/Dashboard";
 import FieldOfficerDashboard  from "./views/fieldOfficer/Dashboard";
 import LandRegistration from "./views/fieldOfficer/LandRegistration";
 import LandRegistrationPage2 from "./views/fieldOfficer/LandRegistration2";
+import LandRegistrationPage3 from "./views/fieldOfficer/LandRegistration3";
+import LandRegistrationPage4 from "./views/fieldOfficer/LandRegistration4";
 import UserRegistration from "./views/admin/UserRegistration";
 import Manager from "./views/manager/Manager";
 import Accountant from "./views/accountant/Accountant";
@@ -53,6 +55,8 @@ const AppWrapper = () => {
         <Route path="/fieldOfficer/Dashboard" element={<FieldOfficerDashboard />} />
         <Route path="/fieldOfficer/LandRegistration" element={<LandRegistration />} />
         <Route path="/fieldOfficer/LandRegistration2" element={<LandRegistrationPage2 />} />
+        <Route path="/fieldOfficer/LandRegistration3" element={<LandRegistrationPage3 />} />
+        <Route path="/fieldOfficer/LandRegistration4" element={<LandRegistrationPage4 />} />
         <Route path="/user/register" element={<UserRegistration />} />
         <Route path="/user/edit/:userId" element={<UserEdit />} />
         <Route path="/manager" element={<Manager />} />
