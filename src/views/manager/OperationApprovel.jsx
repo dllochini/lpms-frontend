@@ -7,11 +7,11 @@ import { useState, useEffect } from "react";
 import OperationDataGrid from "../../components/manager/OperationGrid";
 import { useNavigate } from "react-router-dom";
 import Stack from '@mui/material/Stack';
-
+import OperationDialog from "../../components/manager/OperationDialog";
 
 
 export default function Dashboard() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [responseData, setResponseData] = useState([]);
 
   const fetchData = async function () {
