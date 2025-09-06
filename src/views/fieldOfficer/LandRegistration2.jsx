@@ -15,11 +15,13 @@ import {
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import FormStepper from "../components/FormStepper.jsx";
+import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 const LandRegistration2 = () => {
+   const navigate = useNavigate();
   const [file, setFile] = useState(null);
 
   const divisions = [
@@ -65,6 +67,7 @@ const LandRegistration2 = () => {
   const onSubmit = (data) => {
     console.log({ ...data, file });
   };
+ 
 
   return (
     <Box sx={{ minHeight: "100vh", }}>
@@ -250,10 +253,22 @@ const LandRegistration2 = () => {
 
             {/* Back and Next buttons */}
             <Grid size={{ xs: 12 }} sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-              <Button variant="outlined" onClick={() => navigate("./fieldOfficer/LandRegistration")}>Back</Button>
-              <Button variant="contained" type="submit" onClick={() => navigate("./fieldOfficer/LandRegistration3")}>
+              <Button
+                variant="outlined"
+                onClick={() => navigate("/fieldOfficer/LandRegistration")}
+              >
+                Back
+              </Button>
+
+              <Button
+                variant="contained"
+                type="submit"
+                onClick={() => navigate("/fieldOfficer/LandRegistration3")}
+              >
                 Next
               </Button>
+
+
             </Grid>
           </Grid>
         </Paper>

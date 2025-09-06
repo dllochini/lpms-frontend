@@ -15,12 +15,15 @@ import {
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import FormStepper from "../components/FormStepper.jsx"; // import the stepper
+import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 
 const LandRegistration = () => {
+  const navigate = useNavigate();
+
   const [file, setFile] = useState(null);
 
   const designations = [
@@ -342,12 +345,14 @@ const LandRegistration = () => {
 
             {/* Next button */}
             <Grid size={{ xs: 12 }} sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button 
-               variant="contained"
-               type="submit" 
-               onClick={() => navigate("./fieldOfficer/LandRegistration2")} >
+              <Button
+                variant="contained"
+                type="submit"
+                onClick={() => navigate("/fieldOfficer/LandRegistration2")}
+              >
                 Next
-              </Button>
+            </Button>
+
             </Grid>
           </Grid>
         </Paper>

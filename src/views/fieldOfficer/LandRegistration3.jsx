@@ -14,6 +14,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { Checkbox, FormControlLabel } from "@mui/material";
 import FormStepper from "../components/FormStepper.jsx";
+import { useNavigate } from "react-router-dom";
 
 const documentFields = [
   { name: "titleDeed", label: "Title Deed* (Ownership Deed)" },
@@ -26,6 +27,7 @@ const documentFields = [
 ];
 
 const LandRegistrationUpload = () => {
+  const navigate = useNavigate();
   const [files, setFiles] = useState({});
 
   const handleFileChange = (name, file) => {
@@ -120,10 +122,21 @@ const LandRegistrationUpload = () => {
 />
 
             <Box sx={{ display: "flex", gap: 2 }}>
-              <Button variant="outlined">Back</Button>
-              <Button variant="contained" type="submit">
+             <Button
+                variant="outlined"
+                onClick={() => navigate("/fieldOfficer/LandRegistration2")}
+              >
+                Back
+              </Button>
+
+              <Button
+                variant="contained"
+                type="submit"
+                onClick={() => navigate("/fieldOfficer/LandRegistration4")}
+              >
                 Next
               </Button>
+
             </Box>
           </Box>
         </Paper>
