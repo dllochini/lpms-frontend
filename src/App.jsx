@@ -18,6 +18,7 @@ import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 import Operation from "./views/fieldOfficer/Operation";
 import ManagerDashboard from "./views/manager/Dashboard";
+import PendingPaymentApprovel from "./views/manager/PendingPaymentApprovel";
 
 // A wrapper component so we can use hooks like useNavigate
 const AppWrapper = () => {
@@ -59,6 +60,8 @@ const AppWrapper = () => {
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
         <Route path="/fieldOfficer/operation" element={<Operation />} />
         <Route path="manager/dashboard" element={<ManagerDashboard/>}/>
+        <Route path="manager/pendingPaymentApprovel" element={<PendingPaymentApprovel/>}/>
+       
       </Route>
     </Routes>
   );
