@@ -5,42 +5,55 @@ import {
   Button,
 } from "@mui/material";
 import { useState, useEffect } from "react";
-import * as React from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { useForm } from "react-hook-form";
 
 import DataGrid from "../../components/fieldOfficer/DataGrid";
 import ResourceDialog from "../../components/fieldOfficer/Dialog";
-
-// Import from the new API file
 import { getResources } from "../../api/resources";
+import { getUnits } from "../../api/unit";
 
 export default function Resource() {
   const [responseData, setResponseData] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [units, setUnits] = useState([]);
   const [formData, setFormData] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
 
-  const { control, handleSubmit, reset } = useForm();
-
   // ✅ Fetch data from new API
-  const fetchData = async function () {
+  const fetchData = async () => {
     try {
-      const response = await getResources();
-      // console.log("API resources:", response);
-      setResponseData(response?.data ?? []);
+      const resources = await getResources();
+      const unitsData = await getUnits();
+
+      const resourcesArray = Array.isArray(resources?.data)
+        ? resources.data
+        : resources?.resources || [];
+
+      setResponseData(resourcesArray);
+
+      // extract unique categories
+      const uniqueCategories = [
+        ...new Set(resourcesArray.map((r) => r.category).filter(Boolean)),
+      ];
+      setCategories(uniqueCategories);
+
+      setUnits(
+        Array.isArray(unitsData?.data)
+          ? unitsData.data
+          : unitsData?.units || []
+      );
     } catch (error) {
-      console.error("Error fetching resources:", error);
+      console.error("Error fetching:", error);
     }
   };
 
   useEffect(() => {
-    // console.log("Fetching resources...");
     fetchData();
   }, []);
 
   const handleOpenDialog = () => {
+    setFormData({}); // new resource → empty form
     setOpenDialog(true);
-    setFormData({});
   };
 
   const handleCloseDialog = () => setOpenDialog(false);
@@ -50,29 +63,10 @@ export default function Resource() {
   };
 
   const handleEditResource = (resource) => {
-    setFormData(resource);
+    setFormData(resource); // existing resource → fill form
     setOpenDialog(true);
   };
 
-  const onSubmit = (data) => {
-    if (formData._id) {
-      // Edit
-      setResponseData((prev) =>
-        prev.map((item) =>
-          item._id === formData._id ? { ...item, ...data } : item
-        )
-      );
-    } else {
-      // Create
-      setResponseData((prev) => [
-        ...prev,
-        { ...data, _id: Date.now().toString() },
-      ]);
-    }
-
-    // reset();
-    handleCloseDialog();
-  };
   return (
     <Box>
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
@@ -111,12 +105,13 @@ export default function Resource() {
         />
 
         <ResourceDialog
-          open={openDialog}
-          onClose={handleCloseDialog}
-          onSave={handleSubmit(onSubmit)}
-          formData={formData}
-          setFormData={setFormData}
-        />
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        defaultValues={formData}
+        categories={categories}   // ✅ pass down
+        units={units}             // ✅ pass down
+      />
+
       </Paper>
     </Box>
   );

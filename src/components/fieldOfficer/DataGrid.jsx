@@ -7,37 +7,51 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { useState } from "react";
-
-// Replace this with your actual resources API
-// import { deleteResourceById } from "../../api/resources";
+import { deleteResourceById } from "../../api/resources";
 
 const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const [selectedResourceName, setSelectedResourceName] = useState("");
+
+  // Snackbar states
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   // Open confirmation dialog
   const handleDeleteClick = (id) => {
+    const resource = data.find((r) => r._id === id);
+    setSelectedResourceName(resource ? resource.resource : "");
     setSelectedId(id);
     setOpenDialog(true);
   };
 
   // Confirm delete
   const handleConfirmDelete = async () => {
-    if (!selectedId) return;
-
-    try {
-      // Call your API to delete the resource
-      // await deleteResourceById(selectedId);
-
-      // Update parent state
-      if (onDelete) onDelete(selectedId);
-    } catch (error) {
-      console.error("Delete failed:", error);
-    } finally {
-      setOpenDialog(false);
-      setSelectedId(null);
+    if (selectedId) {
+      try {
+        await deleteResourceById(selectedId);
+        if (onDelete) {
+          onDelete(selectedId);
+        }
+        setSnackbarMessage(
+          `Resource "${selectedResourceName}" deleted successfully`
+        );
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
+      } catch (error) {
+        console.error("Delete failed:", error);
+        setSnackbarMessage("Failed to delete resource");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      }
     }
+    setOpenDialog(false);
+    setSelectedId(null);
   };
 
   // Cancel delete
@@ -117,8 +131,8 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete resource <strong>{selectedId}</strong>
-          ?
+          Are you sure you want to delete resource{" "}
+          <strong>{selectedResourceName}</strong>?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
@@ -129,6 +143,22 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Snackbar for success/error messages */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={4000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
