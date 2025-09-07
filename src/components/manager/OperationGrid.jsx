@@ -7,96 +7,57 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-import { useNavigate } from "react-router-dom";
-import { deleteUserById } from "../../api/user";
 import { useState } from "react";
 
-const OperationDataGrid = ({ data, onDelete }) => {
-  const navigate = useNavigate();
+// Replace this with your actual resources API
+// import { deleteResourceById } from "../../api/resources";
 
-  // Dialog state
+const OperationGrid= ({ data, onDelete, onEdit }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [selectedUserName, setSelectedUserName] = useState("");
 
-  // Snackbar state
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
+  // Open confirmation dialog
   const handleDeleteClick = (id) => {
-    const user = data.find((u) => u._id === id);
-    setSelectedUserName(user ? user.fullName : "");
     setSelectedId(id);
     setOpenDialog(true);
   };
 
+  // Confirm delete
   const handleConfirmDelete = async () => {
-    if (selectedId) {
-      try {
-        await deleteUserById(selectedId);
-        if (onDelete) {
-          onDelete(selectedId);
-        }
-        setSnackbarMessage(`User "${selectedUserName}" deleted successfully`);
-        setSnackbarSeverity("success");
-        setSnackbarOpen(true);
-      } catch (error) {
-        console.error("Delete failed:", error);
-        setSnackbarMessage("Failed to delete user");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
-      }
+    if (!selectedId) return;
+
+    try {
+      // Call your API to delete the resource
+      // await deleteResourceById(selectedId);
+
+      // Update parent state
+      if (onDelete) onDelete(selectedId);
+    } catch (error) {
+      console.error("Delete failed:", error);
+    } finally {
+      setOpenDialog(false);
+      setSelectedId(null);
     }
-    setOpenDialog(false);
-    setSelectedId(null);
   };
 
+  // Cancel delete
   const handleCancelDelete = () => {
     setOpenDialog(false);
     setSelectedId(null);
   };
 
+  // Edit resource
   const handleEditClick = (id) => {
-    navigate(`/user/edit/${id}`);
-  };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
+    const resource = data.find((r) => r._id === id);
+    if (onEdit) onEdit(resource);
   };
 
   const columns = [
-    { field: "_id", headerName: "LandID", flex: 3 },
-    {
-      field: "fieldOfficer",
-      headerName: "FieldOfficer",
-      headerAlign: "left",
-      align: "left",
-      flex: 3,
-    },
-    {
-      field: "operation",
-      headerName: "Operation",
-      headerAlign: "left",
-      align: "left",
-      flex: 4,
-    },
-    {
-      field: "startdate",
-      headerName: "StartDate",
-      headerAlign: "left",
-      align: "left",
-      flex: 2,
-    },
-    {
-      field: "request",
-      headerName: "Request/Completed Date",
-      headerAlign: "left",
-      align: "left",
-      flex: 4,
-    },
+    { field: "_id", headerName: "LandID", flex: 2 },
+    { field: "fieldOfficer", headerName: "Field Officer", flex: 2 },
+    { field: "operation", headerName: "Operation", flex: 1.5 },
+    { field: "startDate", headerName: "Start Date", flex: 1.5 },
+    { field: "compeledDate", headerName: "Requested/Completed Date", flex: 2 },
     {
       field: "actions",
       type: "actions",
@@ -107,12 +68,14 @@ const OperationDataGrid = ({ data, onDelete }) => {
           icon={<EditIcon />}
           label="Edit"
           onClick={() => handleEditClick(params.id)}
+          showInMenu={false}
           key="edit"
         />,
         <GridActionsCellItem
           icon={<DeleteIcon />}
           label="Delete"
           onClick={() => handleDeleteClick(params.id)}
+          showInMenu={false}
           key="delete"
         />,
       ],
@@ -121,23 +84,14 @@ const OperationDataGrid = ({ data, onDelete }) => {
     },
   ];
 
-  const rows = Array.isArray(data)
-    ? data
-        .filter(
-          (row) =>
-            typeof row.role === "object" &&
-            row.role !== null &&
-            row.role.name?.toLowerCase() !== "farmer"
-        )
-        .map((row) => ({
-          id: row._id,
-          ...row,
-          role:
-            typeof row.role === "object" && row.role !== null
-              ? row.role.name
-              : row.role,
-        }))
-    : [];
+const rows = Array.isArray(data)
+  ? data.map((row) => ({
+      id: row._id,
+      ...row,
+      unit: row.unitID?.name || row.unitID || 'N/A', // fallback if name not populated
+    }))
+  : [];
+
 
   return (
     <>
@@ -152,18 +106,16 @@ const OperationDataGrid = ({ data, onDelete }) => {
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
           }
-          disableColumnResize
           checkboxSelection={false}
           disableRowSelectionOnClick
         />
       </div>
 
-      {/* Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <strong>{selectedUserName}</strong>{" "}
-          user?
+          Are you sure you want to delete resource <strong>{selectedId}</strong>?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
@@ -174,24 +126,8 @@ const OperationDataGrid = ({ data, onDelete }) => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Snackbar to show the deletion success */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 };
 
-export default OperationDataGrid;
+export default OperationGrid;
