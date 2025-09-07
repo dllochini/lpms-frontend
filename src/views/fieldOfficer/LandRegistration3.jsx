@@ -8,11 +8,11 @@ import {
   Button,
   Divider,
   Grid,
-  
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import { Checkbox, FormControlLabel } from "@mui/material";
 import FormStepper from "../components/FormStepper.jsx";
 import { useNavigate } from "react-router-dom";
 
@@ -37,25 +37,24 @@ const LandRegistrationUpload = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Uploaded files:", files);
+    navigate("/fieldOfficer/LandRegistration4");
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", }}>
+    <Box sx={{ minHeight: "100vh" }}>
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
         {/* Header */}
         <Typography variant="h5" gutterBottom>
           Farmer and Land Registration
         </Typography>
-        
-         {/* Stepper */}
+
+        {/* Stepper */}
         <FormStepper activeStep={2} />
 
         {/* Breadcrumbs */}
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
           <Link underline="hover" color="inherit" href="/">
-            <HomeIcon
-              sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }}
-            />
+            <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
             Home
           </Link>
           <Typography color="text.primary">Add New Farmer & Land</Typography>
@@ -77,14 +76,11 @@ const LandRegistrationUpload = () => {
           </Typography>
           <Divider sx={{ mb: 2 }} />
 
-          <Grid container spacing={2} direction="column" >
+          <Grid container spacing={2} direction="column">
             {documentFields.map((doc) => (
               <Grid
                 key={doc.name}
-                item
-                xs={12}
-                sx={{ display: "flex", alignItems: "center", gap: 2}}
-
+                sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}
               >
                 <Typography sx={{ minWidth: 280 }}>{doc.label}</Typography>
                 <Button
@@ -117,26 +113,21 @@ const LandRegistrationUpload = () => {
             }}
           >
             <FormControlLabel
-  control={<Checkbox />}
-  label="All above approved by Legal Officer"
-/>
+              control={<Checkbox />}
+              label="All above approved by Legal Officer"
+            />
 
             <Box sx={{ display: "flex", gap: 2 }}>
-             <Button
+              <Button
                 variant="outlined"
                 onClick={() => navigate("/fieldOfficer/LandRegistration2")}
               >
                 Back
               </Button>
 
-              <Button
-                variant="contained"
-                type="submit"
-                onClick={() => navigate("/fieldOfficer/LandRegistration4")}
-              >
+              <Button variant="contained" type="submit">
                 Next
               </Button>
-
             </Box>
           </Box>
         </Paper>
