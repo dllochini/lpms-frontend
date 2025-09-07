@@ -56,35 +56,12 @@ const BasicDataGrid = ({ data, onDelete }) => {
   };
 
   const columns = [
-    { field: "_id", headerName: "Operation ID", flex: 2 },
-    {
-      field: "operationName",
-      headerName: "Operation Name",
-      headerAlign: "left",
-      align: "left",
-      flex: 3,
-    },
-    {
-      field: "relatedMachines",
-      headerName: "Related Machines",
-      headerAlign: "left",
-      align: "left",
-      flex: 3,
-    },
-    {
-      field: "relatedImplements",
-      headerName: "Related Implements",
-      headerAlign: "left",
-      align: "left",
-      flex: 3,
-    },
-    {
-      field: "note",
-      headerName: "Note",
-      headerAlign: "left",
-      align: "left",
-      flex: 3,
-    },
+    { field: "landId", headerName: "Land ID", flex: 1.5 },
+    { field: "farmer", headerName: "Farmer Name", flex: 2.5 },
+    { field: "location", headerName: "Address", flex: 3 },
+    { field: "size", headerName: "Area (Acres)", flex: 1.5 },
+    { field: "contact", headerName: "Contact Details", flex: 2.5 },
+    { field: "note", headerName: "Note", flex: 3 },
     {
       field: "actions",
       type: "actions",
@@ -116,11 +93,14 @@ const BasicDataGrid = ({ data, onDelete }) => {
     ? data.map((row) => ({
         id: row._id,
         ...row,
-        // If role is an object, use its 'role' property; otherwise, use as is
-        role:
-          typeof row.role === "object" && row.role !== null
-            ? row.role.role
-            : row.role,
+        farmer:
+        typeof row.farmer === "object" && row.farmer !== null
+              ? row.farmer.fullName
+              : row.farmer,
+        contact:
+        typeof row.farmer === "object" && row.farmer !== null
+              ? row.farmer.contact_no
+              : row.farmer,
       }))
     : [];
   // ...existing code...
