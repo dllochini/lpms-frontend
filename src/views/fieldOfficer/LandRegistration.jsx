@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   TextField,
@@ -9,22 +9,25 @@ import {
   Paper,
   MenuItem,
   Breadcrumbs,
+  Autocomplete,
   Link,
   Divider,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FormStepper from "../components/FormStepper.jsx"; // import the stepper
+import FormStepper from "../components/FormStepper.jsx";
 import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-
+import { getUserById, getUsers } from "../../api/user.js";
 
 const LandRegistration = () => {
   const navigate = useNavigate();
-
   const [file, setFile] = useState(null);
+  const [farmers, setFarmers] = useState([]);
+  const [farmersLoading, setFarmersLoading] = useState(false);
+  const [selectedFarmer, setSelectedFarmer] = useState(null);
 
   const designations = [
     { value: "Mr.", label: "Mr." },
@@ -33,16 +36,32 @@ const LandRegistration = () => {
     { value: "Rev", label: "Rev" },
   ];
 
+  const setWithExpiry = (key, value, ttl) => {
+    const now = new Date();
+    const item = { value, expiry: now.getTime() + ttl };
+    localStorage.setItem(key, JSON.stringify(item));
+  };
+
+  const getWithExpiry = (key) => {
+    const itemStr = localStorage.getItem(key);
+    if (!itemStr) return null;
+    const item = JSON.parse(itemStr);
+    if (new Date().getTime() > item.expiry) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return item.value;
+  };
+
   const schema = yup.object({
     designation: yup.string().required("Choose a designation"),
-    firstName: yup.string().required("First name is required"),
-    lastName: yup.string().required("Last name is required"),
     fullName: yup.string().required("Full name is required"),
     nic: yup.string().required("NIC / Passport No. is required"),
     address: yup.string().required("Address is required"),
-    contactNo: yup
+    contact_no: yup
       .string()
-      .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits"),
+      .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits")
+      .required(),
     accountNo: yup.string().required("Account number is required"),
     bank: yup.string().required("Bank is required"),
     branch: yup.string().required("Branch is required"),
@@ -51,16 +70,15 @@ const LandRegistration = () => {
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm({
-    defaultValues: {
+    defaultValues: getWithExpiry("landForm1") || {
       designation: "",
-      firstName: "",
-      lastName: "",
       fullName: "",
       nic: "",
       address: "",
-      contactNo: "",
+      contact_no: "",
       accountNo: "",
       bank: "",
       branch: "",
@@ -68,31 +86,71 @@ const LandRegistration = () => {
     resolver: yupResolver(schema),
   });
 
+  useEffect(() => {
+    let canceled = false;
+    const fetchFarmers = async () => {
+      setFarmersLoading(true);
+      try {
+        const res = await getUsers();
+        setFarmers(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error("Failed to load farmers:", err);
+      } finally {
+        if (!canceled) setFarmersLoading(false);
+      }
+    };
+    fetchFarmers();
+    return () => (canceled = true);
+  }, []);
+
   const onSubmit = (data) => {
-    console.log({ ...data, file });
+    const formData = { ...data, file };
+    setWithExpiry("landForm1", formData, 30 * 60 * 1000);
+    navigate("/fieldOfficer/LandRegistration2");
+  };
+
+  const handleSearchFarmer = async () => {
+    if (!selectedFarmer?._id) return;
+    try {
+      const res = await getUserById(selectedFarmer._id);
+      const farmerData = res.data;
+      const fields = [
+        "designation",
+        "fullName",
+        "nic",
+        "address",
+        "contact_no",
+        "accountNo",
+        "bank",
+        "branch",
+      ];
+      fields.forEach((f) => setValue(f, farmerData[f] ?? ""));
+      setWithExpiry(
+        "landForm1",
+        fields.reduce((acc, f) => ({ ...acc, [f]: farmerData[f] ?? "" }), {}),
+        30 * 60 * 1000
+      );
+    } catch (err) {
+      console.error("Error fetching farmer:", err);
+    }
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", margin: 0,  }}>
-      <Box sx={{ maxWidth: 1100, mx: "auto", p: 3, }}>
-        {/* Header */}
+    <Box sx={{ minHeight: "100vh", margin: 0 }}>
+      <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
         <Typography variant="h5" gutterBottom>
           Farmer and Land Registration
         </Typography>
-       
-       {/* Stepper */}
-        <FormStepper activeStep={0} />
-
-        {/* Breadcrumbs */}
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
           <Link underline="hover" color="inherit" href="/">
-            <HomeIcon
-              sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }}
-            />{" "}
+            <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />{" "}
             Home
           </Link>
           <Typography color="text.primary">Add New Farmer & Land</Typography>
         </Breadcrumbs>
+        <Box sx={{ mt: 4 }}>
+          <FormStepper activeStep={0} />
+        </Box>
       </Box>
 
       <Box
@@ -100,39 +158,58 @@ const LandRegistration = () => {
         noValidate
         autoComplete="off"
         onSubmit={handleSubmit(onSubmit)}
-        sx={{ display: "flex", justifyContent: "center", mb: 3, direction:"column" }}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          mb: 3,
+          direction: "column",
+        }}
       >
         <Paper
           elevation={5}
-          sx={{ maxWidth: "70%", mx: "auto", px: 10,py:5, borderRadius: 5 }}
+          sx={{ maxWidth: "70%", mx: "auto", px: 10, py: 5, borderRadius: 5 }}
         >
           <Typography variant="h6" gutterBottom>
             Farmer Details
           </Typography>
           <Divider sx={{ mb: 2 }} />
 
-
-          <Grid container spacing={2} >
+          <Grid container spacing={2}>
             {/* Farmer search */}
-           
-            <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 ,
-              // border:"2px solid blue",
-              }}>
+            <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 200 }}>
                 Farmer already registered?
               </InputLabel>
-              <TextField
-                placeholder="Full Name or NIC/Passport"
-                size="small"
+              <Autocomplete
                 sx={{ flex: 1 }}
+                options={farmers}
+                getOptionLabel={(option) =>
+                  option?.fullName
+                    ? `${option.fullName} — ${option.nic || ""}`
+                    : ""
+                }
+                loading={farmersLoading}
+                isOptionEqualToValue={(opt, val) => opt._id === val._id}
+                onChange={(_, selected) => setSelectedFarmer(selected)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    size="small"
+                    placeholder="Search by name or NIC"
+                  />
+                )}
               />
-              <Button variant="contained">Search</Button>
-              {/* <Typography><Divider sx={{ mb: 2 }} /></Typography> */}
-              
+              <Button
+                variant="contained"
+                disabled={!selectedFarmer}
+                onClick={handleSearchFarmer}
+              >
+                Search
+              </Button>
             </Grid>
-          
-            
-            
+
+            <Divider sx={{ width: "100%", mb: 2 }} />
+
             {/* Designation */}
             <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Designation :</InputLabel>
@@ -156,44 +233,6 @@ const LandRegistration = () => {
                   </TextField>
                 )}
               />
-            </Grid>
-
-             <Grid container spacing={2}> 
-            {/* First Name */}
-            <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
-              <InputLabel sx={{ minWidth: 130 }}>First Name :</InputLabel>
-              <Controller
-                name="firstName"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    size="small"
-                    sx={{ flex: 1 }}
-                    error={!!errors.firstName}
-                    helperText={errors.firstName?.message || " "}
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Last Name */}
-            <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
-              <InputLabel sx={{ minWidth: 130 }}>Last Name :</InputLabel>
-              <Controller
-                name="lastName"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    size="small"
-                    sx={{ flex: 1 }}
-                    error={!!errors.lastName}
-                    helperText={errors.lastName?.message || " "}
-                  />
-                )}
-              />
-            </Grid>
             </Grid>
 
             {/* Full Name */}
@@ -277,15 +316,15 @@ const LandRegistration = () => {
             <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Contact No :</InputLabel>
               <Controller
-                name="contactNo"
+                name="contact_no"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     size="small"
                     sx={{ flex: 1 }}
-                    error={!!errors.contactNo}
-                    helperText={errors.contactNo?.message || " "}
+                    error={!!errors.contact_no}
+                    helperText={errors.contact_no?.message || " "}
                   />
                 )}
               />
@@ -344,15 +383,13 @@ const LandRegistration = () => {
             </Grid>
 
             {/* Next button */}
-            <Grid size={{ xs: 12 }} sx={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button
-                variant="contained"
-                type="submit"
-                onClick={() => navigate("/fieldOfficer/LandRegistration2")}
-              >
+            <Grid
+              size={{ xs: 12 }}
+              sx={{ display: "flex", justifyContent: "flex-end" }}
+            >
+              <Button variant="contained" type="submit">
                 Next
-            </Button>
-
+              </Button>
             </Grid>
           </Grid>
         </Paper>
@@ -362,5 +399,3 @@ const LandRegistration = () => {
 };
 
 export default LandRegistration;
-
-

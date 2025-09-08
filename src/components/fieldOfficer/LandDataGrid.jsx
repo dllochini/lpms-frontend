@@ -70,11 +70,11 @@ const LandsDataGrid = ({ data, onDelete }) => {
   };
 
   const columns = [
-    { field: "landId", headerName: "Land ID", flex: 2 },
-    { field: "farmerName", headerName: "Farmer Name", flex: 2 },
-    { field: "address", headerName: "Address", flex: 3 },
-    { field: "area", headerName: "Area (Acres)", flex: 1 },
-    { field: "contact", headerName: "Contact Details", flex: 2 },
+    { field: "landId", headerName: "Land ID", flex: 1.5 },
+    { field: "farmer", headerName: "Farmer Name", flex: 2.5 },
+    { field: "location", headerName: "Address", flex: 3 },
+    { field: "size", headerName: "Area (Acres)", flex: 1.5 },
+    { field: "contact", headerName: "Contact Details", flex: 2.5 },
     { field: "note", headerName: "Note", flex: 3 },
     {
       field: "actions",
@@ -101,12 +101,15 @@ const LandsDataGrid = ({ data, onDelete }) => {
   const rows = Array.isArray(data)
     ? data.map((row) => ({
         id: row._id,
-        landId: row.landId,
-        farmerName: row.farmerName,
-        address: row.address,
-        area: row.area,
-        contact: row.contact,
-        note: row.note,
+        ...row,
+        farmer:
+        typeof row.farmer === "object" && row.farmer !== null
+              ? row.farmer.fullName
+              : row.farmer,
+        contact:
+        typeof row.farmer === "object" && row.farmer !== null
+              ? row.farmer.contact_no
+              : row.farmer,
       }))
     : [];
 
