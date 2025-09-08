@@ -20,9 +20,9 @@ export default function OperationDialog({
 }) {
   const { control, handleSubmit, reset } = useForm({
     defaultValues: initialData || {
-      operationName: "",
-      relatedMachine: "",
-      relatedImplement: "",
+      name: "",
+      // relatedMachine: "",
+      // relatedImplement: "",
       note: "",
     },
   });
@@ -30,9 +30,9 @@ export default function OperationDialog({
   // Reset form when data changes (important for edit mode)
   React.useEffect(() => {
     reset(initialData || {
-      operationName: "",
-      relatedMachine: "",
-      relatedImplement: "",
+      name: "",
+      // relatedMachine: "",
+      // relatedImplement: "",
       note: "",
     });
   }, [initialData, reset]);
@@ -69,7 +69,7 @@ export default function OperationDialog({
           Name of Operation :
         </InputLabel>
         <Controller
-          name="operationName"
+          name="name"
           control={control}
           render={({ field }) => (
             <TextField {...field} fullWidth size="small" sx={{ mb: 2 }} />
@@ -81,7 +81,7 @@ export default function OperationDialog({
           Related Machines :
         </InputLabel>
         <Controller
-          name="relatedMachine"
+          // name="relatedMachine"
           control={control}
           render={({ field }) => (
             <TextField {...field} fullWidth size="small" select sx={{ mb: 1 }}>
@@ -113,7 +113,7 @@ export default function OperationDialog({
           Related Implements :
         </InputLabel>
         <Controller
-          name="relatedImplement"
+          // name="relatedImplement"
           control={control}
           render={({ field }) => (
             <TextField {...field} fullWidth size="small" sx={{ mb: 2 }} />

@@ -1,11 +1,4 @@
-
-import {
-  Typography,
-  Box,
-  Paper,
-  Button,
-  Breadcrumbs,
-} from "@mui/material";
+import { Typography, Box, Paper, Button, Breadcrumbs } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
 import { useState, useEffect } from "react";
@@ -33,7 +26,7 @@ export default function Operation() {
   // Fetch operations from backend
   const fetchData = async () => {
     const response = await getOperations();
-    console.log("response :", response);
+    // console.log("operations :", response);
     setResponseData(response?.data ?? []);
   };
 
@@ -45,7 +38,7 @@ export default function Operation() {
   const handleDelete = async (deletedOperationId) => {
     try {
       await deleteOperationById(deletedOperationId); // only call once (parent)
-      console.log("Deleted operation ID:", deletedOperationId);
+      // console.log("Deleted operation ID:", deletedOperationId);
       setResponseData((prev) =>
         prev.filter((op) => op._id !== deletedOperationId)
       );
@@ -84,23 +77,29 @@ export default function Operation() {
 
   // Submit form handler (Create or Update)
   const handleSubmitDialog = async (data) => {
+    // console.log("Submitting operation data:", data);
     try {
+      let updatedOrCreated;
       if (selectedRow) {
         // Update existing
         const res = await updateOperationById(selectedRow._id, data);
+        // console.log("Update response:", res);
+        updatedOrCreated = res.data; // adjust if your API wraps the object
         setResponseData((prev) =>
           prev.map((item) =>
-            item._id === selectedRow._id ? res.data : item
+            item._id === selectedRow._id ? updatedOrCreated : item
           )
         );
       } else {
         // Create new
         const res = await createOperation(data);
-        setResponseData((prev) => [...prev, res.data]);
+        updatedOrCreated = res.data; // adjust if needed
+        setResponseData((prev) => [...prev, updatedOrCreated]);
       }
       handleCloseDialog();
     } catch (err) {
       console.error("Failed to submit operation:", err);
+      alert("Failed to save operation. Check console for details.");
     }
   };
 
@@ -151,10 +150,10 @@ export default function Operation() {
         </Box>
 
         <DataGrid
-        data={responseData}
-        onDelete={handleDelete}
-        onEdit={handleOpenEditDialog}
-      />
+          data={responseData}
+          onDelete={handleDelete}
+          onEdit={handleOpenEditDialog}
+        />
       </Paper>
 
       {/* Add/Edit Dialog (imported) */}
@@ -167,5 +166,3 @@ export default function Operation() {
     </Box>
   );
 }
-
-
