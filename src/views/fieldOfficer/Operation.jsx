@@ -1,241 +1,168 @@
+import { Typography, Box, Paper, Button, Breadcrumbs } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import HomeIcon from "@mui/icons-material/Home";
+import { useState, useEffect } from "react";
+import * as React from "react";
+import DataGrid from "../../components/fieldOfficer/BasicDataGrid";
+import { Link as RouterLink } from "react-router-dom";
+import Link from "@mui/material/Link";
+
 import {
-    Typography,
-    Box,
-    Paper,
-    Button,
-    Breadcrumbs,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    TextField,
-    Grid,
-    InputLabel
-  } from "@mui/material";
-  import AddIcon from "@mui/icons-material/Add";
-  import HomeIcon from "@mui/icons-material/Home";
-  import { getUsers } from "../../api/user";
-  import { useState, useEffect } from "react";
-//   import { useNavigate } from "react-router-dom";
-  import * as React from "react";
-  import DataGrid from "../../components/fieldOfficer/BasicDataGrid";
-  import { Controller, useForm } from "react-hook-form";
-  import { FormControl, Select, MenuItem } from "@mui/material";
+  getOperations,
+  createOperation,
+  updateOperationById,
+  deleteOperationById,
+} from "../../api/operation";
 
-  
-  export default function Operation() {
-    // const navigate = useNavigate();
-    const [responseData, setResponseData] = useState([]);
-  
-    // ✅ Dialog state
-    const [openDialog, setOpenDialog] = useState(false);
-    const handleOpenDialog = () => setOpenDialog(true);
-    const handleCloseDialog = () => setOpenDialog(false);
-  
-    // ✅ react-hook-form setup
-    const { control, handleSubmit, reset } = useForm();
-  
-    // Fetch API data
-    const fetchData = async function () {
-      const response = await getUsers();
-      setResponseData(response?.data ?? []);
-    };
-  
-    useEffect(() => {
-      fetchData();
-    }, []);
-  
-    const handleDelete = (deletedUserId) => {
-      setResponseData((prev) => prev.filter((user) => user._id !== deletedUserId));
-    };
-  
-    // Form submit handler
-    const onSubmit = (data) => {
-      console.log("Form Data:", data);
-  
-      // Add the new task locally (mock example)
-      setResponseData((prev) => [
-        ...prev,
-        { _id: Date.now().toString(), name: data.operationName }
-      ]);
-  
-      reset(); // clear form
+import OperationDialog from "../../components/fieldOfficer/OperationDialog"; // <-- import dialog
+
+export default function Operation() {
+  const [responseData, setResponseData] = useState([]);
+
+  // Dialog state
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null); // for edit mode
+
+  // Fetch operations from backend
+  const fetchData = async () => {
+    const response = await getOperations();
+    // console.log("operations :", response);
+    setResponseData(response?.data ?? []);
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Delete handler
+  const handleDelete = async (deletedOperationId) => {
+    try {
+      await deleteOperationById(deletedOperationId); // only call once (parent)
+      // console.log("Deleted operation ID:", deletedOperationId);
+      setResponseData((prev) =>
+        prev.filter((op) => op._id !== deletedOperationId)
+      );
+    } catch (error) {
+      console.error("Delete failed in parent:", error);
+      // optional user feedback
+      if (error.response?.status === 404) {
+        alert("Operation not found (already deleted).");
+        // still remove it locally to keep UI consistent
+        setResponseData((prev) =>
+          prev.filter((op) => op._id !== deletedOperationId)
+        );
+      } else {
+        alert("Failed to delete operation. See console for details.");
+      }
+    }
+  };
+
+  // Open dialog in Add mode
+  const handleOpenAddDialog = () => {
+    setSelectedRow(null);
+    setOpenDialog(true);
+  };
+
+  // Open dialog in Edit mode
+  const handleOpenEditDialog = (row) => {
+    setSelectedRow(row);
+    setOpenDialog(true);
+  };
+
+  // Close dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setSelectedRow(null);
+  };
+
+  // Submit form handler (Create or Update)
+  const handleSubmitDialog = async (data) => {
+    // console.log("Submitting operation data:", data);
+    try {
+      let updatedOrCreated;
+      if (selectedRow) {
+        // Update existing
+        const res = await updateOperationById(selectedRow._id, data);
+        // console.log("Update response:", res);
+        updatedOrCreated = res.data; // adjust if your API wraps the object
+        setResponseData((prev) =>
+          prev.map((item) =>
+            item._id === selectedRow._id ? updatedOrCreated : item
+          )
+        );
+      } else {
+        // Create new
+        const res = await createOperation(data);
+        updatedOrCreated = res.data; // adjust if needed
+        setResponseData((prev) => [...prev, updatedOrCreated]);
+      }
       handleCloseDialog();
-    };
+    } catch (err) {
+      console.error("Failed to submit operation:", err);
+      alert("Failed to save operation. Check console for details.");
+    }
+  };
 
-    
-    
-  
-    return (
-      <Box>
-        {/* Greeting & Breadcrumb */}
-        <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
-          <Typography variant="h5" gutterBottom>
-            Operations
-          </Typography>
-  
-          <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-            <Typography color="text.primary">
-              <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
-              Home
-            </Typography>
-          </Breadcrumbs>
-        </Box>
-  
-        {/* Main Content */}
-        <Paper
-          elevation={5}
-          sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 5 }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mb: 2
-            }}
+  return (
+    <Box>
+      {/* Header and Breadcrumbs */}
+      <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
+        <Typography variant="h5" gutterBottom>
+          Operations
+        </Typography>
+        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
+          <Link
+            component={RouterLink}
+            to="/"
+            underline="hover"
+            color="inherit"
+            sx={{ display: "flex", alignItems: "center" }}
           >
-            <Typography variant="h6"></Typography>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleOpenDialog}
-              startIcon={<AddIcon />}
-            >
-              ADD NEW TASK
-            </Button>
-          </Box>
-  
-          <DataGrid data={responseData} onDelete={handleDelete} />
-  
-          {/* Dialog */}
-          <Dialog
-          open={openDialog}
-          onClose={handleCloseDialog}
-          fullWidth
-          maxWidth="sm"
-          PaperProps={{
-            sx: {
-              borderRadius: "20px", // rounded corners
-              overflow: "hidden",
-            },
+            <HomeIcon sx={{ mr: 0.5, fontSize: 18 }} />
+            Home
+          </Link>
+          <Typography color="text.primary">Operations</Typography>
+        </Breadcrumbs>
+      </Box>
+
+      {/* Table & Add Button */}
+      <Paper
+        elevation={5}
+        sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 5 }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 2,
           }}
         >
-          <DialogTitle
-            sx={{
-              fontWeight: "bold",
-              textAlign: "center",
-              fontSize: "1.25rem",
-              py: 2,
-            }}
+          <Typography variant="h6"></Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleOpenAddDialog}
+            startIcon={<AddIcon />}
           >
-            Add New Operation
-          </DialogTitle>
+            ADD NEW OPERATION
+          </Button>
+        </Box>
 
-          <DialogContent sx={{ px: 4, pb: 2 }}>
-            {/* Name of Operation */}
-            <InputLabel sx={{ mb: 0.5 }}>Name of Operation :</InputLabel>
-            <Controller
-              name="operationName"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField {...field} fullWidth size="small" sx={{ mb: 2 }} />
-              )}
-            />
+        <DataGrid
+          data={responseData}
+          onDelete={handleDelete}
+          onEdit={handleOpenEditDialog}
+        />
+      </Paper>
 
-            {/* Related Machines */}
-            <InputLabel sx={{ mb: 0.5 }}>Related Machines :</InputLabel>
-            <Controller
-              name="relatedMachine"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <FormControl fullWidth size="small" sx={{ mb: 1 }}>
-                  <Select {...field} displayEmpty>
-                    <MenuItem value="">Select</MenuItem>
-                    {/* <MenuItem value="Tractor">Tractor</MenuItem>
-                    <MenuItem value="Harvester">Harvester</MenuItem> */}
-                  </Select>
-                </FormControl>
-              )}
-            />
-            <Button
-              variant="contained"
-              sx={{
-                borderRadius: "20px",
-                textTransform: "none",
-                fontWeight: "bold",
-                mb: 2,
-              }}
-            >
-              Add New Machine
-            </Button>
-
-            {/* Related Implements */}
-            <InputLabel sx={{ mb: 0.5 }}>Related Implements :</InputLabel>
-            <Controller
-              name="relatedImplement"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField {...field} fullWidth size="small" sx={{ mb: 2 }} />
-              )}
-            />
-
-            {/* Note */}
-            <InputLabel sx={{ mb: 0.5 }}>Note :</InputLabel>
-            <Controller
-              name="note"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  size="small"
-                  multiline
-                  minRows={3}
-                  sx={{ mb: 1 }}
-                />
-              )}
-            />
-          </DialogContent>
-
-          <DialogActions sx={{ justifyContent: "center", pb: 2 }}>
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Button
-                onClick={handleCloseDialog}
-                variant="contained"
-                sx={{
-                  borderRadius: "20px",
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  px: 4,
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit(onSubmit)}
-                sx={{
-                  borderRadius: "20px",
-                  textTransform: "none",
-                  fontWeight: "bold",
-                  px: 4,
-                }}
-              >
-                Create
-              </Button>
-            </Box>
-          </DialogActions>
-        </Dialog>
-
-
-        </Paper>
-      </Box>
-    );
-  }
-  
+      {/* Add/Edit Dialog (imported) */}
+      <OperationDialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        onSubmit={handleSubmitDialog}
+        initialData={selectedRow}
+      />
+    </Box>
+  );
+}

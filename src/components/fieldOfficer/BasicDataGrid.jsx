@@ -1,5 +1,7 @@
+
+
 import * as React from "react";
-import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
+import { DataGrid as MuiDataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Dialog from "@mui/material/Dialog";
@@ -7,19 +9,16 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import { useNavigate } from "react-router-dom";
-import { deleteUserById } from "../../api/user";
+
 import { useState } from "react";
 
-
-const BasicDataGrid = ({ data, onDelete }) => {
-  const navigate = useNavigate();
-
-  // State for dialog open + user id to delete
+const BasicDataGrid = ({ data, onDelete, onEdit }) => {
+  // Delete dialog state
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedId, setSelectedId] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
 
+  // Delete handlers
   const handleDeleteClick = (id) => {
     const user = data.find((u) => u._id === id);
     setSelectedUserName(user ? user.fullName : "");
@@ -27,41 +26,57 @@ const BasicDataGrid = ({ data, onDelete }) => {
     setOpenDialog(true);
   };
 
-  // Confirm delete
   const handleConfirmDelete = async () => {
     if (selectedId) {
       try {
-        await deleteUserById(selectedId);
+        // await deleteOperationById(selectedId);
         if (onDelete) {
           onDelete(selectedId);
         }
       } catch (error) {
         console.error("Delete failed:", error);
-        // optionally show a toast/snackbar for failure
       }
     }
     setOpenDialog(false);
     setSelectedId(null);
   };
 
-  // Cancel delete
   const handleCancelDelete = () => {
     setOpenDialog(false);
     setSelectedId(null);
   };
 
-  // Edit handler to redirect
+  // Edit handler
   const handleEditClick = (id) => {
-    navigate(`/user/edit/${id}`);
+    const row = data.find((u) => u._id === id);
+    if (onEdit && row) {
+      onEdit(row);
+    }
   };
 
+  // Columns config
   const columns = [
-    { field: "landId", headerName: "Land ID", flex: 1.5 },
-    { field: "farmer", headerName: "Farmer Name", flex: 2.5 },
-    { field: "location", headerName: "Address", flex: 3 },
-    { field: "size", headerName: "Area (Acres)", flex: 1.5 },
-    { field: "contact", headerName: "Contact Details", flex: 2.5 },
-    { field: "note", headerName: "Note", flex: 3 },
+    { field: "_id", headerName: "Operation ID", flex: 4 },
+    {
+      field: "name",
+      headerName: "Operation Name",
+      flex: 3,
+    },
+    // {
+    //   field: "relatedMachines",
+    //   headerName: "Related Machines",
+    //   flex: 3,
+    // },
+    // {
+    //   field: "relatedImplements",
+    //   headerName: "Related Implements",
+    //   flex: 3,
+    // },
+    {
+      field: "note",
+      headerName: "Note",
+      flex: 3,
+    },
     {
       field: "actions",
       type: "actions",
@@ -72,14 +87,12 @@ const BasicDataGrid = ({ data, onDelete }) => {
           icon={<EditIcon />}
           label="Edit"
           onClick={() => handleEditClick(params.id)}
-          showInMenu={false}
           key="edit"
         />,
         <GridActionsCellItem
           icon={<DeleteIcon />}
           label="Delete"
           onClick={() => handleDeleteClick(params.id)}
-          showInMenu={false}
           key="delete"
         />,
       ],
@@ -88,27 +101,17 @@ const BasicDataGrid = ({ data, onDelete }) => {
     },
   ];
 
-  // ...existing code...
   const rows = Array.isArray(data)
     ? data.map((row) => ({
         id: row._id,
         ...row,
-        farmer:
-        typeof row.farmer === "object" && row.farmer !== null
-              ? row.farmer.fullName
-              : row.farmer,
-        contact:
-        typeof row.farmer === "object" && row.farmer !== null
-              ? row.farmer.contact_no
-              : row.farmer,
       }))
     : [];
-  // ...existing code...
 
   return (
     <>
       <div style={{ width: "100%" }}>
-        <DataGrid
+        <MuiDataGrid
           autoHeight
           rows={rows}
           columns={columns}
@@ -124,12 +127,11 @@ const BasicDataGrid = ({ data, onDelete }) => {
         />
       </div>
 
-      {/* Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <strong>{selectedUserName}</strong>{" "}
-          user?
+          Are you sure you want to delete <strong>{selectedUserName}</strong>?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
@@ -145,3 +147,4 @@ const BasicDataGrid = ({ data, onDelete }) => {
 };
 
 export default BasicDataGrid;
+
