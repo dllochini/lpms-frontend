@@ -82,6 +82,16 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
       headerName: "Operation Name",
       flex: 3,
     },
+    // {
+    //   field: "relatedMachines",
+    //   headerName: "Related Machines",
+    //   flex: 3,
+    // },
+    // {
+    //   field: "relatedImplements",
+    //   headerName: "Related Implements",
+    //   flex: 3,
+    // },
     {
       field: "note",
       headerName: "Note",
