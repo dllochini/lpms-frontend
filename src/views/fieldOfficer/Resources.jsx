@@ -76,9 +76,6 @@ export default function Resource() {
         <Typography variant="h5" gutterBottom>
           Resources
         </Typography>
-      </Box>
-      <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
-      <div role="presentation" >
           <Breadcrumbs aria-label="breadcrumb">
             <Link underline="hover" color="inherit" href="/">
               Home
@@ -88,7 +85,6 @@ export default function Resource() {
             </Link>
             <Typography sx={{ color: 'text.primary' }}>Resources</Typography>
           </Breadcrumbs>
-        </div>
       </Box>
 
       <Paper
