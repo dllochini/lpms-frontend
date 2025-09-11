@@ -1,3 +1,5 @@
+
+// App.jsx
 import "./App.css";
 import Layout from "./views/Layout";
 import Login from "./views/Login";
@@ -15,6 +17,7 @@ import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
 import LandProgressTracking from "./views/fieldOfficer/LandProgressTable";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
+import Operation from "./views/fieldOfficer/Operation";
 
 // A wrapper component so we can use hooks like useNavigate
 const AppWrapper = () => {
@@ -55,6 +58,7 @@ const AppWrapper = () => {
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/fieldOfficer/land-progress-tracking" element={<LandProgressTracking />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
+        <Route path="/fieldOfficer/operation" element={<Operation />} />
       </Route>
     </Routes>
   );

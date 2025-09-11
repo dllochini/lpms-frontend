@@ -1,5 +1,7 @@
+
+
 import * as React from "react";
-import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
+import { DataGrid as MuiDataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Dialog from "@mui/material/Dialog";
@@ -7,26 +9,16 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-import { useNavigate } from "react-router-dom";
-import { deleteUserById } from "../../api/user";
+
 import { useState } from "react";
 
-
-const BasicDataGrid = ({ data, onDelete }) => {
-  const navigate = useNavigate();
-
-  // Dialog state
+const BasicDataGrid = ({ data, onDelete, onEdit }) => {
+  // Delete dialog state
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
 
-  // Snackbar state
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
-
+  // Delete handlers
   const handleDeleteClick = (id) => {
     const user = data.find((u) => u._id === id);
     setSelectedUserName(user ? user.fullName : "");
@@ -37,18 +29,12 @@ const BasicDataGrid = ({ data, onDelete }) => {
   const handleConfirmDelete = async () => {
     if (selectedId) {
       try {
-        await deleteUserById(selectedId);
+        // await deleteOperationById(selectedId);
         if (onDelete) {
           onDelete(selectedId);
         }
-        setSnackbarMessage(`User "${selectedUserName}" deleted successfully`);
-        setSnackbarSeverity("success");
-        setSnackbarOpen(true);
       } catch (error) {
         console.error("Delete failed:", error);
-        setSnackbarMessage("Failed to delete user");
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
       }
     }
     setOpenDialog(false);
@@ -60,43 +46,36 @@ const BasicDataGrid = ({ data, onDelete }) => {
     setSelectedId(null);
   };
 
+  // Edit handler
   const handleEditClick = (id) => {
-    navigate(`/user/edit/${id}`);
+    const row = data.find((u) => u._id === id);
+    if (onEdit && row) {
+      onEdit(row);
+    }
   };
 
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
-
+  // Columns config
   const columns = [
-    { field: "_id", headerName: "ID", flex: 3 },
+    { field: "_id", headerName: "Operation ID", flex: 4 },
     {
-      field: "designation",
-      headerName: "Designation",
-      headerAlign: "left",
-      align: "left",
-      flex: 1,
+      field: "name",
+      headerName: "Operation Name",
+      flex: 3,
     },
+    // {
+    //   field: "relatedMachines",
+    //   headerName: "Related Machines",
+    //   flex: 3,
+    // },
+    // {
+    //   field: "relatedImplements",
+    //   headerName: "Related Implements",
+    //   flex: 3,
+    // },
     {
-      field: "fullName",
-      headerName: "Full Name",
-      headerAlign: "left",
-      align: "left",
-      flex: 4,
-    },
-    {
-      field: "role",
-      headerName: "Role",
-      headerAlign: "left",
-      align: "left",
-      flex: 2,
-    },
-    {
-      field: "email",
-      headerName: "Email",
-      headerAlign: "left",
-      align: "left",
-      flex: 4,
+      field: "note",
+      headerName: "Note",
+      flex: 3,
     },
     {
       field: "actions",
@@ -123,27 +102,16 @@ const BasicDataGrid = ({ data, onDelete }) => {
   ];
 
   const rows = Array.isArray(data)
-    ? data
-        .filter(
-          (row) =>
-            typeof row.role === "object" &&
-            row.role !== null &&
-            row.role.name?.toLowerCase() !== "farmer"
-        )
-        .map((row) => ({
-          id: row._id,
-          ...row,
-          role:
-            typeof row.role === "object" && row.role !== null
-              ? row.role.name
-              : row.role,
-        }))
+    ? data.map((row) => ({
+        id: row._id,
+        ...row,
+      }))
     : [];
 
   return (
     <>
       <div style={{ width: "100%" }}>
-        <DataGrid
+        <MuiDataGrid
           autoHeight
           rows={rows}
           columns={columns}
@@ -159,12 +127,11 @@ const BasicDataGrid = ({ data, onDelete }) => {
         />
       </div>
 
-      {/* Confirmation Dialog */}
+      {/* Delete Confirmation Dialog */}
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <strong>{selectedUserName}</strong>{" "}
-          user?
+          Are you sure you want to delete <strong>{selectedUserName}</strong>?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
@@ -175,24 +142,9 @@ const BasicDataGrid = ({ data, onDelete }) => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Snackbar to show the deletion success */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={handleSnackbarClose}
-          severity={snackbarSeverity}
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </>
   );
 };
 
 export default BasicDataGrid;
+
