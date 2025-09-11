@@ -14,12 +14,11 @@ import UserEdit from "./views/admin/UserEdit";
 import ResetPw from "./views/ResetPw";
 import HigherManager from "./views/higherManager/HigherManager";
 import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
-import LandProgressTracking from "./views/fieldOfficer/LandProgressTable";
+import Resources from "./views/fieldOfficer/Resources";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 import Operation from "./views/fieldOfficer/Operation";
 
-// A wrapper component so we can use hooks like useNavigate
 const AppWrapper = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,19 +26,13 @@ const AppWrapper = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const publicPaths = ["/login", "/reset-password"];
-
-    // ✅ Read toggle flag from .env
     const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
 
-    // ✅ Skip auth check completely if bypass flag is on
-    if (bypassAuth) {
-      return;
-    }
-
-    // ✅ Enforce auth check if bypass is off
-    if ((!token || isTokenExpired(token)) && !publicPaths.includes(location.pathname)) {
-      clearAuth();
-      navigate("/login");
+    if (!bypassAuth) {
+      if ((!token || isTokenExpired(token)) && !publicPaths.includes(location.pathname)) {
+        clearAuth();
+        navigate("/login");
+      }
     }
   }, [navigate, location]);
 
@@ -59,6 +52,7 @@ const AppWrapper = () => {
         <Route path="/fieldOfficer/land-progress-tracking" element={<LandProgressTracking />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
         <Route path="/fieldOfficer/operation" element={<Operation />} />
+        <Route path="/fieldOfficer/resources" element={<Resources />} />
       </Route>
     </Routes>
   );
