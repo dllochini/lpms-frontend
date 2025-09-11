@@ -9,8 +9,8 @@ import {
 import { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
 
-import DataGrid from "../../components/fieldOfficer/DataGrid";
-import ResourceDialog from "../../components/fieldOfficer/Dialog";
+import DataGrid from "../../components/fieldOfficer/ResourceDataGrid";
+import ResourceDialog from "../../components/fieldOfficer/ResourceDialogBox";
 import { getResources } from "../../api/resources";
 import { getUnits } from "../../api/unit";
 

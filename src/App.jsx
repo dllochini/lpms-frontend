@@ -14,7 +14,6 @@ import UserEdit from "./views/admin/UserEdit";
 import ResetPw from "./views/ResetPw";
 import HigherManager from "./views/higherManager/HigherManager";
 import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
-import Operation from "./views/fieldOfficer/Operation";
 import Resources from "./views/fieldOfficer/Resources";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
@@ -52,6 +51,7 @@ const AppWrapper = () => {
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
         <Route path="/fieldOfficer/operation" element={<Operation />} />
+        <Route path="/fieldOfficer/resources" element={<Resources />} />
       </Route>
     </Routes>
   );
