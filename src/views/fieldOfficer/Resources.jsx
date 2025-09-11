@@ -3,6 +3,8 @@ import {
   Box,
   Paper,
   Button,
+  Breadcrumbs,
+  Link,
 } from "@mui/material";
 import { useState, useEffect } from "react";
 import AddIcon from "@mui/icons-material/Add";
@@ -74,6 +76,19 @@ export default function Resource() {
         <Typography variant="h5" gutterBottom>
           Resources
         </Typography>
+      </Box>
+      <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
+      <div role="presentation" >
+          <Breadcrumbs aria-label="breadcrumb">
+            <Link underline="hover" color="inherit" href="/">
+              Home
+            </Link>
+             <Link underline="hover" color="inherit" href="./views/fieldOfficer/FieldOfficer">
+              Dashboard
+            </Link>
+            <Typography sx={{ color: 'text.primary' }}>Resources</Typography>
+          </Breadcrumbs>
+        </div>
       </Box>
 
       <Paper
