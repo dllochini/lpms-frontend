@@ -12,17 +12,19 @@ import {
   Select,
   MenuItem,
   Typography,
-  DataGrid
 } from "@mui/material";
 import InputLabel from "@mui/material/InputLabel";
 import { Form } from "react-router-dom";
+import { DataGrid } from '@mui/x-data-grid';
+
 
 export default function OperationDialog({
   open,
   onClose, 
   onSave, 
   formData, 
-  setFormData 
+  setFormData,
+  data
 })
  {
   const handleChange = (e) => {
@@ -30,37 +32,44 @@ export default function OperationDialog({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleEditClick = (id) => {
+    const resource = data.find((r) => r._id === id);
+    if (onEdit) onEdit(resource);
+  };
+
   const columns = [
-             { field: "_id", headerName: "LandID", flex: 2 },
-             { field: "fieldOfficer", headerName: "Field Officer", flex: 2 },
-             { field: "operation", headerName: "Operation", flex: 1.5 },
-             { field: "startDate", headerName: "Start Date", flex: 1.5 },
-             { field: "compeledDate", headerName: "Requested/Completed Date", flex: 2 },
-             {
-               field: "actions",
-               type: "actions",
-               headerName: "Action",
-               flex: 2,
-               getActions: (params) => [
-         
-                   <Button
-                     variant="contained"
-                     color="primary"
-                     onClick={handleEditClick}
-                     // startIcon={<AddIcon />}
-                     sx={{ mb: 2,display: "flex", alignItems: "center" , justifyContent: "center" }}
-                   
-                   >
-                     view Details
-                   </Button>
-         
-         
-                 
-               ],
-               sortable: false,
-               filterable: false,
-             },
-           ];
+      { field: "_id", headerName: "TaskID", flex: 2 },
+      { field: "date", headerName: "Date", flex: 2 },
+      { field: "typeOfMachine", headerName: "Type of Machine", flex: 1.5 },
+      { field: "unitOfMeasure", headerName: "Unit of Measure", flex: 1.5 },
+      { field: "todayProgress", headerName: "Today Progress", flex: 2 },
+      {field: "note",type: "actions",headerName: "Note",flex: 2,sortable: false,filterable: false,},
+        // getActions: (params) => [
+  
+        //     <Button
+        //       variant="contained"
+        //       color="primary"
+        //       onClick={handleEditClick}
+        //       // startIcon={<AddIcon />}
+        //       sx={{ mb: 2,display: "flex", alignItems: "center" , justifyContent: "center" }}
+            
+        //     >
+        //       view Details
+        //     </Button>
+  
+  
+          
+        // ],
+         ];
+  
+  const rows = Array.isArray(data)
+    ? data.map((row) => ({
+        id: row._id,
+        ...row,
+        unit: row.unitID?.name || row.unitID || 'N/A', // fallback if name not populated
+      }))
+    : [];
+
 
   return (
     <Dialog open={open} onClose={onClose}
@@ -74,9 +83,6 @@ export default function OperationDialog({
           }}
       >
       <DialogTitle
-       
-      
-
         sx={{
           fontWeight: "bold",
           textAlign: "left",
@@ -84,8 +90,7 @@ export default function OperationDialog({
           py: 2,
         }}
       >
-        
-       
+         
         {formData?.id ? "Edit Resource": "Operation Approval"}
         <hr style={{ 
           border: "none", 
@@ -96,18 +101,22 @@ export default function OperationDialog({
 
         
         </DialogTitle>
-      <DialogContent
-        style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}
-      >
+      <DialogContent style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
         <div style={{ height: 400, width: "100%" }}>
 
             <DataGrid
         
-              data={responseData}
-              onDelete={handleDelete}
-              onEdit={handleEditResource}
-              autoHeight
-            />
+              rows={rows}
+              columns={columns}
+              rowHeight={100}
+              pageSizeOptions={[10, 20, 50]}
+              initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+              density="compact"
+              getRowClassName={(params) =>
+                params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+              }
+              checkboxSelection={false}
+                />
           </div>
       </DialogContent>
       <DialogActions>
