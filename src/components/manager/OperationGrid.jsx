@@ -13,7 +13,7 @@ import { useState } from "react";
 // Replace this with your actual resources API
 // import { deleteResourceById } from "../../api/resources";
 
-const OperationGrid= ({ data, onDelete, onEdit }) => {
+const OperationGrid= ({ data, onDelete, onEdit, onView }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
@@ -69,8 +69,8 @@ const OperationGrid= ({ data, onDelete, onEdit }) => {
           <Button
             variant="contained"
             color="primary"
-            onClick={handleEditClick}
-            // startIcon={<AddIcon />}
+            // onClick={handleEditClick}
+            onClick={() => onView(params.row)} // ← call parent handleViewDetails
             sx={{ mb: 2,display: "flex", alignItems: "center" , justifyContent: "center" }}
           
           >
@@ -109,7 +109,7 @@ const rows = Array.isArray(data)
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
           }
           checkboxSelection={false}
-          // disableRowSelectionOnClick
+          disableRowSelectionOnClick
         />
       </div>
 

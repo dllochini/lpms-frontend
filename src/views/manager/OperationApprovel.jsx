@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 
 import OperationGrid from "../../components/manager/OperationGrid";
 import OperationDialog from "../../components/manager/OperationDialog";
+// import { getOperationDetails } from "../api/operations";
 
 // Import from the new API file
 // import { getOperationapproval } from "../../api/operationapproval";
@@ -51,6 +52,7 @@ export default function Operationapproval() {
   const [responseData, setResponseData] =  useState(USE_STATIC ? staticData : []);
   const [formData, setFormData] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
+  const [selectedRow, setSelectedRow] = useState(null);
 
   const { control, handleSubmit, reset } = useForm();
 
@@ -69,6 +71,13 @@ export default function Operationapproval() {
     // console.log("Fetching resources...");
     if(!USE_STATIC) fetchData();
   }, []);
+
+  const handleViewDetails = (row) => {
+    console.log("Clicked row:", row);
+  setSelectedRow(row);
+  setOpenDialog(true); // This should trigger the dialog to open
+};
+
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -105,6 +114,8 @@ export default function Operationapproval() {
     // reset();
     handleCloseDialog();
   };
+
+
   return (
     <Box>
       
@@ -189,14 +200,16 @@ export default function Operationapproval() {
           data={responseData}
           onDelete={handleDelete}
           onEdit={handleEditResource}
+          onView={handleViewDetails} 
           autoHeight
         />
         <OperationDialog
           open={openDialog}
           onClose={handleCloseDialog}
-          onSubmit={handleSubmit(onSubmit)}
+          // onSubmit={handleSubmit(onSubmit)}
           control={control}
-          initialData={formData}
+          // initialData={formData}
+          initialData={selectedRow}
         />
       </Paper>
     </Box>
