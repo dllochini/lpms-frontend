@@ -65,27 +65,13 @@ const OperationGrid= ({ data, onDelete, onEdit }) => {
       headerName: "Action",
       flex: 2,
       getActions: (params) => [
-        // <GridActionsCellItem
-        //   icon={<EditIcon />}
-        //   label="Edit"
-        //   onClick={() => handleEditClick(params.id)}
-        //   showInMenu={false}
-        //   key="edit"
-        // />,
-        // <GridActionsCellItem
-        //   icon={<DeleteIcon />}
-        //   label="Delete"
-        //   onClick={() => handleDeleteClick(params.id)}
-        //   showInMenu={false}
-        //   key="delete"
-        // />,
 
           <Button
             variant="contained"
             color="primary"
             onClick={handleEditClick}
             // startIcon={<AddIcon />}
-            sx={{ mb: 2,display: "flex",justifyContent: "center"}}
+            sx={{ mb: 2,display: "flex", alignItems: "center" , justifyContent: "center" }}
           
           >
             view Details
@@ -123,7 +109,7 @@ const rows = Array.isArray(data)
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
           }
           checkboxSelection={false}
-          disableRowSelectionOnClick
+          // disableRowSelectionOnClick
         />
       </div>
 

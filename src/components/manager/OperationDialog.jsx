@@ -10,7 +10,9 @@ import {
   Input,
   FormControl,
   Select,
-  MenuItem
+  MenuItem,
+  Typography,
+  DataGrid
 } from "@mui/material";
 import InputLabel from "@mui/material/InputLabel";
 import { Form } from "react-router-dom";
@@ -21,11 +23,44 @@ export default function OperationDialog({
   onSave, 
   formData, 
   setFormData 
-}) {
+})
+ {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  const columns = [
+             { field: "_id", headerName: "LandID", flex: 2 },
+             { field: "fieldOfficer", headerName: "Field Officer", flex: 2 },
+             { field: "operation", headerName: "Operation", flex: 1.5 },
+             { field: "startDate", headerName: "Start Date", flex: 1.5 },
+             { field: "compeledDate", headerName: "Requested/Completed Date", flex: 2 },
+             {
+               field: "actions",
+               type: "actions",
+               headerName: "Action",
+               flex: 2,
+               getActions: (params) => [
+         
+                   <Button
+                     variant="contained"
+                     color="primary"
+                     onClick={handleEditClick}
+                     // startIcon={<AddIcon />}
+                     sx={{ mb: 2,display: "flex", alignItems: "center" , justifyContent: "center" }}
+                   
+                   >
+                     view Details
+                   </Button>
+         
+         
+                 
+               ],
+               sortable: false,
+               filterable: false,
+             },
+           ];
 
   return (
     <Dialog open={open} onClose={onClose}
@@ -39,76 +74,41 @@ export default function OperationDialog({
           }}
       >
       <DialogTitle
+       
+      
+
         sx={{
           fontWeight: "bold",
-          textAlign: "center",
+          textAlign: "left",
           fontSize: "1.25rem",
           py: 2,
         }}
       >
-        {formData?.id ? "Edit Resource": "Add New Resource"}
+        
+       
+        {formData?.id ? "Edit Resource": "Operation Approval"}
+        <hr style={{ 
+          border: "none", 
+          height: "1px", 
+          backgroundColor: "#000", 
+          margin: "8px 0" 
+        }} />
+
+        
         </DialogTitle>
       <DialogContent
         style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}
       >
-         <InputLabel sx={{ mb: 0.2 }}>Resource Name :</InputLabel>
-          <TextField
-              name="resourceName"
-              value={formData?.resourceName || ""}
-              onChange={handleChange}
-              fullWidth
-              size="small"
-              sx={{ mb: 1 }}
-            />
-    
-        
-        {/* Category Dropdown */}
-        <InputLabel sx={{mb:0.5}}>Category</InputLabel>
-        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-        <Select
-          name="category"
-          value={formData?.category || ""}
-          onChange={handleChange}
-        >
-          <MenuItem value="Machine">Machine</MenuItem>
-          <MenuItem value="Vehicle">Vehicle</MenuItem>
-          <MenuItem value="Manual">Manual</MenuItem>
-        </Select>
-      </FormControl>
-        
-        <InputLabel sx={{ mb: 0.5 }}>Unit Of Measure:</InputLabel>
-        <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-          <Select
-            name="unitOfMeasure"
-            value={formData?.unitOfMeasure || ""}
-            onChange={handleChange}
-          >
-             <MenuItem value="Per acers">Per acers</MenuItem>
-          <MenuItem value="Per hour">Per hour</MenuItem>
-          <MenuItem value="Per square metres">Per square metres</MenuItem>
-          </Select>
-        </FormControl>
-        {/* <TextField
-          name="unitOfMeasure"
-          value={formData?.unitOfMeasure || ""}
-          onChange={handleChange}
-          fullWidth
-          size="small"
-          sx={{ mb: 2 }}
-        /> */}
+        <div style={{ height: 400, width: "100%" }}>
 
-        <InputLabel sx={{ mb: 0.5 }}>Note:</InputLabel>
-        <TextField
-          name="note"
-          value={formData?.note || ""}
-          onChange={handleChange}
-          fullWidth
-          size="small"
-          multiline
-          rows={4}
-          placeholder="Enter any additional notes or details"
-          sx={{ mb: 2 }}
-        />
+            <DataGrid
+        
+              data={responseData}
+              onDelete={handleDelete}
+              onEdit={handleEditResource}
+              autoHeight
+            />
+          </div>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}variant= "contained" color= "primary">Cancel</Button>
