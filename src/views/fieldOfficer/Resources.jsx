@@ -19,7 +19,7 @@ export default function Resource() {
   const [formData, setFormData] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
 
-  // ✅ Fetch data from new API
+  // ✅ Fetch data from API
   const fetchData = async () => {
     try {
       const resources = await getResources();
@@ -59,6 +59,7 @@ export default function Resource() {
   const handleCloseDialog = () => setOpenDialog(false);
 
   const handleDelete = (deletedId) => {
+    // Keep local state in sync after delete
     setResponseData((prev) => prev.filter((item) => item._id !== deletedId));
   };
 
@@ -105,13 +106,13 @@ export default function Resource() {
         />
 
         <ResourceDialog
-        open={openDialog}
-        onClose={() => setOpenDialog(false)}
-        defaultValues={formData}
-        categories={categories}   // ✅ pass down
-        units={units}             // ✅ pass down
-      />
-
+          open={openDialog}
+          onClose={handleCloseDialog}
+          defaultValues={formData}
+          categories={categories}
+          units={units}
+          onSuccess={fetchData} // ✅ refresh after add/edit
+        />
       </Paper>
     </Box>
   );

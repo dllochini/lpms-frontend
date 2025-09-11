@@ -10,15 +10,12 @@ import {
   MenuItem,
   InputLabel,
   TextField,
-  Alert,
   Snackbar,
+  Alert,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
-import { getUnits } from "../../api/unit";
 import {
   createResource,
-  getResources,
   updateResourceById,
 } from "../../api/resources";
 
@@ -26,43 +23,39 @@ export default function ResourceDialog({
   open,
   onClose,
   defaultValues,
-  categories,
-  units,
+  categories = [],
+  units = [],
+  onSuccess, // ✅ new prop
 }) {
   const { control, handleSubmit, reset } = useForm({
-    defaultValues: defaultValues || {
+    defaultValues: {
+      resource: "",
       category: "",
-      name: "",
+      unit: "",
       description: "",
-      unitOfMeasure: "",
     },
   });
 
-  const navigate = useNavigate();
   const [openConfirm, setOpenConfirm] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Reset form when defaultValues change
+  // Reset form when dialog opens or defaultValues changes
   useEffect(() => {
     if (open) {
       reset({
-        resource: defaultValues.resource || "",
-        category: defaultValues.category || "",
-        unit: defaultValues.unit?._id || defaultValues.unit || "",
-        description: defaultValues.description || "",
+        resource: defaultValues?.resource || "",
+        category: defaultValues?.category || "",
+        unit:
+          (defaultValues?.unit && defaultValues.unit._id) ||
+          defaultValues?.unit ||
+          "",
+        description: defaultValues?.description || "",
       });
     }
-  }, [
-    open,
-    defaultValues.resource,
-    defaultValues.category,
-    defaultValues.unit?._id,
-    defaultValues.description,
-    reset,
-  ]);
+  }, [open, defaultValues, reset]);
 
   const onSubmit = (data) => {
     setFormData(data);
@@ -72,6 +65,7 @@ export default function ResourceDialog({
   const handleConfirmSubmit = async () => {
     setIsSubmitting(true);
     setOpenConfirm(false);
+    setSubmitError("");
     try {
       let response;
       if (defaultValues?._id) {
@@ -82,15 +76,26 @@ export default function ResourceDialog({
         response = await createResource(formData);
       }
 
-      console.log("Resource saved successfully:", response);
+      // success UI
       setOpenSnackbar(true);
       reset();
 
-      setTimeout(() => {
-        navigate("/fieldOfficer/resources");
-      }, 2000);
+      // notify parent to refresh data
+      if (onSuccess) {
+        try {
+          await onSuccess();
+        } catch (e) {
+          console.warn("onSuccess callback failed:", e);
+        }
+      }
+
+      // close dialog after success
+      onClose();
     } catch (error) {
-      setSubmitError(error.response?.data?.error || "Something went wrong");
+      console.error("Save failed:", error);
+      setSubmitError(
+        (error?.response && error.response?.data?.error) || "Something went wrong"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -116,9 +121,7 @@ export default function ResourceDialog({
         </DialogTitle>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogContent
-            sx={{ display: "flex", flexDirection: "column", gap: 2 }}
-          >
+          <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {/* Resource Name */}
             <Controller
               name="resource"
@@ -218,10 +221,7 @@ export default function ResourceDialog({
         <DialogActions>
           <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
           <Button
-            onClick={() => {
-              handleConfirmSubmit();
-              onClose();
-            }}
+            onClick={handleConfirmSubmit}
             color="primary"
             variant="contained"
             disabled={isSubmitting}
@@ -239,7 +239,7 @@ export default function ResourceDialog({
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="success" onClose={() => setOpenSnackbar(false)}>
-          Submission successful! Redirecting...
+          {defaultValues?._id ? "Resource updated successfully!" : "Resource created successfully!"}
         </Alert>
       </Snackbar>
 
