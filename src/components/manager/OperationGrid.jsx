@@ -7,6 +7,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import Typography from "@mui/icons-material/Add";
 import { useState } from "react";
 
 // Replace this with your actual resources API
@@ -62,22 +63,36 @@ const OperationGrid= ({ data, onDelete, onEdit }) => {
       field: "actions",
       type: "actions",
       headerName: "Action",
-      flex: 1.5,
+      flex: 2,
       getActions: (params) => [
-        <GridActionsCellItem
-          icon={<EditIcon />}
-          label="Edit"
-          onClick={() => handleEditClick(params.id)}
-          showInMenu={false}
-          key="edit"
-        />,
-        <GridActionsCellItem
-          icon={<DeleteIcon />}
-          label="Delete"
-          onClick={() => handleDeleteClick(params.id)}
-          showInMenu={false}
-          key="delete"
-        />,
+        // <GridActionsCellItem
+        //   icon={<EditIcon />}
+        //   label="Edit"
+        //   onClick={() => handleEditClick(params.id)}
+        //   showInMenu={false}
+        //   key="edit"
+        // />,
+        // <GridActionsCellItem
+        //   icon={<DeleteIcon />}
+        //   label="Delete"
+        //   onClick={() => handleDeleteClick(params.id)}
+        //   showInMenu={false}
+        //   key="delete"
+        // />,
+
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleEditClick}
+            // startIcon={<AddIcon />}
+            sx={{ mb: 2,display: "flex",justifyContent: "center"}}
+          
+          >
+            view Details
+          </Button>
+
+
+        
       ],
       sortable: false,
       filterable: false,
@@ -100,6 +115,7 @@ const rows = Array.isArray(data)
           autoHeight
           rows={rows}
           columns={columns}
+          rowHeight={100}
           pageSizeOptions={[10, 20, 50]}
           initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
           density="compact"

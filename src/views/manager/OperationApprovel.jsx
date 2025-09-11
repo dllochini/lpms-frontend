@@ -16,10 +16,39 @@ import OperationGrid from "../../components/manager/OperationGrid";
 import OperationDialog from "../../components/manager/OperationDialog";
 
 // Import from the new API file
-// import { getResources } from "../../api/resources";
+// import { getOperationapproval } from "../../api/operationapproval";
 
-export default function Resource() {
-  const [responseData, setResponseData] = useState([]);
+
+const USE_STATIC = true; // toggle this to false to enable API fetch
+
+
+// Example static data: adjust fields to match what OperationGrid expects
+const staticData = [
+{
+_id: "1",
+fieldOfficer: "Road Repair - Zone A",
+operation: "Pluging",
+startDate: new Date().toISOString(),
+compeledDate: "Pending",
+},
+{
+_id: "2",
+fieldOfficer: "Water Supply Inspection",
+operation: "Bush Clearing",
+startDate: new Date().toISOString(),
+compeledDate: "Pending",
+},
+{
+_id: "3",
+fieldOfficer: "Land Title Review",
+operation: "Bush Clearing",
+startDate: new Date().toISOString(),
+compeledDate: "Pending",
+},
+];
+
+export default function Operationapproval() {
+  const [responseData, setResponseData] =  useState(USE_STATIC ? staticData : []);
   const [formData, setFormData] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -28,7 +57,7 @@ export default function Resource() {
   // ✅ Fetch data from new API
   const fetchData = async function () {
     try {
-      const response = await getResources();
+      // const response = await getOperationapproval();
       // console.log("API resources:", response);
       setResponseData(response?.data ?? []);
     } catch (error) {
@@ -38,7 +67,7 @@ export default function Resource() {
 
   useEffect(() => {
     // console.log("Fetching resources...");
-    fetchData();
+    if(!USE_STATIC) fetchData();
   }, []);
 
   const handleOpenDialog = () => {
@@ -97,7 +126,7 @@ export default function Resource() {
             <Button
                     variant="outlined"
                     color="primary"
-                    onClick={handleOpenDialog}
+                    // onClick={handleOpenDialog}
               >
               Operation Approval 
             </Button>
@@ -156,17 +185,18 @@ export default function Resource() {
         </Box>
 
         <OperationGrid
+     
           data={responseData}
           onDelete={handleDelete}
           onEdit={handleEditResource}
+          autoHeight
         />
-
         <OperationDialog
           open={openDialog}
           onClose={handleCloseDialog}
-          onSave={handleSubmit(onSubmit)}
-          formData={formData}
-          setFormData={setFormData}
+          onSubmit={handleSubmit(onSubmit)}
+          control={control}
+          initialData={formData}
         />
       </Paper>
     </Box>
