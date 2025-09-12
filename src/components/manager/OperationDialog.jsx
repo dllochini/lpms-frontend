@@ -153,8 +153,8 @@ export default function OperationDialog({
           </div>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}variant= "contained" color= "red">REJECT</Button>
-        <Button onClick={onSave} variant="contained" color="grren">
+        <Button onClick={onClose}variant= "contained" color= "secondary">REJECT</Button>
+        <Button onClick={onSave} variant="contained" color="success">
           ACCEPT
         </Button>
       </DialogActions>
