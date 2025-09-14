@@ -17,6 +17,7 @@ import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 import Operation from "./views/fieldOfficer/Operation";
+import ProgressTrack from "./views/fieldOfficer/ProgressTrack";
 
 // A wrapper component so we can use hooks like useNavigate
 const AppWrapper = () => {
@@ -57,6 +58,7 @@ const AppWrapper = () => {
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
         <Route path="/fieldOfficer/operation" element={<Operation />} />
+        <Route path="fieldOfficer/progressTrack" element={<ProgressTrack/>}/>
       </Route>
     </Routes>
   );
