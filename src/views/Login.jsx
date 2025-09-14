@@ -64,7 +64,8 @@ export default function LoginPage() {
 
     try {
       const response = await loginUser(data); // axios POST /auth/login
-      const { role, token } = response.data;
+      console.log("Login response:", response);
+      const { role, name, token } = response.data;
 
       if (!token || !role) {
         setLoginError("Login failed: missing token or role");
@@ -74,6 +75,7 @@ export default function LoginPage() {
       // Save role + token
       localStorage.setItem("role", role);
       localStorage.setItem("token", token);
+      localStorage.setItem("name", name);
 
       // set default Authorization header for axios
       setAuthToken(token);

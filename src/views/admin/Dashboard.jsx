@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const navigate = useNavigate();
   const [responseData, setResponseData] = useState([]);
+  const [userName, setUserName] = useState("");
+  const [role, setRole] = useState("");
 
   const fetchData = async function () {
     const response = await getUsers();
@@ -19,8 +21,10 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
+    setUserName(localStorage.getItem("name") || "");
+    setRole(localStorage.getItem("role") || "");
   }, []);
-
+  
   const handleDelete = (deletedUserId) => {
     setResponseData((prev) =>
       prev.filter((user) => user._id !== deletedUserId)
@@ -32,7 +36,7 @@ export default function Dashboard() {
       {/* Greeting & Breadcrumb */}
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
         <Typography variant="h5" gutterBottom>
-          Hello Admin!
+          Hello {userName}!
         </Typography>
 
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>

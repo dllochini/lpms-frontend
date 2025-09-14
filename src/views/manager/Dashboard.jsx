@@ -6,8 +6,9 @@ import {
   Grid,
   Card,
   CardContent,
-  Button,
   Stack,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import { useEffect, useState } from "react";
@@ -25,56 +26,81 @@ export default function ManagerDashboard() {
 
   const [requests] = useState([]);
   const [payments] = useState([]);
+  const [userName, setUserName] = useState("");
+  const [role, setRole] = useState("");
+
+  useEffect(() => {
+    setUserName(localStorage.getItem("name") || "");
+    setRole(localStorage.getItem("role") || "");
+  }, []);
+
+  // track selected tab
+  // const [tabValue, setTabValue] = useState(0);
 
   useEffect(() => {
     // fetch real data if needed
   }, []);
 
-  // control the horizontal offset of the whole table-group (positive -> push right)
-  const tableGroupOffset = 20; // pixels; change this to increase/decrease right-nudge
-  // control width of each table card (min)
-  const tableCardMinWidth = 420;
+  // const handleTabChange = (e, newValue) => {
+  //   setTabValue(newValue);
+  // };
 
   return (
     <Box sx={{ mb: 4 }}>
-      {/* Top Nav */}
-      <Box sx={{ maxWidth: 1100, mx: "auto", p: 2 }}>
-        <Stack direction="row" spacing={2} justifyContent="center">
-          <Button variant="contained" color="primary" size="small" sx={{ borderRadius: 20, px: 3 }}>
-            Home
-          </Button>
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
-            Operations Approval
-          </Button>
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
-            Payments Approval
-          </Button>
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
-            Land Progress
-          </Button>
-        </Stack>
-      </Box>
+      {/* Top Nav (Tabs) */}
+      {/* <Box
+        sx={{
+          maxWidth: 1100,
+          mx: "auto",
+          p: 0,
+          // border: "2px solid red",
+          display: "flex",
+          justifyContent: "left",
+        }}
+      >
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          centered
+          textColor="primary"
+          indicatorColor="primary"
+          sx={{
+            "& .MuiTab-root": {
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 500,
+              minWidth: 140,
+            },
+          }}
+        >
+          <Tab label="Home" />
+          <Tab label="Operations Approval" />
+          <Tab label="Payments Approval" />
+          <Tab label="Land Progress" />
+        </Tabs>
+      </Box> */}
 
       {/* Breadcrumbs */}
       <Box
-          sx={{
-            maxWidth: 1100,
-            mx: "auto",
-            p: 3,
-            // nudge left on md+ screens (md: -2 => -16px). Increase absolute value for bigger shift.
-            ml: { xs: 0, md: 17 },
-          }}
-        >
-          <Typography variant="h5" gutterBottom>Hello Manager!</Typography>
-          <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-            <Typography color="text.primary">
-              <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
-              Home
-            </Typography>
-          </Breadcrumbs>
-        </Box>
+        sx={{
+          maxWidth: 1100,
+          mx: "auto",
+          p: 3,
+          ml: { xs: 0, md: 17 },
+        }}
+      >
+        <Typography variant="h5" gutterBottom>
+          Hello {userName}!
+        </Typography>
+        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
+          <Typography color="text.primary">
+            <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
+            Home
+          </Typography>
+        </Breadcrumbs>
+      </Box>
 
-      {/* MAIN CARD: Division Overview (only small stat cards) */}
+      {/* MAIN CARD: Division Overview */}
       <Paper
         elevation={5}
         sx={{
@@ -84,21 +110,32 @@ export default function ManagerDashboard() {
           borderRadius: 5,
           mb: 3,
           backgroundColor: "#fdfdfd",
+          // border: "2px solid red",
         }}
       >
         <Typography variant="h6" gutterBottom>
           Division Overview
         </Typography>
 
-        {/* Center the small stat cards as a group */}
-        <Grid container spacing={2} justifyContent="center" alignItems="center" sx={{ mb: 1 }}>
+        {/* Stat cards */}
+        <Grid
+          container
+          spacing={2}
+          justifyContent="center"
+          alignItems="center"
+          sx={{ mb: 1 }}
+        >
           {[
             { label: "Total registered lands", value: overview.totalLands },
             { label: "Assigned field officers", value: overview.fieldOfficers },
             { label: "Pending operations", value: overview.pendingOps },
             { label: "Pending payments", value: overview.pendingPayments },
           ].map((item, idx) => (
-            <Grid item key={idx} xs="auto" sx={{ display: "flex", justifyContent: "center" }}>
+            <Grid
+              key={idx}
+              xs="auto"
+              sx={{ display: "flex", justifyContent: "center" }}
+            >
               <Card
                 elevation={2}
                 sx={{
@@ -111,10 +148,17 @@ export default function ManagerDashboard() {
                 }}
               >
                 <CardContent sx={{ py: 2 }}>
-                  <Typography variant="h4" sx={{ fontWeight: "700", lineHeight: 1 }}>
+                  <Typography
+                    variant="h4"
+                    sx={{ fontWeight: "700", lineHeight: 1 }}
+                  >
                     {item.value}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
                     {item.label}
                   </Typography>
                 </CardContent>
@@ -124,70 +168,81 @@ export default function ManagerDashboard() {
         </Grid>
       </Paper>
 
-      {/* ---------------------------
-          TABLES: OUTSIDE the MAIN CARD,
-          centered under it but nudged slightly to the right
-          --------------------------- */}
+      {/* TABLES */}
       <Box
         sx={{
           maxWidth: 1000,
           mx: "auto",
-          // transform nudges the whole group to the right by tableGroupOffset px.
-          // On small screens this transform still applies but cards will stack.
-          transform: `translateX(${tableGroupOffset}px)`,
+          p: 0,
+          // transform: "translateX(20px)", // keep your offset
+          // border: "2px solid red",
+          justifyContent: "space-between",
         }}
       >
         <Grid
           container
           spacing={3}
-          justifyContent="center" // center the group under the main card
-          alignItems="flex-start"
+          justifyContent="space-between"
+          alignItems="center"
+          justifySelf={"center"}
+          width={"97%"}
+          // sx={{ p: 0, border: "2px solid red" }}
         >
-          {/* Requests card (auto-sized) */}
-          {/* centered, auto-sized card */}
-          <Grid item xs="auto" md="auto" sx={{ display: "flex", justifyContent: "center" }}>
+          <Grid
+            xs="auto"
+            md="auto"
+            sx={{ display: "flex", justifyContent: "center" }}
+          >
             <Paper
               elevation={0}
               sx={{
                 p: 2,
                 borderRadius: 3,
                 border: "1px solid #eee",
-                minWidth: tableCardMinWidth,       // number is treated as px by MUI
-                width: { xs: "100%", md: "auto" }, // full width on small screens, auto on md+
+                minWidth: 420,
+                width: { xs: "100%", md: "auto" },
                 display: "flex",
                 flexDirection: "column",
-                mx: "auto",                        // centers the Paper inside the grid cell
+                mx: "auto",
               }}
             >
-              <Typography variant="subtitle1" gutterBottom sx={{ fontSize: "1rem" }}>
+              <Typography
+                variant="subtitle1"
+                gutterBottom
+                sx={{ fontSize: "1rem" }}
+              >
                 Recent Requests
               </Typography>
-
               <div style={{ width: "100%" }}>
                 <RequestsDataGrid requests={requests} />
               </div>
             </Paper>
           </Grid>
 
-
-          {/* Payments card (auto-sized) */}
-          <Grid item xs={12} md="auto" sx={{ display: "flex", justifyContent: "center" }}>
+          <Grid
+            xs={12}
+            md="auto"
+            sx={{ display: "flex", justifyContent: "center" }}
+          >
             <Paper
               elevation={0}
               sx={{
                 p: 2,
                 borderRadius: 3,
                 border: "1px solid #eee",
-                minWidth: `${tableCardMinWidth}px`,
+                minWidth: 420,
                 width: { xs: "100%", md: "auto" },
                 display: "flex",
                 flexDirection: "column",
               }}
             >
-              <Typography variant="subtitle1" gutterBottom sx={{ fontSize: "1rem" }}>
+              <Typography
+                variant="subtitle1"
+                gutterBottom
+                sx={{ fontSize: "1rem" }}
+              >
                 Recent Payments
               </Typography>
-
               <div style={{ width: "100%" }}>
                 <PaymentDataGrid payments={payments} />
               </div>
