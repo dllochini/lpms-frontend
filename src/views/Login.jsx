@@ -65,7 +65,7 @@ export default function LoginPage() {
     try {
       const response = await loginUser(data); // axios POST /auth/login
       console.log("Login response:", response);
-      const { role, name, token } = response.data;
+      const {loggedUserId, role, name, token } = response.data;
 
       if (!token || !role) {
         setLoginError("Login failed: missing token or role");
@@ -73,18 +73,21 @@ export default function LoginPage() {
       }
 
       // Save role + token
+      localStorage.setItem("loggedUserId", loggedUserId);
       localStorage.setItem("role", role);
-      localStorage.setItem("token", token);
       localStorage.setItem("name", name);
+      localStorage.setItem("token", token);
 
       // set default Authorization header for axios
       setAuthToken(token);
 
       setLoginSuccess("Login successful!");
 
+    
       // redirect user
       const path = redirectByRole(role);
       navigate(path, { replace: true }); // replace so user can’t go back to login
+
     } catch (err) {
       setLoginError(err.response?.data?.error || "Login failed");
     } finally {
@@ -268,6 +271,7 @@ export default function LoginPage() {
         </Collapse>
       </Card>
 
+      {/* Footer */}
       <Typography
         variant="body2"
         color="white"

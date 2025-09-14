@@ -11,9 +11,10 @@ import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
 import Login from "./views/Login";
-import ResetPw from "./views/ResetPw";
+import ResetPw from "./views/ResetPw"; 
 import Home from "./views/Home";
 import NoPage from "./views/NoPage";
+import Profile from "./views/Profile";
 
 //Admin
 import AdminDashboard from "./views/admin/Dashboard";
@@ -70,13 +71,14 @@ const AppWrapper = () => {
       <Route path="*" element={<NoPage />} />
 
       <Route path="/admin/" element={<AdminLayout />}>
+      <Route path="profile" element={<Profile />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="register" element={<UserRegistration />} />
         <Route path="edit/:userId" element={<UserEdit />} />
       </Route>
 
       <Route path="/fieldOfficer/" element={<FieldOfficerLayout />}>
-        {/* <Route path="/fieldOfficer" element={<FieldOfficer />} /> */}
+        <Route path="" element={<FieldOfficer />} />
         <Route path="operation" element={<Operation />} />
         <Route path="resources" element={<Resources />} />
       </Route>

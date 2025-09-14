@@ -11,7 +11,6 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [responseData, setResponseData] = useState([]);
   const [userName, setUserName] = useState("");
-  const [role, setRole] = useState("");
 
   const fetchData = async function () {
     const response = await getUsers();
@@ -22,7 +21,6 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData();
     setUserName(localStorage.getItem("name") || "");
-    setRole(localStorage.getItem("role") || "");
   }, []);
   
   const handleDelete = (deletedUserId) => {
@@ -65,7 +63,7 @@ export default function Dashboard() {
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => navigate("/user/register")}
+            onClick={() => navigate("/admin/register")}
           >
             CREATE NEW USER
           </Button>
