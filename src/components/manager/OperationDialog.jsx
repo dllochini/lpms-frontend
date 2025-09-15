@@ -12,7 +12,8 @@ import {
   Select,
   MenuItem,
   Typography,
-  Box
+  Snackbar,
+  Alert
 } from "@mui/material";
 import InputLabel from "@mui/material/InputLabel";
 import { Form } from "react-router-dom";
@@ -32,6 +33,10 @@ export default function OperationDialog({
  {
 
   const [taskRows, setTaskRows] = useState([]);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     if (initialData?.tasks) {
@@ -79,8 +84,29 @@ export default function OperationDialog({
       }))
     : [];
 
+    const isEditing = Boolean(formData?.id || initialData?._id);
+
+
+    const handleConfirmSubmit = async () => {
+      setIsSubmitting(true);
+      setSubmitError("");
+      try {
+      if (typeof onSave === "function") {
+      // allow onSave to be async (return a promise)
+      await onSave(formData);
+      }
+      setOpenConfirm(false);
+      setOpenSnackbar(true);
+      } catch (err) {
+      setSubmitError(err?.message || String(err) || "Something went wrong");
+      } finally {
+      setIsSubmitting(false);
+      }
+    };
+
 
   return (
+    <>
     <Dialog open={open} onClose={onClose}
       fullWidth
       maxWidth="md"
@@ -159,5 +185,53 @@ export default function OperationDialog({
         </Button>
       </DialogActions>
     </Dialog>
+
+        {/* Confirm Dialog */}
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
+        <DialogTitle>Confirm Submission</DialogTitle>
+        <DialogContent>
+          <>
+          {defaultValues?._id
+            ? "Are you sure you want to update this resource?"
+            : "Are you sure you want to create this resource?"}
+          </>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
+          <Button
+            onClick={handleConfirmSubmit}
+            color="primary"
+            variant="contained"
+            disabled={isSubmitting}
+          >
+            Yes, Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="success" onClose={() => setOpenSnackbar(false)}>
+          {defaultValues?._id ? "Resource updated successfully!" : "Resource created successfully!"}
+        </Alert>
+      </Snackbar>
+
+      /* Error Snackbar */
+      <Snackbar
+        open={!!submitError}
+        autoHideDuration={4000}
+        onClose={() => setSubmitError("")}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity="error" onClose={() => setSubmitError("")}>
+          {submitError}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
