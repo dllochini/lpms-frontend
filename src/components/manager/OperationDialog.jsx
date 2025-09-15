@@ -1,37 +1,21 @@
-// src/components/fieldOfficer/ResourceDialog.jsx
-import React from "react";
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Input,
-  FormControl,
-  Select,
-  MenuItem,
-  Typography,
-  Snackbar,
-  Alert
-} from "@mui/material";
-import InputLabel from "@mui/material/InputLabel";
-import { Form } from "react-router-dom";
-import { DataGrid } from '@mui/x-data-grid';
-import { useState, useEffect } from "react";
-
+import React, { useState, useEffect } from "react";
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+import Button from "@mui/material/Button";
+import Typography from "@mui/material/Typography";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
+import { DataGrid } from "@mui/x-data-grid";
 
 export default function OperationDialog({
   open,
-  onClose, 
-  onSave, 
-  formData, 
-  setFormData,
+  onClose,
+  onSave,
   data,
-  initialData
-})
- {
-
+  initialData,
+}) {
   const [taskRows, setTaskRows] = useState([]);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +25,7 @@ export default function OperationDialog({
   useEffect(() => {
     if (initialData?.tasks) {
       const rows = initialData.tasks.map((task, index) => ({
-        id: task.taskId || index,
+        id: task.taskId ?? index,
         date: task.date,
         typeOfMachine: task.typeOfMachine,
         unitOfMeasure: task.unit,
@@ -50,121 +34,68 @@ export default function OperationDialog({
       }));
       setTaskRows(rows);
     } else {
-      setTaskRows([]); // No tasks
+      setTaskRows([]);
     }
   }, [initialData]);
 
-
-  if (!initialData) return null; // nothing selected yet
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleEditClick = (id) => {
-    const resource = data.find((r) => r._id === id);
-    if (onEdit) onEdit(resource);
-  };
+  if (!initialData) return null;
 
   const columns = [
-      { field: "_id", headerName: "TaskID", flex: 2 },
-      { field: "date", headerName: "Date", flex: 2 },
-      { field: "typeOfMachine", headerName: "Type of Machine", flex: 1.5 },
-      { field: "unitOfMeasure", headerName: "Unit of Measure", flex: 1.5 },
-      { field: "todayProgress", headerName: "Today Progress", flex: 2 },
-      {field: "note",headerName: "Note",flex: 2,sortable: false,filterable: false,},
-         ];
-  
-  const rows = Array.isArray(initialData?.tasks)
-    ? initialData.tasks.map((row) => ({
-        id: row._id,
-        ...row,
-        unit: row.TaskID?.name || row.TaskID || 'N/A', // fallback if name not populated
-      }))
-    : [];
+    { field: "id", headerName: "TaskID", flex: 2 },
+    { field: "date", headerName: "Date", flex: 2 },
+    { field: "typeOfMachine", headerName: "Type of Machine", flex: 1.5 },
+    { field: "unitOfMeasure", headerName: "Unit of Measure", flex: 1.5 },
+    { field: "todayProgress", headerName: "Today Progress", flex: 2 },
+    { field: "note", headerName: "Note", flex: 2, sortable: false, filterable: false },
+  ];
 
-    const isEditing = Boolean(formData?.id || initialData?._id);
-
-
-    const handleConfirmSubmit = async () => {
-      setIsSubmitting(true);
-      setSubmitError("");
-      try {
+  const handleConfirmSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError("");
+    try {
       if (typeof onSave === "function") {
-      // allow onSave to be async (return a promise)
-      await onSave(formData);
+        await onSave(initialData); // pass back initialData
       }
       setOpenConfirm(false);
       setOpenSnackbar(true);
-      } catch (err) {
+    } catch (err) {
       setSubmitError(err?.message || String(err) || "Something went wrong");
-      } finally {
+    } finally {
       setIsSubmitting(false);
-      }
-    };
-
+    }
+  };
 
   return (
     <>
-    <Dialog open={open} onClose={onClose}
-      fullWidth
-      maxWidth="md"
-      PaperProps={{
-            sx: {
-              borderRadius: "20px", // rounded corners
-              overflow: "hidden",
-            },
-          }}
-      >
-      <DialogTitle
-        sx={{
-          fontWeight: "bold",
-          textAlign: "left",
-          fontSize: "1.25rem",
-          py: 2,
+      <Dialog
+        open={open}
+        onClose={onClose}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            borderRadius: "20px",
+            overflow: "hidden",
+          },
         }}
       >
-         
-        {formData?.id ? "Edit Resource": "Operation Approval"}
-        <hr style={{ 
-          border: "none", 
-          height: "1px", 
-          backgroundColor: "#000", 
-          margin: "8px 0" 
-        }} />
-
-        
+        <DialogTitle sx={{ fontWeight: "bold", textAlign: "left", fontSize: "1.25rem", py: 2 }}>
+          Operation Approval
+          <hr style={{ border: "none", height: "1px", backgroundColor: "#000", margin: "8px 0" }} />
         </DialogTitle>
-      <DialogContent style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
-        <div style={{ height: 200, width: "100%" }}>
-          <Typography variant="body1">
-          <strong>Land ID:</strong> {initialData.landId}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Field Officer:</strong> {initialData.fieldOfficer}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Operation:</strong> {initialData.operation}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Start Date:</strong> {initialData.startDate}
-          </Typography>
-          <Typography variant="body1">
-            <strong>Complete Date:</strong> {initialData.completedDate}
-          </Typography>
-          <hr style={{ 
-            border: "none", 
-            height: "1px", 
-            backgroundColor: "#000", 
-            margin: "8px 0" 
-          }} />
-        </div>
-        <div style={{ height: 400, width: "100%" }}>
 
+        <DialogContent style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "10px" }}>
+          <div style={{ height: 200, width: "100%" }}>
+            <Typography variant="body1"><strong>Land ID:</strong> {initialData.landId}</Typography>
+            <Typography variant="body1"><strong>Field Officer:</strong> {initialData.fieldOfficer}</Typography>
+            <Typography variant="body1"><strong>Operation:</strong> {initialData.operation}</Typography>
+            <Typography variant="body1"><strong>Start Date:</strong> {initialData.startDate}</Typography>
+            <Typography variant="body1"><strong>Complete Date:</strong> {initialData.completedDate}</Typography>
+            <hr style={{ border: "none", height: "1px", backgroundColor: "#000", margin: "8px 0" }} />
+          </div>
 
+          <div style={{ height: 400, width: "100%" }}>
             <DataGrid
-        
               rows={taskRows}
               columns={columns}
               rowHeight={100}
@@ -175,35 +106,29 @@ export default function OperationDialog({
                 params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
               }
               checkboxSelection={false}
-                />
+            />
           </div>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}variant= "contained" color= "secondary">REJECT</Button>
-        <Button onClick={onSave} variant="contained" color="success">
-          ACCEPT
-        </Button>
-      </DialogActions>
-    </Dialog>
+        </DialogContent>
 
-        {/* Confirm Dialog */}
+        <DialogActions>
+          <Button onClick={onClose} variant="contained" color="secondary">
+            REJECT
+          </Button>
+          <Button onClick={() => setOpenConfirm(true)} variant="contained" color="success">
+            ACCEPT
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirm Dialog */}
       <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirm Submission</DialogTitle>
         <DialogContent>
-          <>
-          {defaultValues?._id
-            ? "Are you sure you want to update this resource?"
-            : "Are you sure you want to create this resource?"}
-          </>
+          {"Are you sure you want to approve this operation?"}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
-          <Button
-            onClick={handleConfirmSubmit}
-            color="primary"
-            variant="contained"
-            disabled={isSubmitting}
-          >
+          <Button onClick={handleConfirmSubmit} color="primary" variant="contained" disabled={isSubmitting}>
             Yes, Submit
           </Button>
         </DialogActions>
@@ -217,11 +142,11 @@ export default function OperationDialog({
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity="success" onClose={() => setOpenSnackbar(false)}>
-          {defaultValues?._id ? "Resource updated successfully!" : "Resource created successfully!"}
+          Operation approved successfully!
         </Alert>
       </Snackbar>
 
-      /* Error Snackbar */
+      {/* Error Snackbar */}
       <Snackbar
         open={!!submitError}
         autoHideDuration={4000}
