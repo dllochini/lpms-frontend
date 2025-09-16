@@ -32,14 +32,13 @@ import { DataGrid } from "@mui/x-data-grid";
 
 export default function ProgressTrack() {
   const [tasks, setTasks] = useState([
-    { id: 1, name: "Bush Clearing", progress: 100 },
-    { id: 2, name: "Ploughing", progress: 50 },
+    { id: 1, name: "Bush Clearing", progress: 100, done: false },
+    { id: 2, name: "Ploughing", progress: 50, done: false },
   ]);
 
   const [expandedTaskId, setExpandedTaskId] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  // form fields for the existing "Add New Operation" dialog (left as-is)
   const [form, setForm] = useState({
     operation: "",
     machine: "",
@@ -50,13 +49,8 @@ export default function ProgressTrack() {
     note: "",
   });
 
-  // --- new state: rows per task (mapping taskId -> rows array) ---
-  const [sampleTableRowsByTask, setSampleTableRowsByTask] = useState({
-    // Example seeded row for testing:
-    // 1: [{ id: 11, date: "2025-09-10", machine: "Tractor", unit: "Ha", todayProgress: 20, note: "Started field" }],
-  });
+  const [sampleTableRowsByTask, setSampleTableRowsByTask] = useState({});
 
-  // --- states for Add New Task dialog (the second dialog) ---
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [taskForm, setTaskForm] = useState({
@@ -88,21 +82,19 @@ export default function ProgressTrack() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // small fix to previous bug (template literal)
   const handleAddTask = () => {
     const newTask = {
       id: tasks.length + 1,
       name: form.operation || `Task ${tasks.length + 1}`,
       progress: 0,
+      done: false,
     };
     setTasks([...tasks, newTask]);
     setOpenDialog(false);
   };
 
-  // --- handlers for the new "Add New Task" dialog ---
   const handleTaskDialogOpen = (task) => {
     setSelectedTask(task);
-    // reset the taskForm to sensible defaults
     setTaskForm({
       machine: "",
       startDate: "",
@@ -113,6 +105,7 @@ export default function ProgressTrack() {
     });
     setTaskDialogOpen(true);
   };
+
   const handleTaskDialogClose = () => {
     setTaskDialogOpen(false);
     setSelectedTask(null);
@@ -123,10 +116,10 @@ export default function ProgressTrack() {
   };
 
   const handleAddTaskRow = () => {
-    if (!selectedTask) return;
+    if (!selectedTask || selectedTask.done) return;
 
     const newRow = {
-      id: Date.now(), // quick unique id
+      id: Date.now(),
       date: taskForm.startDate || new Date().toISOString().split("T")[0],
       machine: taskForm.machine || "-",
       unit: taskForm.unit || "Acre",
@@ -141,9 +134,16 @@ export default function ProgressTrack() {
       return copy;
     });
 
-    // close dialog and clear selected
     setTaskDialogOpen(false);
     setSelectedTask(null);
+  };
+
+  const handleMarkTaskDone = (taskId) => {
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId ? { ...t, done: true, progress: 100 } : t
+      )
+    );
   };
 
   return (
@@ -207,7 +207,11 @@ export default function ProgressTrack() {
                   <Typography variant="body1">{task.name}</Typography>
                 </Box>
                 <Box sx={{ flex: 1, mx: 3 }}>
-                  <LinearProgress variant="determinate" value={task.progress} sx={{ height: 8, borderRadius: 5 }} />
+                  <LinearProgress
+                    variant="determinate"
+                    value={task.progress}
+                    sx={{ height: 8, borderRadius: 5 }}
+                  />
                 </Box>
                 <Typography variant="body2" sx={{ minWidth: 40 }}>
                   {task.progress}%
@@ -248,10 +252,20 @@ export default function ProgressTrack() {
                   />
                   {/* Buttons under the table */}
                   <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2, gap: 2 }}>
-                    <Button variant="contained" color="primary" onClick={() => handleTaskDialogOpen(task)}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      onClick={() => handleTaskDialogOpen(task)}
+                      disabled={task.done}
+                    >
                       Add New Task
                     </Button>
-                    <Button variant="contained" color="primary">
+                    <Button
+                      variant="contained"
+                      color="success"
+                      onClick={() => handleMarkTaskDone(task.id)}
+                      disabled={task.done}
+                    >
                       Done
                     </Button>
                   </Box>
@@ -272,38 +286,36 @@ export default function ProgressTrack() {
         </Box>
       </Paper>
 
-      {/* --- Original Dialog Form (unchanged UI) --- */}
+      {/* Add New Operation Dialog */}
       <Dialog open={openDialog} onClose={handleDialogClose} fullWidth maxWidth="sm">
         <DialogTitle>Add New Operation</DialogTitle>
         <DialogContent dividers>
-        <FormControl fullWidth margin="dense">
+          <FormControl fullWidth margin="dense">
             <InputLabel>Operation</InputLabel>
             <Select name="operation" value={form.operation} onChange={handleFormChange}>
-                <MenuItem value="Ploughing">Ploughing</MenuItem>
-                <MenuItem value="Bush Clearing">Bush Clearing</MenuItem>
-                <MenuItem value="Harrowing">Harrowing</MenuItem>
+              <MenuItem value="Ploughing">Ploughing</MenuItem>
+              <MenuItem value="Bush Clearing">Bush Clearing</MenuItem>
+              <MenuItem value="Harrowing">Harrowing</MenuItem>
             </Select>
-            </FormControl>
+          </FormControl>
 
-            {/* ADD NEW OPERATION button placed right after the Operation select */}
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 1, mb: 1 }}>
+          <Box sx={{ display: "flex", justifyContent: "center", mt: 1, mb: 1 }}>
             <Button
-                variant="contained"
-                color="primary"
-                onClick={handleAddTask}         // calls your existing handler
-                sx={{
+              variant="contained"
+              color="primary"
+              onClick={handleAddTask}
+              sx={{
                 borderRadius: "20px",
                 px: 3,
                 py: 1,
                 boxShadow: "0 6px 12px rgba(0,0,0,0.15)",
                 textTransform: "uppercase",
                 fontWeight: 600,
-                }}
+              }}
             >
-                ADD NEW OPERATION
+              ADD NEW OPERATION
             </Button>
-            </Box>
-
+          </Box>
 
           <TextField
             label="Start Date"
@@ -325,9 +337,6 @@ export default function ProgressTrack() {
             margin="dense"
             InputLabelProps={{ shrink: true }}
           />
-
-         
-
           <TextField
             label="Note"
             name="note"
@@ -348,7 +357,7 @@ export default function ProgressTrack() {
         </DialogActions>
       </Dialog>
 
-      {/* --- Add New Task Dialog (new, triggered inside each task collapse) --- */}
+      {/* Add New Task Dialog */}
       <Dialog open={taskDialogOpen} onClose={handleTaskDialogClose} fullWidth maxWidth="sm">
         <DialogTitle>Add New Task</DialogTitle>
         <DialogContent dividers>
@@ -432,3 +441,5 @@ export default function ProgressTrack() {
     </Box>
   );
 }
+
+
