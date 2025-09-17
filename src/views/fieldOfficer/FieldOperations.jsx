@@ -2,28 +2,28 @@ import { Typography, Box, Paper, Button, Breadcrumbs } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
 import { useState, useEffect } from "react";
-import * as React from "react";
 import DataGrid from "../../components/fieldOfficer/OperationDataGrid";
 import { Link as RouterLink } from "react-router-dom";
 import Link from "@mui/material/Link";
 
 import {
-  getOperations,
+  getOperationById,
   createOperation,
   updateOperationById,
   deleteOperationById,
+  getOperations,
 } from "../../api/operation";
 
 import OperationDialog from "../../components/fieldOfficer/OperationDialogBox"; // <-- import dialog
 
-export default function Operation() {
+export default function FieldOperation() {
   const [responseData, setResponseData] = useState([]);
 
   // Dialog state
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedRow, setSelectedRow] = useState(null); // for edit mode
+  const [selectedRow, setSelectedRow] = useState(null);
 
-  // Fetch operations from backend
+  // Fetch operations (already includes implements)
   const fetchData = async () => {
     const response = await getOperations();
     // console.log("operations :", response);
@@ -43,11 +43,9 @@ export default function Operation() {
         prev.filter((op) => op._id !== deletedOperationId)
       );
     } catch (error) {
-      console.error("Delete failed in parent:", error);
-      // optional user feedback
+      console.error("Delete failed:", error);
       if (error.response?.status === 404) {
         alert("Operation not found (already deleted).");
-        // still remove it locally to keep UI consistent
         setResponseData((prev) =>
           prev.filter((op) => op._id !== deletedOperationId)
         );
@@ -57,31 +55,32 @@ export default function Operation() {
     }
   };
 
-  // Open dialog in Add mode
   const handleOpenAddDialog = () => {
     setSelectedRow(null);
     setOpenDialog(true);
   };
 
-  // Open dialog in Edit mode
-  const handleOpenEditDialog = (row) => {
-    setSelectedRow(row);
-    setOpenDialog(true);
+  const handleOpenEditDialog = async (row) => {
+    try {
+      const res = await getOperationById(row._id);
+      setSelectedRow(res.data);
+      setOpenDialog(true);
+    } catch (err) {
+      console.error("Failed to fetch operation:", err);
+      alert("Failed to load operation data.");
+    }
   };
 
-  // Close dialog
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedRow(null);
   };
 
-  // Submit form handler (Create or Update)
   const handleSubmitDialog = async (data) => {
     // console.log("Submitting operation data:", data);
     try {
       let updatedOrCreated;
       if (selectedRow) {
-        // Update existing
         const res = await updateOperationById(selectedRow._id, data);
         // console.log("Update response:", res);
         updatedOrCreated = res.data; // adjust if your API wraps the object
@@ -91,7 +90,6 @@ export default function Operation() {
           )
         );
       } else {
-        // Create new
         const res = await createOperation(data);
         updatedOrCreated = res.data; // adjust if needed
         setResponseData((prev) => [...prev, updatedOrCreated]);
@@ -156,7 +154,6 @@ export default function Operation() {
         />
       </Paper>
 
-      {/* Add/Edit Dialog (imported) */}
       <OperationDialog
         open={openDialog}
         onClose={handleCloseDialog}

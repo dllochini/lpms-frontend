@@ -61,7 +61,7 @@ const BasicDataGrid = ({ data, onDelete }) => {
   };
 
   const handleEditClick = (id) => {
-    navigate(`/user/edit/${id}`);
+    navigate(`/admin/edit/${id}`);
   };
 
   const handleSnackbarClose = () => {
