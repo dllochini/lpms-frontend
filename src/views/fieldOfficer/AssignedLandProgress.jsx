@@ -12,7 +12,7 @@ import { getTasksByLandId } from "../../api/task";
 import {getWorkDoneByTaskId} from "../../api/workdone";
 import { getOperations } from "../../api/operation";
 
-export default function LandProgressTracking() {
+export default function AssignedLandProgress() {
   // const navigate = useNavigate();
 
   // Stores aggregated land data for the DataGrid

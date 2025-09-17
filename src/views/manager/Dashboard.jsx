@@ -16,7 +16,7 @@ import { useEffect, useState } from "react";
 import RequestsDataGrid from "../../components/manager/RequestDataGrid";
 import PaymentDataGrid from "../../components/manager/PaymentDataGrid";
 
-export default function ManagerDashboard() {
+export default function Dashboard() {
   const [overview] = useState({
     totalLands: 0,
     fieldOfficers: 0,

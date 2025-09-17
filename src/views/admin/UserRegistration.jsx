@@ -160,7 +160,7 @@ const UserRegistration = () => {
       setOpenSnackbar(true);
       reset();
       setTimeout(() => {
-        navigate("/admin/dashboard");
+        navigate("/admin");
       }, 2000);
     } catch (error) {
       setSubmitError(error.response?.data?.error || "Something went wrong");

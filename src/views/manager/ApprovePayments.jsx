@@ -28,7 +28,7 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Link as RouterLink } from "react-router-dom";
 import PendingPaymentDataGrid from "../../components/manager/PendingPaymentDataGrid";
 
-export default function PaymentApproval() {
+export default function ApprovePayements() {
   const [rows, setRows] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [expandedOps, setExpandedOps] = useState({}); // { opIndex: true }
@@ -101,13 +101,6 @@ export default function PaymentApproval() {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
-      {/* Top Navigation Buttons */}
-      <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ mb: 2 }}>
-        <Button variant="outlined" component={RouterLink} to="/">Home</Button>
-        <Button variant="outlined" component={RouterLink} to="/operations">Operations Approval</Button>
-        <Button variant="contained" color="primary" component={RouterLink} to="/payments">Payments Approval</Button>
-        <Button variant="outlined" component={RouterLink} to="/land-progress">Land Progress</Button>
-      </Stack>
 
       <Typography variant="h5" gutterBottom>Pending Payment Approval</Typography>
       <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", mb: 2 }}>

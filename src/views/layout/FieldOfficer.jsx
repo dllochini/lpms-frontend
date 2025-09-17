@@ -25,27 +25,25 @@ import {
   Logout,
   AccountCircle,
   ExpandMore,
-  Home as HomeIcon,
-  VerifiedUser as VerifiedUserIcon,
-  Payment as PaymentIcon,
-  Landscape as LandscapeIcon,
 } from "@mui/icons-material";
 import companyLogo from "/images/ceylon-sugar-industries.png";
 import { clearAuth } from "../../utils/auth";
 
 const navItems = [
-  { label: "Home", path: "/", icon: <HomeIcon /> },
+  { label: "Dashboard", path: "/fieldOfficer" },
   {
-    label: "Operations Approval",
-    path: "/operations-approval",
-    icon: <VerifiedUserIcon />,
+    label: "Land Registry",
+    path: "/fieldOfficer/landRegistry",
   },
   {
-    label: "Payments Approval",
-    path: "/payments-approval",
-    icon: <PaymentIcon />,
+    label: "Assigned Land progress",
+    path: "/fieldOfficer/assignedLandProgress",
   },
-  { label: "Land Progress", path: "/land-progress", icon: <LandscapeIcon /> },
+  { label: "Farm Resources", path: "/fieldOfficer/farmResources" },
+  {
+    label: "Field Operations",
+    path: "/fieldOfficer/fieldOperations",
+  },
 ];
 
 const drawerWidth = 260;
