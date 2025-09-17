@@ -114,7 +114,7 @@ export default function PendingOperationalApproval() {
       </Stack>
 
       <Typography variant="h5" gutterBottom>
-        Land Progress Approval
+        Land Progress 
       </Typography>
 
       <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", mb: 2 }}>
@@ -127,7 +127,7 @@ export default function PendingOperationalApproval() {
         >
           <HomeIcon sx={{ mr: 0.5, fontSize: 18 }} /> Home
         </Link>
-        <Typography color="text.primary">Land Progress Approval</Typography>
+        <Typography color="text.primary">Land Progress </Typography>
       </Breadcrumbs>
 
       <Paper elevation={5} sx={{ p: 2, borderRadius: 3 }}>
