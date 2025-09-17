@@ -12,10 +12,10 @@ import {
 import HomeIcon from "@mui/icons-material/Home";
 import { useEffect, useState } from "react";
 
-import RequestsDataGrid from "../../components/manager/RequestDataGrid";
-import PaymentDataGrid from "../../components/manager/PaymentDataGrid";
+import Graph from "../../components/higherManager/Graph";
+import Coverage from "../../components/higherManager/Coverage";
 
-export default function ManagerDashboard() {
+export default function HigherManagerDashboard() {
   const [overview] = useState({
     totalLands: 0,
     fieldOfficers: 0,
@@ -43,9 +43,9 @@ export default function ManagerDashboard() {
           <Button variant="contained" color="primary" size="small" sx={{ borderRadius: 20, px: 3 }}>
             Home
           </Button>
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
+          {/* <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
             Operations Approval
-          </Button>
+          </Button> */}
           <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
             Payments Approval
           </Button>
@@ -65,7 +65,7 @@ export default function ManagerDashboard() {
             ml: { xs: 0, md: 17 },
           }}
         >
-          <Typography variant="h5" gutterBottom>Hello Manager!</Typography>
+          <Typography variant="h5" gutterBottom>Hello!</Typography>
           <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
             <Typography color="text.primary">
               <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
@@ -87,16 +87,16 @@ export default function ManagerDashboard() {
         }}
       >
         <Typography variant="h6" gutterBottom>
-          Division Overview
+          Overall Overview
         </Typography>
 
         {/* Center the small stat cards as a group */}
         <Grid container spacing={2} justifyContent="center" alignItems="center" sx={{ mb: 1 }}>
           {[
-            { label: "Total registered lands", value: overview.totalLands },
-            { label: "Assigned field officers", value: overview.fieldOfficers },
-            { label: "Pending operations", value: overview.pendingOps },
-            { label: "Pending payments", value: overview.pendingPayments },
+            { label: "Total lands", value: overview.totalLands },
+            { label: "Total Area(Acres)", value: overview.fieldOfficers },
+            { label: "Number of Division", value: overview.pendingOps },
+            { label: "Lands in Progress", value: overview.pendingPayments },
           ].map((item, idx) => (
             <Grid item key={idx} xs="auto" sx={{ display: "flex", justifyContent: "center" }}>
               <Card
@@ -159,12 +159,9 @@ export default function ManagerDashboard() {
                 mx: "auto",                        // centers the Paper inside the grid cell
               }}
             >
-              <Typography variant="subtitle1" gutterBottom sx={{ fontSize: "1rem" }}>
-                Recent Requests
-              </Typography>
-
+      
               <div style={{ width: "100%" }}>
-                <RequestsDataGrid requests={requests} />
+                <Graph />
               </div>
             </Paper>
           </Grid>
@@ -184,12 +181,8 @@ export default function ManagerDashboard() {
                 flexDirection: "column",
               }}
             >
-              <Typography variant="subtitle1" gutterBottom sx={{ fontSize: "1rem" }}>
-                Recent Payments
-              </Typography>
-
               <div style={{ width: "100%" }}>
-                <PaymentDataGrid payments={payments} />
+                <Coverage/>
               </div>
             </Paper>
           </Grid>

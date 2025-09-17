@@ -18,6 +18,8 @@ import Resources from "./views/fieldOfficer/Resources";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 import Operation from "./views/fieldOfficer/Operation";
+import DashBoardHigherManger from "./views/higherManager/DashBoardHigherManager";
+
 
 const AppWrapper = () => {
   const navigate = useNavigate();
@@ -49,6 +51,7 @@ const AppWrapper = () => {
         <Route path="/manager" element={<Manager />} />
         <Route path="/accountant" element={<Accountant />} />
         <Route path="/higherManager" element={<HigherManager />} />
+        <Route path="/higherManager/dashboard" element={<DashBoardHigherManger />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
         <Route path="/fieldOfficer/operation" element={<Operation />} />
         <Route path="/fieldOfficer/resources" element={<Resources />} />
