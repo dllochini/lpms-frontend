@@ -73,9 +73,12 @@ const UserRegistration = () => {
 
   const designations = [
     { value: "Mr.", label: "Mr." },
-    { value: "Miss.", label: "Miss." },
     { value: "Mrs.", label: "Mrs." },
-    { value: "Rev", label: "Rev" },
+    { value: "Miss.", label: "Miss." },
+    { value: "Ms.", label: "Ms." },
+    { value: "Dr.", label: "Dr." },
+    { value: "Prof.", label: "Prof." },
+    { value: "Rev.", label: "Rev." },
   ];
 
   // Yup schema
@@ -176,7 +179,7 @@ const UserRegistration = () => {
           </Typography>
 
           <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-            <Link underline="hover" color="inherit" href="/admin/dashboard">
+            <Link underline="hover" color="inherit" href="/admin">
               <HomeIcon
                 sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }}
               />{" "}
@@ -423,7 +426,7 @@ const UserRegistration = () => {
                   color="secondary"
                   onClick={() => reset()}
                 >
-                  Cancel
+                  Reset
                 </Button>
                 <Button type="submit" variant="contained" color="primary">
                   Submit

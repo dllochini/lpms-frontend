@@ -29,9 +29,12 @@ import { getDivisions } from "../../api/division";
 
 const designations = [
   { value: "Mr.", label: "Mr." },
-  { value: "Miss.", label: "Miss." },
   { value: "Mrs.", label: "Mrs." },
-  { value: "Rev", label: "Rev" },
+  { value: "Miss.", label: "Miss." },
+  { value: "Ms.", label: "Ms." },
+  { value: "Dr.", label: "Dr." },
+  { value: "Prof.", label: "Prof." },
+  { value: "Rev.", label: "Rev." },
 ];
 
 const UserEdit = () => {
@@ -187,7 +190,7 @@ const UserEdit = () => {
       await updateUserById(userId, formData);
       setOpenSnackbar(true);
       setTimeout(() => {
-        navigate("/admin/dashboard");
+        navigate("/admin");
       }, 2000);
     } catch (error) {
       setSubmitError(error.response?.data?.error || "Something went wrong");
