@@ -52,6 +52,7 @@ const AppWrapper = () => {
         <Route path="/accountant" element={<Accountant />} />
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/higherManager/dashboard" element={<DashBoardHigherManger />} />
+        <Route path= "/higherManager/paymentApproval" element={<PaymentApproval />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
         <Route path="/fieldOfficer/operation" element={<Operation />} />
         <Route path="/fieldOfficer/resources" element={<Resources />} />
