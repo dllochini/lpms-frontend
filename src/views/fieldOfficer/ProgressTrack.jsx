@@ -350,7 +350,7 @@ export default function ProgressTrack() {
                 fontWeight: 600,
               }}
             >
-              ADD NEW OPERATION
+              ADD NEW TASK
             </Button>
           </Box>
 
@@ -396,7 +396,7 @@ export default function ProgressTrack() {
 
       {/* Add New Task Dialog */}
       <Dialog open={taskDialogOpen} onClose={handleTaskDialogClose} fullWidth maxWidth="sm">
-        <DialogTitle>Add New Task</DialogTitle>
+        <DialogTitle>Add New Progress</DialogTitle>
         <DialogContent dividers>
           <TextField
             label="Operation"

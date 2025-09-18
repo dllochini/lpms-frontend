@@ -29,60 +29,60 @@ import { Link as RouterLink } from "react-router-dom";
 import PendingPaymentDataGrid from "../../components/manager/PendingPaymentDataGrid";
 
 export default function ApprovePayements() {
-  const [rows, setRows] = useState([]);
+  const [rows] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [expandedOps, setExpandedOps] = useState({}); // { opIndex: true }
 
   useEffect(() => {
     // sample rows - replace with API fetch as needed
-    setRows([
-      {
-        id: "B1234",
-        billId: "B1234",
-        landId: "L1234",
-        fieldOfficer: "Alex Jones",
-        accountant: "Alex Jones",
-        requestedDate: "2025-08-12",
-        operations: [
-          {
-            date: "04/17/2022",
-            operation: "Bush Clearing",
-            subtotal: 10000,
-            details: []
-          },
-          {
-            date: "04/17/2022",
-            operation: "Ploughing",
-            subtotal: 10000,
-            details: [
-              { date: "04/17/2022", method: "Tractor 4WD", unitPrice: 200, subtotal: 4000 },
-              { date: "04/17/2022", method: "Tractor 4WD", unitPrice: 100, subtotal: 3000 }
-            ]
-          },
-          {
-            date: "04/18/2022",
-            operation: "Fertilizing",
-            subtotal: 15000,
-            details: [
-              { date: "04/18/2022", method: "Manual Spray", unitPrice: 500, subtotal: 15000 }
-            ]
-          }
-        ],
-        discount: 4000,
-        total: 100000
-      },
-      {
-        id: "B1235",
-        billId: "B1235",
-        landId: "L1235",
-        fieldOfficer: "Chris Smith",
-        accountant: "John Doe",
-        requestedDate: "2025-08-13",
-        operations: [],
-        discount: 0,
-        total: 0
-      }
-    ]);
+    // setRows([
+    //   {
+    //     id: "B1234",
+    //     billId: "B1234",
+    //     landId: "L1234",
+    //     fieldOfficer: "Alex Jones",
+    //     accountant: "Alex Jones",
+    //     requestedDate: "2025-08-12",
+    //     operations: [
+    //       {
+    //         date: "04/17/2022",
+    //         operation: "Bush Clearing",
+    //         subtotal: 10000,
+    //         details: []
+    //       },
+    //       {
+    //         date: "04/17/2022",
+    //         operation: "Ploughing",
+    //         subtotal: 10000,
+    //         details: [
+    //           { date: "04/17/2022", method: "Tractor 4WD", unitPrice: 200, subtotal: 4000 },
+    //           { date: "04/17/2022", method: "Tractor 4WD", unitPrice: 100, subtotal: 3000 }
+    //         ]
+    //       },
+    //       {
+    //         date: "04/18/2022",
+    //         operation: "Fertilizing",
+    //         subtotal: 15000,
+    //         details: [
+    //           { date: "04/18/2022", method: "Manual Spray", unitPrice: 500, subtotal: 15000 }
+    //         ]
+    //       }
+    //     ],
+    //     discount: 4000,
+    //     total: 100000
+    //   },
+    //   {
+    //     id: "B1235",
+    //     billId: "B1235",
+    //     landId: "L1235",
+    //     fieldOfficer: "Chris Smith",
+    //     accountant: "John Doe",
+    //     requestedDate: "2025-08-13",
+    //     operations: [],
+    //     discount: 0,
+    //     total: 0
+    //   }
+    // ]);
   }, []);
 
   // called when grid "VIEW DETAILS" clicked

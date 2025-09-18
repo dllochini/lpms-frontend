@@ -14,7 +14,7 @@ import Login from "./views/Login";
 import ResetPw from "./views/ResetPw"; 
 import Home from "./views/Home";
 import NoPage from "./views/NoPage";
-import Profile from "./views/Profile";
+// import Profile from "./views/Profile";
 
 //Admin
 import AdminDashboard from "./views/admin/Dashboard";
@@ -75,7 +75,7 @@ const AppWrapper = () => {
 
       {/* Admin */}
       <Route path="/admin/" element={<AdminLayout />}>
-      <Route path="profile" element={<Profile />} />
+      {/* <Route path="profile" element={<Profile />} /> */}
         <Route path="" element={<AdminDashboard />} />
         <Route path="register" element={<UserRegistration />} />
         <Route path="edit/:userId" element={<UserEdit />} />

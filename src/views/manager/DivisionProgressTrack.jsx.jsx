@@ -23,7 +23,7 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 
-export default function ManagerProgressTrack() {
+export default function DivisionProgressTrack() {
   const { landId } = useParams(); // Get landId from URL
   const [tasks, setTasks] = useState([]);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
