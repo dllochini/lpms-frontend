@@ -47,27 +47,6 @@ export default function FieldOfficerDashboard() {
 
   return (
     <Box sx={{ mb: 4 }}>
-      {/* Top Nav */}
-      {/* <Box sx={{ maxWidth: 1100, mx: "auto", p: 2 }}>
-        <Stack direction="row" spacing={2} justifyContent="center">
-          <Button variant="contained" color="primary" size="small" sx={{ borderRadius: 20, px: 3 }}>
-            Home
-          </Button>
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
-            Farners & Lands
-          </Button>
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
-            Progress Tracking
-          </Button>
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
-            Resources
-          </Button>
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
-            Operations
-          </Button>
-        </Stack>
-      </Box> */}
-
       {/* Breadcrumbs/title */}
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3, ml: { xs: 0, md: 18} }}>
         <Typography variant="h5" gutterBottom>

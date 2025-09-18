@@ -86,32 +86,7 @@ export default function DivisionProgress() {
 
   return (
     <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
-      {/* Top Navigation Buttons */}
-      {/* <Stack
-        direction="row"
-        spacing={2}
-        justifyContent="center"
-        alignItems="center"
-        sx={{ mb: 2 }}
-      >
-        <Button variant="outlined" component={RouterLink} to="/">
-          Home
-        </Button>
-        <Button variant="outlined" component={RouterLink} to="/operations">
-          Operations Approval
-        </Button>
-        <Button variant="outlined" component={RouterLink} to="/payments">
-          Payments Approval
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          component={RouterLink}
-          to="/land-progress"
-        >
-          Land Progress
-        </Button>
-      </Stack> */}
+     
 
       <Typography variant="h5" gutterBottom>
        Division Progress 
@@ -131,7 +106,7 @@ export default function DivisionProgress() {
       </Breadcrumbs>
 
       <Paper elevation={5} sx={{ p: 2, borderRadius: 3 }}>
-        <div style={{ height: 400, width: "100%" }}>
+        <div style={{ height: 200, width: "100%" }}>
           <DataGrid
             rows={rows}
             columns={columns}

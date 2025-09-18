@@ -31,6 +31,7 @@ import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress";
 // Higher Manager
 import HigherManagerDashboard from "./views/higherManager/Dashboard";
 import HigherManagerLandProgress from "./views/higherManager/LandProgress";
+import HigherManagerLandProgressTracking from "./views/higherManager/LandProgressTracking";
 import HigherManagerApprovePayments from "./views/higherManager/ApprovePayments";
 
 //Manager
@@ -102,6 +103,10 @@ const AppWrapper = () => {
         <Route path="" element={<HigherManagerDashboard />} />
         <Route path="landProgress" element={<HigherManagerLandProgress />} />
         <Route path="approvePayments" element={<HigherManagerApprovePayments />} />
+        <Route
+          path="/higherManager/LandProgressTrack/:landId"
+          element={<HigherManagerLandProgressTracking />}
+        />
       </Route>
       
     </Routes>
