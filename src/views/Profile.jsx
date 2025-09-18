@@ -16,6 +16,7 @@ import {
   Snackbar,
   Alert,
   Link as MuiLink,
+  Link
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
@@ -252,12 +253,14 @@ const Profile = () => {
                 }}
               >
                 <Typography sx={{ fontWeight: 500 }}>Password:</Typography>
-                <Button
-                  variant="text"
-                  onClick={() => window.open("/resetPassword", "_blank")}
-                >
-                  Change Password
-                </Button>
+                <Link
+  component="button"
+  variant="body2"
+  onClick={() => window.open("/resetPassword", "_blank")}
+  sx={{ textDecoration: "underline", color: "primary.main", cursor: "pointer" }}
+>
+  Change Password
+</Link>
               </Box>
             </Grid>
 
