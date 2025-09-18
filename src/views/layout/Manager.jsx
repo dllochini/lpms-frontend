@@ -28,6 +28,8 @@ import {
 } from "@mui/icons-material";
 import companyLogo from "/images/ceylon-sugar-industries.png";
 import { clearAuth } from "../../utils/auth";
+import {redirectProfileByRole} from "../../utils/redirectProfileByRole"
+
 
 const navItems = [
   { label: "Dashboard", path: "/manager" },
@@ -268,7 +270,7 @@ const Layout = () => {
             <MenuItem
               onClick={() => {
                 handleMenuClose();
-                navigate("/profile");
+                navigate(redirectProfileByRole(role));
               }}
             >
               <ListItemIcon>
