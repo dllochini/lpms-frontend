@@ -1,6 +1,4 @@
 import axiosBackend from "../configs/axios-config";
-import setAuthToken from "../utils/setAuthToken";
-import { jwtDecode } from "jwt-decode";
 
 
 export const loginUser = (data) => {
