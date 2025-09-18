@@ -78,6 +78,7 @@ const UserRegistration = () => {
     { value: "Ms.", label: "Ms." },
     { value: "Dr.", label: "Dr." },
     { value: "Prof.", label: "Prof." },
+    { value: "Mx.", label: "Mx." },
     { value: "Rev.", label: "Rev." },
   ];
 
