@@ -168,7 +168,7 @@ const Layout = () => {
         position="fixed"
         color="default"
         elevation={1}
-        sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}
+        sx={{ zIndex: (t) => t.zIndex.drawer + 1,borderRadius:0, }}
       >
         <Toolbar
           sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}
@@ -192,7 +192,7 @@ const Layout = () => {
               src={companyLogo}
               alt="Company logo"
               sx={{ height: 44, cursor: "pointer" }}
-              onClick={() => navigate("/")}
+              onClick={() => window.open("https://ceylonsugar.com", "_blank")}
             />
           </Box>
 
