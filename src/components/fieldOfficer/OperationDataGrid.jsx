@@ -1,5 +1,3 @@
-
-
 import * as React from "react";
 import { DataGrid as MuiDataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
@@ -9,6 +7,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 import { useState } from "react";
 
@@ -16,12 +16,19 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   // Delete dialog state
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [selectedUserName, setSelectedUserName] = useState("");
+  const [selectedOperationName, setSelectedOperationName] = useState("");
+
+  // Snackbar state
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   // Delete handlers
   const handleDeleteClick = (id) => {
-    const user = data.find((u) => u._id === id);
-    setSelectedUserName(user ? user.fullName : "");
+    const operation = data.find((u) => u._id === id);
+    setSelectedOperationName(operation ? operation.name : "");
     setSelectedId(id);
     setOpenDialog(true);
   };
@@ -29,12 +36,21 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   const handleConfirmDelete = async () => {
     if (selectedId) {
       try {
-        // await deleteOperationById(selectedId);
         if (onDelete) {
-          onDelete(selectedId);
+          await onDelete(selectedId); // Call parent handler
         }
+        setSnackbar({
+          open: true,
+          message: `Operation "${selectedOperationName}" deleted successfully!`,
+          severity: "success",
+        });
       } catch (error) {
         console.error("Delete failed:", error);
+        setSnackbar({
+          open: true,
+          message: "Delete failed. Please try again.",
+          severity: "error",
+        });
       }
     }
     setOpenDialog(false);
@@ -44,6 +60,10 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   const handleCancelDelete = () => {
     setOpenDialog(false);
     setSelectedId(null);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   // Edit handler
@@ -131,7 +151,8 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete <strong>{selectedUserName}</strong>?
+          Are you sure you want to delete{" "}
+          <strong>{selectedOperationName || "this operation"}</strong>?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
@@ -142,10 +163,24 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Snackbar Notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
 
 export default BasicDataGrid;
-
-
