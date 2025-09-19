@@ -1,18 +1,28 @@
+// App.jsx
 import "./App.css";
-import Layout from "./views/Layout";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+import { useEffect } from "react";
+import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
+
 import Login from "./views/Login";
+import ResetPw from "./views/ResetPw"; 
 import Home from "./views/Home";
 import NoPage from "./views/NoPage";
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import Profile from "./views/Profile";
+
+//Admin
 import AdminDashboard from "./views/admin/Dashboard";
 import UserRegistration from "./views/admin/UserRegistration";
-import Manager from "./views/manager/Manager";
-import Accountant from "./views/accountant/Accountant";
 import UserEdit from "./views/admin/UserEdit";
 import ResetPw from "./views/ResetPw";
 import HigherManager from "./views/higherManager/HigherManager";
 import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
-import OperationApproval from "./views/manager/OperationApprovel";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
@@ -24,19 +34,16 @@ const AppWrapper = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const publicPaths = ["/login", "/reset-password"];
-
-    // ✅ Read toggle flag from .env
     const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
 
-    // ✅ Skip auth check completely if bypass flag is on
-    if (bypassAuth) {
-      return;
-    }
-
-    // ✅ Enforce auth check if bypass is off
-    if ((!token || isTokenExpired(token)) && !publicPaths.includes(location.pathname)) {
-      clearAuth();
-      navigate("/login");
+    if (!bypassAuth) {
+      if (
+        (!token || isTokenExpired(token)) &&
+        !publicPaths.includes(location.pathname)
+      ) {
+        clearAuth();
+        navigate("/login");
+      }
     }
   }, [navigate, location]);
 
@@ -51,11 +58,11 @@ const AppWrapper = () => {
         <Route path="/user/register" element={<UserRegistration />} />
         <Route path="/user/edit/:userId" element={<UserEdit />} />
         <Route path="/manager" element={<Manager />} />
-        <Route path="/manager/operation/" element={<OperationApproval />} />
         <Route path="/accountant" element={<Accountant />} />
         <Route path="/higherManager" element={<HigherManager />} />
         <Route path="/fieldOfficer" element={<FieldOfficer />} />
       </Route>
+      
     </Routes>
   );
 };
