@@ -16,7 +16,7 @@ import {
   Snackbar,
   Alert,
   Link as MuiLink,
-  Link
+  Link,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
@@ -24,6 +24,7 @@ import { getUserById, updateUserById } from "../api/user";
 import { getRoles } from "../api/role";
 import { getDivisions } from "../api/division";
 import { redirectByRole } from "../utils/redirectByRole";
+import { forgotPassword } from "../api/auth";
 
 const designations = [
   "Mr.",
@@ -42,9 +43,66 @@ const Profile = () => {
   const [editMode, setEditMode] = useState(false);
   const [formState, setFormState] = useState({});
   const [roles, setRoles] = useState([]);
+  // const [role, setRole] = useState("");
   const [divisions, setDivisions] = useState([]);
-  const [error, setError] = useState("");
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "info",
+  });
+
   const navigate = useNavigate();
+
+  const showSnackbar = (message, severity = "info") => {
+    setSnackbar({ open: true, message, severity });
+  };
+
+  const handleChangePassword = async () => {
+    try {
+      const sendData = {
+        email: formState.email,
+        identifier: "Profile",
+      };
+
+      const response = await forgotPassword(sendData);
+      const { message, resetLink } = response.data;
+
+     if (resetLink?.startsWith("http")) {
+       window.open(resetLink, "_blank");
+     }
+
+      showSnackbar(message, "success");
+    } catch (err) {
+      console.error("Failed to request password reset:", err);
+      showSnackbar("Failed to generate reset link.", "error");
+    }
+  };
+
+  const handleSave = async () => {
+    try {
+      const updatePayload = { ...formState };
+      delete updatePayload._id;
+      delete updatePayload.fullName;
+
+      await updateUserById(userData._id, updatePayload);
+
+      const updatedRoleObj = roles.find((r) => r._id === updatePayload.role);
+
+      setUserData({
+        ...userData,
+        ...updatePayload,
+        role: updatedRoleObj || userData.role,
+      });
+
+      setRole(userData.role?.name);
+
+      setEditMode(false);
+      showSnackbar("Profile updated successfully!", "success");
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Failed to update profile.", "error");
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,9 +123,10 @@ const Profile = () => {
         });
         setRoles(rolesRes.data);
         setDivisions(divisionsRes.data);
+        // setRole(user.role?.name || "");
       } catch (err) {
         console.error(err);
-        setError("Failed to fetch profile data.");
+        showSnackbar("Failed to fetch profile data.", "error");
       } finally {
         setLoading(false);
       }
@@ -76,51 +135,15 @@ const Profile = () => {
     fetchData();
   }, []);
 
-  const handleChange = (field, value) => {
-    setFormState({ ...formState, [field]: value });
-  };
-
-  const handleSave = async () => {
-    try {
-      const updatePayload = { ...formState };
-      delete updatePayload._id;
-      delete updatePayload.fullName;
-
-      await updateUserById(userData._id, updatePayload);
-
-      // Get the full role object from roles array
-      const updatedRoleObj = roles.find((r) => r._id === updatePayload.role);
-
-      setUserData({
-        ...userData,
-        ...updatePayload,
-        role: updatedRoleObj || userData.role, // keep full object
-      });
-
-      setEditMode(false);
-      setError("Profile updated successfully!");
-    } catch (err) {
-      console.error(err);
-      setError("Failed to update profile.");
-    }
-  };
-
-  if (loading)
-    return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
-
-  const roleName = roles.find((r) => r._id === formState.role)?.name || "";
+const roleName = roles.find((r) => r._id === formState.role)?.name || "";
 
   const fieldsToDisplay = [
-    { label: "User ID", value: userData._id, editable: false },
-    { label: "Full Name", value: userData.fullName, editable: false },
+    { label: "User ID", value: userData?._id, editable: false },
+    { label: "Full Name", value: userData?.fullName, editable: false },
     {
       label: "Role",
       value: formState.role,
-      editable: true,
+      editable: false,
       field: "role",
       type: "select",
       options: roles,
@@ -164,7 +187,9 @@ const Profile = () => {
             <Select
               value={formState[field.field] || ""}
               label={field.label}
-              onChange={(e) => handleChange(field.field, e.target.value)}
+              onChange={(e) =>
+                setFormState({ ...formState, [field.field]: e.target.value })
+              }
             >
               {field.options.map((opt) => (
                 <MenuItem key={opt._id} value={opt._id}>
@@ -181,11 +206,14 @@ const Profile = () => {
           fullWidth
           type={field.type || "text"}
           value={formState[field.field] || ""}
-          onChange={(e) => handleChange(field.field, e.target.value)}
+          onChange={(e) =>
+            setFormState({ ...formState, [field.field]: e.target.value })
+          }
         />
       );
     }
-    // Read-only display
+
+    // Read-only mode
     return (
       <Box
         sx={{
@@ -207,6 +235,13 @@ const Profile = () => {
     );
   };
 
+  if (loading)
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
+        <CircularProgress />
+      </Box>
+    );
+
   return (
     <>
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
@@ -216,7 +251,7 @@ const Profile = () => {
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
           <MuiLink
             component={RouterLink}
-            to={redirectByRole(userData.role?.name)}
+            to={redirectByRole(roleName)}
             underline="hover"
             color="text.primary"
           >
@@ -254,13 +289,17 @@ const Profile = () => {
               >
                 <Typography sx={{ fontWeight: 500 }}>Password:</Typography>
                 <Link
-  component="button"
-  variant="body2"
-  onClick={() => window.open("/resetPassword", "_blank")}
-  sx={{ textDecoration: "underline", color: "primary.main", cursor: "pointer" }}
->
-  Change Password
-</Link>
+                  component="button"
+                  variant="body2"
+                  onClick={handleChangePassword}
+                  sx={{
+                    textDecoration: "underline",
+                    color: "primary.main",
+                    cursor: "pointer",
+                  }}
+                >
+                  Change Password
+                </Link>
               </Box>
             </Grid>
 
@@ -305,18 +344,19 @@ const Profile = () => {
         </Paper>
       </Box>
 
+      {/* ✅ Single reusable Snackbar */}
       <Snackbar
-        open={!!error}
-        autoHideDuration={4000}
-        onClose={() => setError("")}
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert
-          severity={
-            error === "Profile updated successfully!" ? "success" : "error"
-          }
-          onClose={() => setError("")}
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          sx={{ width: "100%" }}
         >
-          {error}
+          {snackbar.message}
         </Alert>
       </Snackbar>
     </>
