@@ -27,6 +27,7 @@ import {
 } from "@mui/icons-material";
 import companyLogo from "/images/ceylon-sugar-industries.png";
 import { clearAuth } from "../../utils/auth";
+import {redirectProfileByRole} from "../../utils/redirectProfileByRole"
 
 const drawerWidth = 260;
 
@@ -91,7 +92,7 @@ const Layout = () => {
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", flexDirection: "column" }}>
       {/* AppBar */}
-      <AppBar position="fixed" color="default" elevation={1} sx={{ zIndex: (t) => t.zIndex.drawer + 1 }}>
+      <AppBar position="fixed" color="default" elevation={1} sx={{ zIndex: (t) => t.zIndex.drawer + 1, borderRadius:0, }}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {!isMdUp && (
@@ -104,7 +105,7 @@ const Layout = () => {
               src={companyLogo}
               alt="Company logo"
               sx={{ height: 44, cursor: "pointer" }}
-              onClick={() => navigate("/")}
+              onClick={() => window.open("https://ceylonsugar.com", "_blank")}
             />
           </Box>
 
@@ -150,7 +151,7 @@ const Layout = () => {
             <MenuItem
               onClick={() => {
                 handleMenuClose();
-                navigate("/profile");
+                navigate(redirectProfileByRole(role));
               }}
             >
               <ListItemIcon>

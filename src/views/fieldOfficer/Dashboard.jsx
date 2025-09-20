@@ -16,6 +16,13 @@ import HomeIcon from "@mui/icons-material/Home";
 import { useEffect, useState } from "react";
 
 export default function FieldOfficerDashboard() {
+  
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    setUserName(localStorage.getItem("name") || "");
+  }, []);
+  
   const [overview] = useState({
     totalLands: 0,
     farmers: 0,
@@ -48,18 +55,32 @@ export default function FieldOfficerDashboard() {
   return (
     <Box sx={{ mb: 4 }}>
       {/* Breadcrumbs/title */}
-      <Box sx={{ maxWidth: 1100, mx: "auto", p: 3, ml: { xs: 0, md: 18} }}>
-        <Typography variant="h5" gutterBottom>
-          Hello FieldOfficer!
-        </Typography>
-        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-          <Typography color="text.primary" sx={{ display: "flex", alignItems: "center" }}>
-            <HomeIcon sx={{ mr: 0.5, fontSize: 18 }} />
+      <Box sx={{ maxWidth: 1150, mx: "auto", p: 3 }}>
+        {/* Greeting Card */}
+        <Paper
+          sx={{
+            mx: "auto",
+            p: 3,
+            mb: 3,
+            borderRadius: 4,
+            background: "linear-gradient(135deg, #e8f5e9, #f1f8e9)",
+          }}
+          elevation={0}
+        >
+          <Typography variant="h5" gutterBottom>
+            Hello {userName} 👋
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Welcome back to the Agricultural Land Preparation System Dashboard.
+          </Typography>
+        </Paper>
+        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2 }}>
+          <Typography color="text.primary">
+            <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
             Home
           </Typography>
         </Breadcrumbs>
       </Box>
-
 
       <Box sx={{ maxWidth: mainCardWidth, mx: "auto", px: 2, mb: 1, display: "flex", justifyContent: "flex-end" }}>
         <Button
@@ -261,4 +282,4 @@ export default function FieldOfficerDashboard() {
   );
 }
 
-
+export default FieldOfficerDashboard;
