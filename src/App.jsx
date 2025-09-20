@@ -14,7 +14,7 @@ import Login from "./views/Login";
 import ResetPw from "./views/ResetPw"; 
 import Home from "./views/Home";
 import NoPage from "./views/NoPage";
-import Profile from "./views/Profile";
+// import Profile from "./views/Profile";
 
 //Admin
 import AdminDashboard from "./views/admin/Dashboard";
@@ -31,6 +31,7 @@ import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress";
 // Higher Manager
 import HigherManagerDashboard from "./views/higherManager/Dashboard";
 import HigherManagerLandProgress from "./views/higherManager/LandProgress";
+import HigherManagerLandProgressTracking from "./views/higherManager/LandProgressTracking";
 import HigherManagerApprovePayments from "./views/higherManager/ApprovePayments";
 
 //Manager
