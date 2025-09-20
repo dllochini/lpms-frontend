@@ -43,7 +43,7 @@ const Profile = () => {
   const [editMode, setEditMode] = useState(false);
   const [formState, setFormState] = useState({});
   const [roles, setRoles] = useState([]);
-  // const [role, setRole] = useState("");
+  const [role, setRole] = useState("");
   const [divisions, setDivisions] = useState([]);
   const [snackbar, setSnackbar] = useState({
     open: false,

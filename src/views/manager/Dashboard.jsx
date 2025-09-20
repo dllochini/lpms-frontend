@@ -6,101 +6,147 @@ import {
   Grid,
   Card,
   CardContent,
-  Stack,
-  Tabs,
-  Tab,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import { useEffect, useState } from "react";
-
+import { getManagerDashboardCardInfo } from "../../api/manager";
 import RequestsDataGrid from "../../components/manager/RequestDataGrid";
 import PaymentDataGrid from "../../components/manager/PaymentDataGrid";
+import { getUserById } from "../../api/user";
 
 export default function Dashboard() {
-  const [overview] = useState({
+  const [overview, setOverview] = useState({
     totalLands: 0,
     fieldOfficers: 0,
     pendingOps: 0,
     pendingPayments: 0,
   });
 
-  const [requests] = useState([]);
-  const [payments] = useState([]);
+  const [requests, setRequests] = useState([]); // raw API array (tasks)
+  const [payments, setPayments] = useState([]); // raw API array (bills)
   const [userName, setUserName] = useState("");
   const [role, setRole] = useState("");
+  const [div, setDivision] = useState("");
 
+  // Fetch dashboard overview data
   useEffect(() => {
-    setUserName(localStorage.getItem("name") || "");
-    setRole(localStorage.getItem("role") || "");
+    const fetchDashboard = async () => {
+      const loggedUserId = localStorage.getItem("loggedUserId") || "";
+      if (!loggedUserId) return;
+
+      try {
+        const userRes = await getUserById(loggedUserId);
+
+        if (!userRes || !userRes.data) {
+          console.warn("No user data returned");
+          return;
+        }
+
+        const user = userRes.data;
+        setUserName(user.fullName || "");
+        setRole(user.role?.name || "");
+
+        const divisionId = user.division?._id || "";
+        setDivision(divisionId);
+
+        if (!divisionId) return;
+
+        let overviewRes;
+        try {
+          overviewRes = await getManagerDashboardCardInfo(divisionId);
+        } catch (err) {
+          console.error("API call failed:", err.response?.data || err.message);
+          return;
+        }
+
+        if (!overviewRes || !overviewRes.data) {
+          console.warn("No dashboard data returned");
+          return;
+        }
+
+        const data = overviewRes.data;
+
+        // set card overview numbers
+        setOverview({
+          totalLands: data.totalLands || 0,
+          fieldOfficers: data.totalFieldOfficers || 0,
+          pendingOps: data.pendingOperations || 0,
+          pendingPayments: data.pendingBills || 0,
+        });
+
+        // arrays (keys your backend currently returns: recentRequests & recentPayments)
+        setRequests(data.recentRequests || []);
+        setPayments(data.recentPayments || []);
+
+        console.log("received recentRequests:", data.recentPayments);
+      } catch (err) {
+        console.error(
+          "Error fetching dashboard:",
+          err.response?.data || err.message
+        );
+      }
+    };
+
+    fetchDashboard();
   }, []);
 
-  // track selected tab
-  // const [tabValue, setTabValue] = useState(0);
+  // Map requests (raw tasks) to the shape expected by RequestDataGrid
+  const mappedRequests = (requests || []).map((req, idx) => ({
+    id: req._id ?? idx, // DataGrid needs an `id` field
 
-  useEffect(() => {
-    // fetch real data if needed
-  }, []);
+    // Prefer populated nested values, otherwise fall back to raw IDs
+    landId: req.processID?.landID || "",
+      // possible populated shapes: req.processID.landId or req.processID.landID
+      // req.processID?.landId ??
 
-  // const handleTabChange = (e, newValue) => {
-  //   setTabValue(newValue);
-  // };
+    // possible populated shapes: req.assignedTo.name or req.assignedTo.fullName
+    officer:
+      req.assignedTo?.name ?? req.assignedTo?.fullName ?? req.assignedTo ?? "-",
+
+    operation: req.name ?? "-", // task name
+    date: req.startDate ? new Date(req.startDate).toLocaleDateString() : "-",
+  }));
+
+  // If PaymentDataGrid expects a specific shape, map payments similarly.
+  // For now we'll provide simple mapping so the table has ids:
+  const mappedPayments = (payments || []).map((p, idx) => ({
+    // add fields PaymentDataGrid expects; example placeholders:
+
+    amount:req.total_amount ?? "-"
+    // keep raw object if component wants to access it
+  }));
 
   return (
     <Box sx={{ mb: 4 }}>
-      {/* Top Nav (Tabs) */}
-      {/* <Box
-        sx={{
-          maxWidth: 1100,
-          mx: "auto",
-          p: 0,
-          // border: "2px solid red",
-          display: "flex",
-          justifyContent: "left",
-        }}
-      >
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          centered
-          textColor="primary"
-          indicatorColor="primary"
-          sx={{
-            "& .MuiTab-root": {
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 500,
-              minWidth: 140,
-            },
-          }}
-        >
-          <Tab label="Home" />
-          <Tab label="Operations Approval" />
-          <Tab label="Payments Approval" />
-          <Tab label="Land Progress" />
-        </Tabs>
-      </Box> */}
-
       {/* Breadcrumbs */}
-      <Box
-        sx={{
-          maxWidth: 1100,
-          mx: "auto",
-          p: 3,
-          ml: { xs: 0, md: 17 },
-        }}
-      >
-        <Typography variant="h5" gutterBottom>
-          Hello {userName}!
-        </Typography>
-        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-          <Typography color="text.primary">
-            <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
-            Home
-          </Typography>
-        </Breadcrumbs>
-      </Box>
+      <Box sx={{ maxWidth: 1150, mx: "auto", p: 3 }}>
+              {/* Greeting Card */}
+              <Paper
+                sx={{
+                  mx: "auto",
+                  p: 3,
+                  mb: 3,
+                  borderRadius: 4,
+                  background: "linear-gradient(135deg, #e8f5e9, #f1f8e9)",
+                }}
+                elevation={0}
+              >
+                <Typography variant="h5" gutterBottom>
+                  Hello {userName} 👋
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Welcome back to the Agricultural Land Preparation System Dashboard.
+                </Typography>
+              </Paper>
+              <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2 }}>
+                <Typography color="text.primary">
+                  <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
+                  Home
+                </Typography>
+              </Breadcrumbs>
+            </Box>
 
-      {/* MAIN CARD: Division Overview */}
+      {/* Division Overview Card */}
       <Paper
         elevation={5}
         sx={{
@@ -110,21 +156,13 @@ export default function Dashboard() {
           borderRadius: 5,
           mb: 3,
           backgroundColor: "#fdfdfd",
-          // border: "2px solid red",
         }}
       >
         <Typography variant="h6" gutterBottom>
           Division Overview
         </Typography>
 
-        {/* Stat cards */}
-        <Grid
-          container
-          spacing={2}
-          justifyContent="center"
-          alignItems="center"
-          sx={{ mb: 1 }}
-        >
+        <Grid container spacing={2} justifyContent="center" alignItems="center">
           {[
             { label: "Total registered lands", value: overview.totalLands },
             { label: "Assigned field officers", value: overview.fieldOfficers },
@@ -132,6 +170,7 @@ export default function Dashboard() {
             { label: "Pending payments", value: overview.pendingPayments },
           ].map((item, idx) => (
             <Grid
+              item
               key={idx}
               xs="auto"
               sx={{ display: "flex", justifyContent: "center" }}
@@ -150,7 +189,7 @@ export default function Dashboard() {
                 <CardContent sx={{ py: 2 }}>
                   <Typography
                     variant="h4"
-                    sx={{ fontWeight: "700", lineHeight: 1 }}
+                    sx={{ fontWeight: 700, lineHeight: 1 }}
                   >
                     {item.value}
                   </Typography>
@@ -168,29 +207,13 @@ export default function Dashboard() {
         </Grid>
       </Paper>
 
-      {/* TABLES */}
-      <Box
-        sx={{
-          maxWidth: 1000,
-          mx: "auto",
-          p: 0,
-          // transform: "translateX(20px)", // keep your offset
-          // border: "2px solid red",
-          justifyContent: "space-between",
-        }}
-      >
-        <Grid
-          container
-          spacing={3}
-          justifyContent="space-between"
-          alignItems="center"
-          justifySelf={"center"}
-          width={"97%"}
-          // sx={{ p: 0, border: "2px solid red" }}
-        >
+      {/* Recent Requests and Payments */}
+      <Box sx={{ maxWidth: 1000, mx: "auto", p: 0 }}>
+        <Grid container spacing={3} justifyContent="space-between" width="97%">
           <Grid
-            xs="auto"
-            md="auto"
+            item
+            xs="12"
+            md="6"
             sx={{ display: "flex", justifyContent: "center" }}
           >
             <Paper
@@ -214,14 +237,16 @@ export default function Dashboard() {
                 Recent Requests
               </Typography>
               <div style={{ width: "100%" }}>
-                <RequestsDataGrid requests={requests} />
+                {/* pass the mapped rows to RequestDataGrid */}
+                <RequestsDataGrid requests={mappedRequests} />
               </div>
             </Paper>
           </Grid>
 
           <Grid
-            xs={12}
-            md="auto"
+            item
+            xs="12"
+            md="6"
             sx={{ display: "flex", justifyContent: "center" }}
           >
             <Paper
@@ -244,7 +269,8 @@ export default function Dashboard() {
                 Recent Payments
               </Typography>
               <div style={{ width: "100%" }}>
-                <PaymentDataGrid payments={payments} />
+                {/* adapt PaymentDataGrid props as required by that component */}
+                <PaymentDataGrid payments={mappedPayments} />
               </div>
             </Paper>
           </Grid>
