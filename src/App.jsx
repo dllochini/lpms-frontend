@@ -75,7 +75,7 @@ const AppWrapper = () => {
 
       {/* Admin */}
       <Route path="/admin/" element={<AdminLayout />}>
-      <Route path="profile" element={<Profile />} />
+        <Route path="profile" element={<Profile />} />
         <Route path="" element={<AdminDashboard />} />
         <Route path="register" element={<UserRegistration />} />
         <Route path="edit/:userId" element={<UserEdit />} />
@@ -83,6 +83,7 @@ const AppWrapper = () => {
 
       {/* Field Officer */}
       <Route path="/fieldOfficer/" element={<FieldOfficerLayout />}>
+        <Route path="profile" element={<Profile />} />
         <Route path="" element={<FieldOfficerDashboard />} />
         <Route path="fieldOperations" element={<FieldOperations />} />
         <Route path="farmResources" element={<FarmResources />} />
@@ -92,6 +93,7 @@ const AppWrapper = () => {
 
       {/* Manager */}
       <Route path="/manager/" element={<ManagerLayout />}>
+        <Route path="profile" element={<Profile />} />
         <Route path="" element={<Dashboard />} />
         <Route path="approveOperations" element={<ApproveOperations />} />
         <Route path="approvePayments" element={<ManagerApprovePayments />} />
@@ -99,11 +101,14 @@ const AppWrapper = () => {
       </Route>
 
       <Route path="/higherManager/" element={<HigherManagerLayout />}>
+        <Route path="profile" element={<Profile />} />
         <Route path="" element={<HigherManagerDashboard />} />
         <Route path="landProgress" element={<HigherManagerLandProgress />} />
-        <Route path="approvePayments" element={<HigherManagerApprovePayments />} />
+        <Route
+          path="approvePayments"
+          element={<HigherManagerApprovePayments />}
+        />
       </Route>
-      
     </Routes>
   );
 };

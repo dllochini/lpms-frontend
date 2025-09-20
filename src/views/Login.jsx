@@ -98,23 +98,32 @@ export default function LoginPage() {
 
   // Forgot password handler (unchanged except proper finally already present)
   const onForgot = async (data) => {
-    setForgotLoading(true);
-    setForgotError(null);
-    setForgotSuccess(null);
+  setForgotLoading(true);
+  setForgotError(null);
+  setForgotSuccess(null);
 
-    try {
-      const response = await forgotPassword(data);
-      setForgotSuccess(response.data.message);
-      resetForgotForm();
+  try {
+    const tempData = {
+      data: {
+        ...data,              // contains email
+        identifier: "Forgot", // moved inside data
+      },
+    };
+    console.log("sent data", tempData);
 
-      setTimeout(() => setForgotSuccess(null), 5000);
-      setTimeout(() => setForgotOpen(false), 5000);
-    } catch (err) {
-      setForgotError(err.response?.data?.error || "Request failed");
-    } finally {
-      setForgotLoading(false);
-    }
-  };
+    const response = await forgotPassword(tempData);
+    setForgotSuccess(response.data.message);
+    resetForgotForm();
+
+    setTimeout(() => setForgotSuccess(null), 5000);
+    setTimeout(() => setForgotOpen(false), 5000);
+  } catch (err) {
+    setForgotError(err.response?.data?.error || "Request failed");
+  } finally {
+    setForgotLoading(false);
+  }
+};
+
 
   return (
     <Box
