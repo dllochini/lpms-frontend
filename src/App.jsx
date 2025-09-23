@@ -19,6 +19,7 @@ import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 import Operation from "./views/fieldOfficer/Operation";
 import DashBoardHigherManger from "./views/higherManager/DashBoardHigherManager";
+import PaymentApproval from "./views/higherManager/PaymentApproval";
 
 
 const AppWrapper = () => {
