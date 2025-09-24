@@ -6,15 +6,15 @@ import {
   Route,
   useNavigate,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
 import Login from "./views/Login";
 import ResetPw from "./views/ResetPw";
-// import Home from "./views/Home";
 import NoPage from "./views/NoPage";
-// import Profile from "./views/Profile";
+import Profile from "./views/Profile";
 
 //Admin
 import AdminDashboard from "./views/admin/Dashboard";
@@ -68,10 +68,10 @@ const AppWrapper = () => {
 
   return (
     <Routes>
+
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/resetPassword" element={<ResetPw />} />
-
-      {/* <Route index element={<Home />} /> */}
 
       {/* Admin */}
       <Route path="/admin/" element={<AdminLayout />}>
