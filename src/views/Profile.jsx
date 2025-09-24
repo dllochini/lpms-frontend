@@ -51,8 +51,6 @@ const Profile = () => {
     severity: "info",
   });
 
-  const navigate = useNavigate();
-
   const showSnackbar = (message, severity = "info") => {
     setSnackbar({ open: true, message, severity });
   };
@@ -60,16 +58,18 @@ const Profile = () => {
   const handleChangePassword = async () => {
     try {
       const sendData = {
-        email: formState.email,
-        identifier: "Profile",
+        data: {
+          email: formState.email,
+          identifier: "Profile",
+        },
       };
 
       const response = await forgotPassword(sendData);
       const { message, resetLink } = response.data;
 
-     if (resetLink?.startsWith("http")) {
-       window.open(resetLink, "_blank");
-     }
+      if (resetLink?.startsWith("http")) {
+        window.open(resetLink, "_blank");
+      }
 
       showSnackbar(message, "success");
     } catch (err) {
@@ -135,7 +135,7 @@ const Profile = () => {
     fetchData();
   }, []);
 
-const roleName = roles.find((r) => r._id === formState.role)?.name || "";
+  const roleName = roles.find((r) => r._id === formState.role)?.name || "";
 
   const fieldsToDisplay = [
     { label: "User ID", value: userData?._id, editable: false },
