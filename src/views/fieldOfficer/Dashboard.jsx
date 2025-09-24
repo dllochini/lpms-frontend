@@ -281,5 +281,3 @@ export default function FieldOfficerDashboard() {
     </Box>
   );
 }
-
-export default FieldOfficerDashboard;
