@@ -65,7 +65,7 @@ export default function LoginPage() {
     try {
       const response = await loginUser(data); // axios POST /auth/login
       console.log("Login response:", response);
-      const {loggedUserId, role, name, token } = response.data;
+      const { loggedUserId, role, name, token } = response.data;
 
       if (!token || !role) {
         setLoginError("Login failed: missing token or role");
@@ -83,11 +83,9 @@ export default function LoginPage() {
 
       setLoginSuccess("Login successful!");
 
-    
       // redirect user
       const path = redirectByRole(role);
       navigate(path, { replace: true }); // replace so user can’t go back to login
-
     } catch (err) {
       setLoginError(err.response?.data?.error || "Login failed");
     } finally {
@@ -98,32 +96,31 @@ export default function LoginPage() {
 
   // Forgot password handler (unchanged except proper finally already present)
   const onForgot = async (data) => {
-  setForgotLoading(true);
-  setForgotError(null);
-  setForgotSuccess(null);
+    setForgotLoading(true);
+    setForgotError(null);
+    setForgotSuccess(null);
 
-  try {
-    const tempData = {
-      data: {
-        ...data,              // contains email
-        identifier: "Forgot", // moved inside data
-      },
-    };
-    console.log("sent data", tempData);
+    try {
+      const tempData = {
+        data: {
+          ...data, // contains email
+          identifier: "Forgot", // moved inside data
+        },
+      };
+      console.log("sent data", tempData);
 
-    const response = await forgotPassword(tempData);
-    setForgotSuccess(response.data.message);
-    resetForgotForm();
+      const response = await forgotPassword(tempData);
+      setForgotSuccess(response.data.message);
+      resetForgotForm();
 
-    setTimeout(() => setForgotSuccess(null), 5000);
-    setTimeout(() => setForgotOpen(false), 5000);
-  } catch (err) {
-    setForgotError(err.response?.data?.error || "Request failed");
-  } finally {
-    setForgotLoading(false);
-  }
-};
-
+      setTimeout(() => setForgotSuccess(null), 5000);
+      setTimeout(() => setForgotOpen(false), 5000);
+    } catch (err) {
+      setForgotError(err.response?.data?.error || "Request failed");
+    } finally {
+      setForgotLoading(false);
+    }
+  };
 
   return (
     <Box
