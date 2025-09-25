@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import { useEffect, useState } from "react";
+import { Link as RouterLink } from "react-router-dom";
+import { Link } from "@mui/material";
 
 import Graph from "../../components/higherManager/Graph";
 import Coverage from "../../components/higherManager/Coverage";
@@ -46,10 +48,10 @@ export default function HigherManagerDashboard() {
           {/* <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
             Operations Approval
           </Button> */}
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
+          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }} component={RouterLink} to="/higherManager/paymentApproval">
             Payments Approval
           </Button>
-          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }}>
+          <Button variant="outlined" size="small" sx={{ borderRadius: 20, px: 3 }} component={RouterLink} to="/land-progress">
             Land Progress
           </Button>
         </Stack>
