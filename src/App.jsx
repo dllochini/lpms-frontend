@@ -14,7 +14,7 @@ import Login from "./views/Login";
 import ResetPw from "./views/ResetPw"; 
 import Home from "./views/Home";
 import NoPage from "./views/NoPage";
-// import Profile from "./views/Profile";
+import Profile from "./views/Profile";
 
 //Admin
 import AdminDashboard from "./views/admin/Dashboard";

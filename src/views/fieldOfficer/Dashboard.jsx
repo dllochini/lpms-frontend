@@ -15,7 +15,7 @@ import {
 import HomeIcon from "@mui/icons-material/Home";
 import { useEffect, useState } from "react";
 
-export default function FieldOfficerDashboard() {
+function FieldOfficerDashboard() {
   
   const [userName, setUserName] = useState("");
 
