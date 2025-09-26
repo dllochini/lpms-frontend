@@ -1,9 +1,11 @@
 import setAuthToken from "./setAuthToken";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export const clearAuth = () => {
+  localStorage.removeItem("loggedUserId");
   localStorage.removeItem("token");
   localStorage.removeItem("role");
+  localStorage.removeItem("name");
   setAuthToken(null);
 };
 

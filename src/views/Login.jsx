@@ -64,7 +64,8 @@ export default function LoginPage() {
 
     try {
       const response = await loginUser(data); // axios POST /auth/login
-      const { role, token } = response.data;
+      console.log("Login response:", response);
+      const { loggedUserId, role, name, token } = response.data;
 
       if (!token || !role) {
         setLoginError("Login failed: missing token or role");
@@ -72,7 +73,9 @@ export default function LoginPage() {
       }
 
       // Save role + token
+      localStorage.setItem("loggedUserId", loggedUserId);
       localStorage.setItem("role", role);
+      localStorage.setItem("name", name);
       localStorage.setItem("token", token);
 
       // set default Authorization header for axios
@@ -98,7 +101,15 @@ export default function LoginPage() {
     setForgotSuccess(null);
 
     try {
-      const response = await forgotPassword(data);
+      const tempData = {
+        data: {
+          ...data, // contains email
+          identifier: "Forgot", // moved inside data
+        },
+      };
+      console.log("sent data", tempData);
+
+      const response = await forgotPassword(tempData);
       setForgotSuccess(response.data.message);
       resetForgotForm();
 
@@ -266,6 +277,7 @@ export default function LoginPage() {
         </Collapse>
       </Card>
 
+      {/* Footer */}
       <Typography
         variant="body2"
         color="white"

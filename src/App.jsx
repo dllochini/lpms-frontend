@@ -1,9 +1,22 @@
+// App.jsx
 import "./App.css";
-import Layout from "./views/Layout";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
+import { useEffect } from "react";
+import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
+
 import Login from "./views/Login";
-import Home from "./views/Home";
+import ResetPw from "./views/ResetPw";
 import NoPage from "./views/NoPage";
-import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import Profile from "./views/Profile";
+
+//Admin
 import AdminDashboard from "./views/admin/Dashboard";
 import FieldOfficerDashboard  from "./views/fieldOfficer/Dashboard";
 import LandRegistration from "./views/fieldOfficer/LandRegistration";
@@ -11,16 +24,33 @@ import LandRegistrationPage2 from "./views/fieldOfficer/LandRegistration2";
 import LandRegistrationPage3 from "./views/fieldOfficer/LandRegistration3";
 import LandRegistrationPage4 from "./views/fieldOfficer/LandRegistration4";
 import UserRegistration from "./views/admin/UserRegistration";
-import Manager from "./views/manager/Manager";
-import Accountant from "./views/accountant/Accountant";
 import UserEdit from "./views/admin/UserEdit";
-import ResetPw from "./views/ResetPw";
-import HigherManager from "./views/higherManager/HigherManager";
-import FieldOfficer from "./views/fieldOfficer/FieldOfficer";
-import { useEffect } from "react";
-import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
-// A wrapper component so we can use hooks like useNavigate
+// FieldOfficer
+import FieldOfficerDashboard from "./views/fieldOfficer/Dashboard";
+import FieldOperations from "./views/fieldOfficer/FieldOperations";
+import FarmResources from "./views/fieldOfficer/FarmResources";
+import LandRegistry from "./views/fieldOfficer/LandRegistry";
+import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress";
+
+// Higher Manager
+import HigherManagerDashboard from "./views/higherManager/Dashboard";
+import HigherManagerLandProgress from "./views/higherManager/LandProgress";
+import HigherManagerLandProgressTracking from "./views/higherManager/LandProgressTracking";
+import HigherManagerApprovePayments from "./views/higherManager/ApprovePayments";
+
+//Manager
+import Dashboard from "./views/manager/Dashboard";
+import ManagerApprovePayments from "./views/manager/ApprovePayments";
+import ApproveOperations from "./views/manager/ApproveOperations";
+import DivisionProgress from "./views/manager/DivisionProgress";
+
+//Layout
+import ManagerLayout from "./views/layout/Manager";
+import FieldOfficerLayout from "./views/layout/FieldOfficer";
+import AdminLayout from "./views/layout/Admin";
+import HigherManagerLayout from "./views/layout/HigherManager";
+
 const AppWrapper = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,42 +58,65 @@ const AppWrapper = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const publicPaths = ["/login", "/reset-password"];
-
-    // ✅ Read toggle flag from .env
     const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
 
-    // ✅ Skip auth check completely if bypass flag is on
-    if (bypassAuth) {
-      return;
-    }
-
-    // ✅ Enforce auth check if bypass is off
-    if ((!token || isTokenExpired(token)) && !publicPaths.includes(location.pathname)) {
-      clearAuth();
-      navigate("/login");
+    if (!bypassAuth) {
+      if (
+        (!token || isTokenExpired(token)) &&
+        !publicPaths.includes(location.pathname)
+      ) {
+        clearAuth();
+        navigate("/login");
+      }
     }
   }, [navigate, location]);
 
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/reset-password" element={<ResetPw />} />
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="*" element={<NoPage />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/fieldOfficer/Dashboard" element={<FieldOfficerDashboard />} />
-        <Route path="/fieldOfficer/LandRegistration" element={<LandRegistration />} />
-        <Route path="/fieldOfficer/LandRegistration2" element={<LandRegistrationPage2 />} />
-        <Route path="/fieldOfficer/LandRegistration3" element={<LandRegistrationPage3 />} />
-        <Route path="/fieldOfficer/LandRegistration4" element={<LandRegistrationPage4 />} />
-        <Route path="/user/register" element={<UserRegistration />} />
-        <Route path="/user/edit/:userId" element={<UserEdit />} />
-        <Route path="/manager" element={<Manager />} />
-        <Route path="/accountant" element={<Accountant />} />
-        <Route path="/higherManager" element={<HigherManager />} />
-        <Route path="/fieldOfficer" element={<FieldOfficer />} />
 
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/resetPassword" element={<ResetPw />} />
+
+      {/* Admin */}
+      <Route path="/admin/" element={<AdminLayout />}>
+        <Route path="*" element={<NoPage />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="" element={<AdminDashboard />} />
+        <Route path="register" element={<UserRegistration />} />
+        <Route path="edit/:userId" element={<UserEdit />} />
+      </Route>
+
+      {/* Field Officer */}
+      <Route path="/fieldOfficer/" element={<FieldOfficerLayout />}>
+        <Route path="*" element={<NoPage />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="" element={<FieldOfficerDashboard />} />
+        <Route path="fieldOperations" element={<FieldOperations />} />
+        <Route path="farmResources" element={<FarmResources />} />
+        <Route path="landRegistry" element={<LandRegistry />} />
+        <Route path="assignedLandProgress" element={<AssignedLandProgress />} />
+      </Route>
+
+      {/* Manager */}
+      <Route path="/manager/" element={<ManagerLayout />}>
+        <Route path="*" element={<NoPage />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="" element={<Dashboard />} />
+        <Route path="approveOperations" element={<ApproveOperations />} />
+        <Route path="approvePayments" element={<ManagerApprovePayments />} />
+        <Route path="divisionProgress" element={<DivisionProgress />} />
+      </Route>
+
+      <Route path="/higherManager/" element={<HigherManagerLayout />}>
+        <Route path="*" element={<NoPage />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="" element={<HigherManagerDashboard />} />
+        <Route path="landProgress" element={<HigherManagerLandProgress />} />
+        <Route
+          path="approvePayments"
+          element={<HigherManagerApprovePayments />}
+        />
       </Route>
     </Routes>
   );

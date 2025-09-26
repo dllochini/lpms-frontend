@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   TextField,
@@ -16,46 +16,15 @@ import {
   DialogActions,
   Snackbar,
   Alert,
-  Divider,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { useNavigate, useParams } from "react-router-dom";
 import { getUserById, updateUserById } from "../../api/user";
 import { getRoles } from "../../api/role";
-
-const schema = yup
-  .object({
-    designation: yup.string().required("Choose a designation"),
-    role: yup.string().required("Choose a role"),
-    // firstName: yup.string().required("First name is required"),
-    // lastName: yup.string().required("Last name is required"),
-    fullName: yup.string().required("Full name is required"),
-    email: yup.string().email("Invalid email format"),
-    nic: yup
-      .string()
-      .matches(
-        /^([0-9]{9}[vV]|[0-9]{12})$/,
-        "Invalid NIC format. Must be 12 digits or 9 digits with 'V'/'v'"
-      )
-      .nullable()
-      .notRequired(),
-    contact_no: yup
-      .string()
-      .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits")
-      .nullable()
-      .notRequired(),
-  })
-  .required();
-
-const designations = [
-  { value: "Mr.", label: "Mr." },
-  { value: "Miss.", label: "Miss." },
-  { value: "Mrs.", label: "Mrs." },
-  { value: "Rev", label: "Rev" },
-];
+import { getDivisions } from "../../api/division";
+import getUserSchema from "../validations/userSchemas.js";
 
 const UserEdit = () => {
   const { userId } = useParams();
@@ -68,11 +37,24 @@ const UserEdit = () => {
   const [formData, setFormData] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
   const [roles, setRoles] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+  const [initialValues, setInitialValues] = useState(null);
 
-  const fetchRoles = async function () {
+  const designations = [
+    { value: "Mr.", label: "Mr." },
+    { value: "Mrs.", label: "Mrs." },
+    { value: "Miss.", label: "Miss." },
+    { value: "Ms.", label: "Ms." },
+    { value: "Dr.", label: "Dr." },
+    { value: "Prof.", label: "Prof." },
+    { value: "Mx.", label: "Mx." },
+    { value: "Rev.", label: "Rev." },
+  ];
+
+  // Fetch roles
+  const fetchRoles = async () => {
     try {
       const response = await getRoles();
-      console.log("Full Roles API response:", response);
       setRoles(
         Array.isArray(response.data)
           ? response.data
@@ -84,40 +66,68 @@ const UserEdit = () => {
     }
   };
 
+  // Fetch divisions
+  const fetchDivisions = async () => {
+    try {
+      const response = await getDivisions();
+      setDivisions(
+        Array.isArray(response.data)
+          ? response.data
+          : response.data?.divisions || []
+      );
+    } catch (error) {
+      console.error("Error fetching divisions:", error);
+      setDivisions([]);
+    }
+  };
+
   useEffect(() => {
     fetchRoles();
+    fetchDivisions();
   }, []);
+
+  // Build validation schema after roles are loaded
+  const schema = useMemo(() => {
+    if (!roles || roles.length === 0) return null;
+    return getUserSchema(roles, { isEdit: true });
+  }, [roles]);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm({
-    resolver: yupResolver(schema),
+    resolver: schema ? yupResolver(schema) : undefined,
   });
 
+  // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        console.log("Fetching user data for id:", userId);
         const userResponse = await getUserById(userId);
         const user = userResponse.data;
-        console.log("User data fetched:", user);
         setSelectedUserName(user ? user.fullName : "");
-        reset({
+
+        const initial = {
           designation: user.designation || "",
           role:
-            typeof user.role === "object" && user.role !== null
+            typeof user.role === "object" && user.role
               ? user.role._id
               : user.role || "",
-          // // firstName: user.firstName || "",
-          // // lastName: user.lastName || "",
+          division:
+            typeof user.division === "object" && user.division
+              ? user.division._id
+              : user.division || "",
           fullName: user.fullName || "",
           email: user.email || "",
           nic: user.nic || "",
           contact_no: user.contact_no || "",
-        });
+        };
+
+        setInitialValues(initial);
+        reset(initial);
       } catch (error) {
         console.error("Failed to fetch user data:", error);
         setSubmitError("Failed to load user data.");
@@ -134,6 +144,14 @@ const UserEdit = () => {
     }
   }, [userId, reset]);
 
+  const selectedRole = watch("role");
+  const selectedRoleName = roles.find((r) => r._id === selectedRole)?.name;
+  const showDivision =
+    selectedRoleName &&
+    !["Admin", "Higher Management", "Higher Manager"].includes(
+      selectedRoleName
+    );
+
   const onSubmit = (data) => {
     setFormData(data);
     setOpenConfirm(true);
@@ -142,12 +160,9 @@ const UserEdit = () => {
   const handleConfirmSubmit = async () => {
     setOpenConfirm(false);
     try {
-      // Assuming updateUserById(userId, data) updates user info via API
       await updateUserById(userId, formData);
       setOpenSnackbar(true);
-      setTimeout(() => {
-        navigate("/admin/dashboard");
-      }, 2000);
+      setTimeout(() => navigate("/admin"), 2000);
     } catch (error) {
       setSubmitError(error.response?.data?.error || "Something went wrong");
     }
@@ -170,7 +185,7 @@ const UserEdit = () => {
           </Typography>
 
           <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-            <Link underline="hover" color="inherit" href="/admin/dashboard">
+            <Link underline="hover" color="inherit" href="/admin">
               <HomeIcon
                 sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }}
               />{" "}
@@ -220,19 +235,8 @@ const UserEdit = () => {
               </Grid>
 
               {/* Role */}
-              <Grid
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  // border: 1,
-                  // borderColor: "yellow",
-                }}
-              >
-                <InputLabel
-                  className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 130 }}
-                >
+              <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
                   Role :
                 </InputLabel>
                 <Controller
@@ -241,78 +245,50 @@ const UserEdit = () => {
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      id="outlined-select-roles"
                       select
                       size="small"
-                      className="inputField"
-                      sx={{ width: 100 }}
+                      sx={{ width: 200 }}
                       error={!!errors.role}
                       helperText={errors.role?.message || " "}
                     >
-                      {roles
-                        .filter((role) => role.name?.toLowerCase() !== "farmer")
-                        .map((role) => (
-                          <MenuItem key={role._id} value={role._id}>
-                            {role.name}{" "}
-                          </MenuItem>
-                        ))}
+                      {roles.map((role) => (
+                        <MenuItem key={role._id} value={role._id}>
+                          {role.name}
+                        </MenuItem>
+                      ))}
                     </TextField>
                   )}
                 />
               </Grid>
 
-              {/* First and Last Name */}
-              {/* <Grid sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
-                <Grid
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    marginRight: "3%",
-                  }}
-                >
+              {/* Division */}
+              {showDivision && (
+                <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                    First Name :
+                    Division:
                   </InputLabel>
                   <Controller
-                    // name="firstName"
+                    name="division"
                     control={control}
                     render={({ field }) => (
                       <TextField
                         {...field}
+                        select
                         size="small"
-                        // error={!!errors.firstName}
-                        // helperText={errors.firstName?.message || " "}
-                      />
+                        sx={{ width: 200 }}
+                        error={!!errors.division}
+                        helperText={errors.division?.message || " "}
+                      >
+                        {divisions.map((division) => (
+                          <MenuItem key={division._id} value={division._id}>
+                            {division.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
                     )}
                   />
                 </Grid>
-
-                <Grid
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    width: "50%",
-                  }}
-                >
-                  <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                    Last Name :
-                  </InputLabel>
-                  <Controller
-                    // name="lastName"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        size="small"
-                        // error={!!errors.lastName}
-                        // helperText={errors.lastName?.message || " "}
-                      />
-                    )}
-                  />
-                </Grid>
-              </Grid> */}
+              )}
 
               {/* Full Name */}
               <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -392,26 +368,21 @@ const UserEdit = () => {
                 />
               </Grid>
 
-              {/* <Button
-                  type="button"
-                  variant="contained"
-                  color="primary"
-                  onClick={() => navigate("/admin/dashboard")}
-                >
-                  Change Password
-                </Button> */}
-
               <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
                 <Button
                   type="button"
                   variant="contained"
                   color="secondary"
-                  onClick={() => reset()}
+                  onClick={() => reset(initialValues || {})}
                 >
                   Cancel
                 </Button>
-
-                <Button type="submit" variant="contained" color="primary">
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  onClick={() => setSubmitError("")}
+                >
                   Save Changes
                 </Button>
               </Box>
