@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   TextField,
@@ -9,7 +9,6 @@ import {
   Paper,
   MenuItem,
   Breadcrumbs,
-  Link,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -20,25 +19,37 @@ import {
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import HomeIcon from "@mui/icons-material/Home";
 import { createUser } from "../../api/user";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { getRoles } from "../../api/role";
+import { getDivisions } from "../../api/division";
+import getUserSchema from "../validations/userSchemas.js";
 
 const UserRegistration = () => {
   const [openConfirm, setOpenConfirm] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState(null);
-  const navigate = useNavigate();
   const [roles, setRoles] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+  const navigate = useNavigate();
 
-  //Fetch roles from API
-  const fetchRoles = async function () {
+  const designations = [
+    { value: "Mr.", label: "Mr." },
+    { value: "Mrs.", label: "Mrs." },
+    { value: "Miss.", label: "Miss." },
+    { value: "Ms.", label: "Ms." },
+    { value: "Dr.", label: "Dr." },
+    { value: "Prof.", label: "Prof." },
+    { value: "Mx.", label: "Mx." },
+    { value: "Rev.", label: "Rev." },
+  ];
+
+  // Fetch roles
+  const fetchRoles = async () => {
     try {
       const response = await getRoles();
-      console.log("Full Roles API response:", response);
       setRoles(
         Array.isArray(response.data)
           ? response.data
@@ -50,76 +61,43 @@ const UserRegistration = () => {
     }
   };
 
+  // Fetch divisions
+  const fetchDivisions = async () => {
+    try {
+      const response = await getDivisions();
+      setDivisions(
+        Array.isArray(response.data)
+          ? response.data
+          : response.data?.divisions || []
+      );
+    } catch (error) {
+      console.error("Error fetching divisions:", error);
+      setDivisions([]);
+    }
+  };
+
   useEffect(() => {
     fetchRoles();
+    fetchDivisions();
   }, []);
 
-  const designations = [
-    {
-      value: "Mr.",
-      label: "Mr.",
-    },
-    {
-      value: "Miss.",
-      label: "Miss.",
-    },
-    {
-      value: "Mrs.",
-      label: "Mrs.",
-    },
-    {
-      value: "Rev",
-      label: "Rev",
-    },
-  ];
-
-  // Validation schema using Yup
-  const schema = yup
-    .object({
-      designation: yup.string().required("Choose a designation"),
-      role: yup.string().required("Choose a role"),
-      // firstName: yup.string().required("First name is required"),
-      // lastName: yup.string().required("Last name is required"),
-      fullName: yup.string().required("Full name is required"),
-      email: yup.string().email(),
-      nic: yup
-        .string()
-        .matches(
-          /^([0-9]{9}[vV]|[0-9]{12})$/,
-          "Invalid NIC format. Must be 12 digits or 9 digits with 'V'/'v'"
-        ),
-      contact_no: yup
-        .string()
-        .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits"),
-      password: yup
-        .string()
-        .required("Password is required")
-        .min(8, "Password must be at least 8 characters")
-        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-        .matches(/[0-9]/, "Password must contain at least one number")
-        .matches(
-          /[@$!%*?&]/,
-          "Password must contain at least one special character"
-        ),
-      confirmPassword: yup
-        .string()
-        .required("Please confirm your password")
-        .oneOf([yup.ref("password"), null], "Passwords must match"),
-    })
-    .required();
+  // Dynamic validation schema based on roles
+  const schema = useMemo(() => {
+    if (!roles || roles.length === 0) return null;
+    return getUserSchema(roles, { isEdit: true });
+  }, [roles]);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
     reset,
+    watch,
   } = useForm({
     defaultValues: {
       designation: "",
       role: "",
-      // firstName: "",
-      // lastName: "",
+      division: "",
       fullName: "",
       email: "",
       nic: "",
@@ -127,24 +105,32 @@ const UserRegistration = () => {
       password: "",
       confirmPassword: "",
     },
-    resolver: yupResolver(schema),
+    resolver: schema ? yupResolver(schema) : undefined,
   });
 
-  // Handle form submission
-  const onSubmit = async (data) => {
-    setFormData(data); // save form data for confirmed submit
-    setOpenConfirm(true); // open confirm dialog
+  if (!schema) {
+    return <Typography sx={{ p: 3 }}>Loading...</Typography>;
+  }
+
+  const selectedRoleId = watch("role");
+  const selectedRoleObj = roles.find((r) => r._id === selectedRoleId);
+  const showDivision =
+    selectedRoleObj &&
+    !["Admin", "Higher Management"].includes(selectedRoleObj.name);
+
+  const onSubmit = (data) => {
+    setFormData(data);
+    setOpenConfirm(true);
   };
 
   const handleConfirmSubmit = async () => {
     setOpenConfirm(false);
     try {
-      const response = await createUser(formData);
-      // show success message
+      await createUser(formData);
       setOpenSnackbar(true);
       reset();
       setTimeout(() => {
-        navigate("/admin/dashboard");
+        navigate("/admin");
       }, 2000);
     } catch (error) {
       setSubmitError(error.response?.data?.error || "Something went wrong");
@@ -153,78 +139,58 @@ const UserRegistration = () => {
 
   return (
     <>
-      <Box
-        className="body"
-        sx={{
-          minHeight: "125vh",
-          margin: 0,
-        }}
-      >
+      <Box sx={{ minHeight: "125vh", margin: 0 }}>
         <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
-          {/* Header */}
           <Typography variant="h5" gutterBottom>
             New User Registration
           </Typography>
 
-          {/* Breadcrumbs */}
           <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-            <Link underline="hover" color="inherit" href="/admin/dashboard">
-              <HomeIcon
-                sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }}
-              />{" "}
-              Home
-            </Link>
+            <RouterLink
+              to="/admin"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                textDecoration: "none",
+                color: "inherit",
+              }}
+            >
+              <HomeIcon sx={{ mr: 0.5, fontSize: 18 }} /> Home
+            </RouterLink>
             <Typography color="text.primary">Add New User</Typography>
           </Breadcrumbs>
         </Box>
 
-        {/* form */}
         <Box
           component="form"
-          sx={{
-            // marginTop: 3,
-            marginBottom: 3,
-            justifyContent: "center",
-            display: "flex",
-          }}
+          sx={{ marginBottom: 3, justifyContent: "center", display: "flex" }}
           noValidate
           onSubmit={handleSubmit(onSubmit)}
           autoComplete="off"
         >
-          {/* Box for form content */}
           <Paper
             elevation={5}
             sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 5 }}
           >
-            {/* form content  */}
-            <Grid sx={{ margin: 3 }}>
-              {/* designation */}
-              <Grid
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  // border: 1,
-                  // borderColor: "yellow",
-                }}
-              >
-                <InputLabel
-                  className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 130 }}
-                >
-                  Designation :
-                </InputLabel>
+            <Grid
+              sx={{
+                margin: 3,
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
+              {/* Designation */}
+              <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <InputLabel sx={{ minWidth: 130 }}>Designation :</InputLabel>
                 <Controller
                   name="designation"
                   control={control}
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      id="outlined-select-designations"
                       select
-                      // label="Designation"
                       size="small"
-                      className="inputField"
                       sx={{ width: 100 }}
                       error={!!errors.designation}
                       helperText={errors.designation?.message || " "}
@@ -239,33 +205,18 @@ const UserRegistration = () => {
                 />
               </Grid>
 
-              {/* role */}
-              <Grid
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  // border: 1,
-                  // borderColor: "yellow",
-                }}
-              >
-                <InputLabel
-                  className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 130 }}
-                >
-                  Role :
-                </InputLabel>
+              {/* Role */}
+              <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <InputLabel sx={{ minWidth: 130 }}>Role :</InputLabel>
                 <Controller
                   name="role"
                   control={control}
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      id="outlined-select-roles"
                       select
                       size="small"
-                      className="inputField"
-                      sx={{ width: 100 }}
+                      sx={{ width: 200 }}
                       error={!!errors.role}
                       helperText={errors.role?.message || " "}
                     >
@@ -281,112 +232,43 @@ const UserRegistration = () => {
                 />
               </Grid>
 
-              {/* first name and last name container */}
-              {/* <Grid
-                sx={{
-                  // border: 1,
-                  // borderColor: "green",
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: 2,
-                }}
-              >
-                // {/* firstName
-                <Grid
-                  item
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    // border: 1,
-                    // borderColor: "red",
-                    // width: "50%",
-                    marginRight: "3%",
-                  }}
-                >
-                  <InputLabel
-                    className="inputLabel"
-                    sx={{ paddingBottom: 3, minWidth: 130 }}
-                  >
-                    First Name :
-                  </InputLabel>
+              {/* Division */}
+              {showDivision && (
+                <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <InputLabel sx={{ minWidth: 130 }}>Division :</InputLabel>
                   <Controller
-                    // name="firstName"
+                    name="division"
                     control={control}
                     render={({ field }) => (
                       <TextField
                         {...field}
-                        id="outlined-required"
-                        // error={!!errors.firstName}
-                        // helperText={errors.firstName?.message || " "}
+                        select
                         size="small"
-                        className="inputField"
-                      />
+                        sx={{ width: 200 }}
+                        error={!!errors.division}
+                        helperText={errors.division?.message || " "}
+                      >
+                        {divisions.map((division) => (
+                          <MenuItem key={division._id} value={division._id}>
+                            {division.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
                     )}
                   />
                 </Grid>
+              )}
 
-                // {/* lastName
-                <Grid
-                  item
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    // border: 1,
-                    // borderColor: "red",
-                    width: "50%",
-                  }}
-                >
-                  <InputLabel
-                    className="inputLabel"
-                    sx={{ paddingBottom: 3, minWidth: 130 }}
-                  >
-                    Last Name :
-                  </InputLabel>
-                  <Controller
-                    // name="lastName"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        id="outlined-required"
-                        size="small"
-                        className="inputField"
-                        // error={!!errors.lastName}
-                        // helperText={errors.lastName?.message || " "}
-                        // fullWidth
-                      />
-                    )}
-                  />
-                </Grid>
-              </Grid> */}
-
-              {/* Full name */}
-              <Grid
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  // border: 1,
-                  // borderColor: "yellow",
-                }}
-              >
-                <InputLabel
-                  className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 130 }}
-                >
-                  Full Name :
-                </InputLabel>
+              {/* Full Name */}
+              <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <InputLabel sx={{ minWidth: 130 }}>Full Name :</InputLabel>
                 <Controller
                   name="fullName"
                   control={control}
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      id="outlined-required"
                       size="small"
-                      // className="inputField"
                       sx={{ width: "400px" }}
                       error={!!errors.fullName}
                       helperText={errors.fullName?.message || " "}
@@ -396,30 +278,15 @@ const UserRegistration = () => {
               </Grid>
 
               {/* NIC */}
-              <Grid
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  // border: 1,
-                  // borderColor: "yellow",
-                }}
-              >
-                <InputLabel
-                  className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 130 }}
-                >
-                  NIC :
-                </InputLabel>
+              <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <InputLabel sx={{ minWidth: 130 }}>NIC :</InputLabel>
                 <Controller
                   name="nic"
                   control={control}
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      id="outlined-required"
                       size="small"
-                      className="inputField"
                       sx={{ width: "400px" }}
                       error={!!errors.nic}
                       helperText={errors.nic?.message || " "}
@@ -429,30 +296,15 @@ const UserRegistration = () => {
               </Grid>
 
               {/* Email */}
-              <Grid
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  // border: 1,
-                  // borderColor: "yellow",
-                }}
-              >
-                <InputLabel
-                  className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 130 }}
-                >
-                  Email :
-                </InputLabel>
+              <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <InputLabel sx={{ minWidth: 130 }}>Email :</InputLabel>
                 <Controller
                   name="email"
                   control={control}
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      id="outlined-required"
                       size="small"
-                      className="inputField"
                       error={!!errors.email}
                       helperText={errors.email?.message || " "}
                     />
@@ -461,30 +313,15 @@ const UserRegistration = () => {
               </Grid>
 
               {/* Contact */}
-              <Grid
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  // border: 1,
-                  // borderColor: "yellow",
-                }}
-              >
-                <InputLabel
-                  className="inputLabel"
-                  sx={{ paddingBottom: 3, minWidth: 130 }}
-                >
-                  Contact No :
-                </InputLabel>
+              <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <InputLabel sx={{ minWidth: 130 }}>Contact No :</InputLabel>
                 <Controller
                   name="contact_no"
                   control={control}
                   render={({ field }) => (
                     <TextField
                       {...field}
-                      id="outlined-required"
                       size="small"
-                      className="inputField"
                       error={!!errors.contact_no}
                       helperText={errors.contact_no?.message || " "}
                     />
@@ -492,71 +329,29 @@ const UserRegistration = () => {
                 />
               </Grid>
 
-              <Divider sx={{ mb: 2, p: 0 }} />
+              <Divider sx={{ mb: 2 }} />
 
-              {/* password and confirm password*/}
-              <Grid
-                sx={{
-                  // border: 1,
-                  // borderColor: "green",
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: 2,
-                }}
-              >
-                {/* Password */}
-                <Grid
-                  item
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    // border: 1,
-                    // borderColor: "red",
-                    // width: "50%",
-                    // marginRight: "2%"
-                  }}
-                >
-                  <InputLabel
-                    className="inputLabel"
-                    sx={{ paddingBottom: 3, minWidth: 130 }}
-                  >
-                    New Password :
-                  </InputLabel>
+              {/* Passwords */}
+              <Grid sx={{ display: "flex", gap: 2 }}>
+                <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <InputLabel sx={{ minWidth: 130 }}>New Password :</InputLabel>
                   <Controller
                     name="password"
                     control={control}
                     render={({ field }) => (
                       <TextField
                         {...field}
-                        id="outlined-required"
                         type="password"
-                        error={!!errors.password}
-                        helperText={errors.password?.message || " "}
                         size="small"
                         sx={{ width: 200 }}
-                        className="inputField"
+                        error={!!errors.password}
+                        helperText={errors.password?.message || " "}
                       />
                     )}
                   />
                 </Grid>
-
-                {/* Confirm password */}
-                <Grid
-                  item
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    // border: 1,
-                    // borderColor: "red",
-                    // width: "50%",
-                  }}
-                >
-                  <InputLabel
-                    className="inputLabel"
-                    sx={{ paddingBottom: 3, minWidth: 130 }}
-                  >
+                <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <InputLabel sx={{ minWidth: 130 }}>
                     Confirm New Password :
                   </InputLabel>
                   <Controller
@@ -566,44 +361,29 @@ const UserRegistration = () => {
                       <TextField
                         {...field}
                         type="password"
-                        id="outlined-required"
                         size="small"
-                        className="inputField"
                         sx={{ width: 200 }}
                         error={!!errors.confirmPassword}
                         helperText={errors.confirmPassword?.message || " "}
-                        // fullWidth
                       />
                     )}
                   />
                 </Grid>
               </Grid>
 
-              <Divider sx={{ mb: 2, p: 0 }} />
+              <Divider sx={{ mb: 2 }} />
 
-              {/* 2 Buttons */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  // mt: 2,
-                  gap: 2,
-                }}
-              >
+              {/* Buttons */}
+              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
                 <Button
                   type="button"
                   variant="contained"
                   color="secondary"
                   onClick={() => reset()}
                 >
-                  Cancel
+                  Reset
                 </Button>
-
-                <Button
-                  type="submit" // prevent immediate submit
-                  variant="contained"
-                  color="primary"
-                >
+                <Button type="submit" variant="contained" color="primary">
                   Submit
                 </Button>
               </Box>
@@ -612,11 +392,8 @@ const UserRegistration = () => {
         </Box>
       </Box>
 
-      <Dialog
-        sx={{ p: 2 }}
-        open={openConfirm}
-        onClose={() => setOpenConfirm(false)}
-      >
+      {/* Confirm Dialog */}
+      <Dialog open={openConfirm} onClose={() => setOpenConfirm(false)}>
         <DialogTitle>Confirm Submission</DialogTitle>
         <DialogContent>Are you sure you want to submit the form?</DialogContent>
         <DialogActions>
@@ -631,6 +408,7 @@ const UserRegistration = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Success Snackbar */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={4000}
@@ -642,6 +420,7 @@ const UserRegistration = () => {
         </Alert>
       </Snackbar>
 
+      {/* Error Snackbar */}
       <Snackbar
         open={!!submitError}
         autoHideDuration={4000}

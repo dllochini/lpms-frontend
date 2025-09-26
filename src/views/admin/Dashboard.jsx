@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 export default function Dashboard() {
   const navigate = useNavigate();
   const [responseData, setResponseData] = useState([]);
+  const [userName, setUserName] = useState("");
 
   const fetchData = async function () {
     const response = await getUsers();
@@ -19,6 +20,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchData();
+    setUserName(localStorage.getItem("name") || "");
   }, []);
 
   const handleDelete = (deletedUserId) => {
@@ -30,12 +32,26 @@ export default function Dashboard() {
   return (
     <Box sx={{ mb: 1.8 }}>
       {/* Greeting & Breadcrumb */}
-      <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Hello Admin!
-        </Typography>
-
-        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
+      <Box sx={{ maxWidth: 1150, mx: "auto", p: 3 }}>
+        {/* Greeting Card */}
+        <Paper
+          sx={{
+            mx: "auto",
+            p: 3,
+            mb: 3,
+            borderRadius: 4,
+            background: "linear-gradient(135deg, #e8f5e9, #f1f8e9)",
+          }}
+          elevation={0}
+        >
+          <Typography variant="h5" gutterBottom>
+            Hello {userName} 👋
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Welcome back to the Agricultural Land Preparation System Dashboard.
+          </Typography>
+        </Paper>
+        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2 }}>
           <Typography color="text.primary">
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
             Home
@@ -61,7 +77,7 @@ export default function Dashboard() {
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => navigate("/user/register")}
+            onClick={() => navigate("/admin/register")}
           >
             CREATE NEW USER
           </Button>

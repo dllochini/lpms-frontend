@@ -14,7 +14,7 @@ import ResourceDialog from "../../components/fieldOfficer/ResourceDialogBox";
 import { getResources } from "../../api/resources";
 import { getUnits } from "../../api/unit";
 
-export default function Resource() {
+export default function FarmResources() {
   const [responseData, setResponseData] = useState([]);
   const [categories, setCategories] = useState([]);
   const [units, setUnits] = useState([]);
