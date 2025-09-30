@@ -1,4 +1,5 @@
-import { useState } from "react";
+// File: LandRegistrationSubmission.jsx
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -16,21 +17,139 @@ import {
   DialogActions,
   Snackbar,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import FormStepper from "../components/FormStepper.jsx";
 import { useNavigate } from "react-router-dom";
+import { getAllFiles, deleteFile } from "../../utils/db.js";
+import {
+  getWithExpiry,
+  setWithExpiry,
+} from "../../utils/localStorageHelpers.js";
+import { createUserLand } from "../../api/land.js";
 
 const LandRegistrationSubmission = () => {
+  const navigate = useNavigate();
   const [agreementFile, setAgreementFile] = useState(null);
   const [confirmed, setConfirmed] = useState(false);
   const [openConfirm, setOpenConfirm] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [submitError, setSubmitError] = useState("");
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState({});
 
-  const handleFileChange = (file) => setAgreementFile(file);
+  // Load previously saved files from IndexedDB
+  useEffect(() => {
+    const loadFiles = async () => {
+      try {
+        const files = await getAllFiles();
+        setUploadedFiles(files || {});
+      } catch (err) {
+        console.error("Failed to load files:", err);
+      }
+    };
+    loadFiles();
+  }, []);
+
+  // landForm1 and landForm2 may be stored as wrapper { data, fileKey }
+  const form1Wrapper = getWithExpiry("landForm1") || null; // Farmer info wrapper
+  const form2Wrapper = getWithExpiry("landForm2") || null; // Land info wrapper
+
+  const form1 = form1Wrapper?.data || form1Wrapper || {};
+  const form2 = form2Wrapper?.data || form2Wrapper || {};
+
+  const handleFinalSubmission = async () => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      
+      // get logged userId
+      const loggedUserID = localStorage.getItem("loggedUserID");
+      if (loggedUserID) {
+        formData.append("createdBy", loggedUserID);
+        formData.append("updatedBy", loggedUserID);
+      }
+
+      // --- Step 1 (farmer info) ---
+
+      if (form1 && Object.keys(form1).length) {
+        Object.entries(form1).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            formData.append(key, value); // <--- flatten
+          }
+        });
+        if (form1Wrapper?.fileKey) {
+          const f = uploadedFiles[form1Wrapper.fileKey];
+          if (f) formData.append("farmerPhoto", f, f.name);
+        }
+      }
+
+      // --- Step 2 (land info) ---
+      if (form2 && Object.keys(form2).length) {
+        Object.entries(form2).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            formData.append(key, value); // <--- flatten
+          }
+        });
+        if (form2Wrapper?.fileKey) {
+          const lf = uploadedFiles[form2Wrapper.fileKey];
+          if (lf) formData.append("landPhoto", lf, lf.name);
+        }
+      }
+
+      // --- Step 3 (uploaded documents) ---
+      const form3Wrapper = getWithExpiry("landForm3") || {};
+      const filesMap = form3Wrapper.files || {};
+      // GOOD: append every document as 'documents' (multiple values)
+      for (const fileKey of Object.values(filesMap || {})) {
+        const fileObj = uploadedFiles[fileKey];
+        if (fileObj) {
+          formData.append("documents", fileObj, fileObj.name);
+        }
+      }
+
+      // --- Signed agreement (final step) ---
+      if (agreementFile) {
+        formData.append("signedAgreement", agreementFile, agreementFile.name);
+      }
+
+      // Debug log
+      for (let [k, v] of formData.entries()) {
+        console.log("formData entry:", k, v);
+      }
+
+      const res = await createUserLand(formData);
+      console.log("Submission response:", res.data);
+
+      setOpenSnackbar(true);
+
+      // cleanup local storage and optionally delete saved files from IndexedDB
+      localStorage.removeItem("landForm1");
+      localStorage.removeItem("landForm2");
+      localStorage.removeItem("landForm3");
+
+      // delete saved files referenced in filesMap
+      for (const key of Object.values(filesMap || {})) {
+        try {
+          await deleteFile(key);
+        } catch (err) {
+          console.warn("Failed to delete indexedDB file:", key, err);
+        }
+      }
+
+      setTimeout(() => navigate("/fieldOfficer"), 2000);
+    } catch (error) {
+      console.error(error);
+      setSubmitError(
+        error.response?.data?.error || error.message || "Submission failed"
+      );
+    } finally {
+      setLoading(false);
+      setOpenConfirm(false);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -39,32 +158,6 @@ const LandRegistrationSubmission = () => {
       return;
     }
     setOpenConfirm(true);
-  };
-
-  const handleConfirmSubmit = async () => {
-    setOpenConfirm(false);
-    try {
-      const formData = new FormData();
-      formData.append("agreementFile", agreementFile);
-      formData.append("confirmed", confirmed);
-
-      // Replace with your API endpoint
-      const response = await fetch("/api/submit-land-registration", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) throw new Error("Submission failed");
-
-      setOpenSnackbar(true);
-      setAgreementFile(null);
-      setConfirmed(false);
-
-      setTimeout(() => navigate("/dashboard"), 2000);
-    } catch (error) {
-      console.error(error);
-      setSubmitError(error.message || "Something went wrong");
-    }
   };
 
   return (
@@ -88,7 +181,6 @@ const LandRegistrationSubmission = () => {
           </Breadcrumbs>
         </Box>
 
-        {/* Form */}
         <Box
           component="form"
           onSubmit={handleSubmit}
@@ -96,7 +188,7 @@ const LandRegistrationSubmission = () => {
         >
           <Paper
             elevation={5}
-            sx={{ maxWidth: 700, mx: "auto", p: 3, borderRadius: 5 }}
+            sx={{ maxWidth: "70%", mx: "auto", px: 10, py: 5, borderRadius: 5 }}
           >
             <Typography variant="h6" gutterBottom>
               Submission
@@ -104,31 +196,23 @@ const LandRegistrationSubmission = () => {
             <Divider sx={{ mb: 2 }} />
 
             <Grid container direction="column" spacing={2}>
-              {/* Agreement Upload */}
-              <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, alignItems: "center", gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Typography sx={{ minWidth: 120 }}>Agreement :</Typography>
-                <Box sx={{ flex: 1 }}>
-                  <Button
-                    component="label"
-                    variant="outlined"
-                    startIcon={<UploadFileIcon />}
-                    sx={{ width: "100%", textAlign: "left" }}
-                  >
-                    {agreementFile?.name || "Link or drag and drop"}
-                    <input
-                      type="file"
-                      hidden
-                      accept=".jpg,.jpeg,.png,.gif,.svg"
-                      onChange={(e) => handleFileChange(e.target.files[0])}
-                    />
-                  </Button>
-                  <Typography variant="caption" color="text.secondary">
-                    SVG, PNG, JPG or GIF (max: 3MB)
-                  </Typography>
-                </Box>
+                <Button
+                  component="label"
+                  variant="outlined"
+                  startIcon={<UploadFileIcon />}
+                >
+                  {agreementFile?.name || "Upload Agreement"}
+                  <input
+                    type="file"
+                    hidden
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    onChange={(e) => setAgreementFile(e.target.files[0])}
+                  />
+                </Button>
               </Box>
 
-              {/* Confirmation Checkbox */}
               <FormControlLabel
                 control={
                   <Checkbox
@@ -136,20 +220,27 @@ const LandRegistrationSubmission = () => {
                     onChange={(e) => setConfirmed(e.target.checked)}
                   />
                 }
-                label="I confirm that this submission has been reviewed and approved by the Legal Officer."
+                label="I confirm this submission has been reviewed and approved by the Legal Officer."
               />
 
-              {/* Buttons */}
-              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-                <Button variant="outlined" onClick={() => navigate(-1)}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 2,
+                  pt: 2,
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate(-1)}
+                  disabled={loading}
+                >
                   Back
                 </Button>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  disabled={!agreementFile || !confirmed}
-                >
-                  Submit
+                
+                <Button variant="contained" type="submit" disabled={loading}>
+                  {loading ? <CircularProgress size={24} /> : "Submit"}
                 </Button>
               </Box>
             </Grid>
@@ -163,11 +254,7 @@ const LandRegistrationSubmission = () => {
         <DialogContent>Are you sure you want to submit the form?</DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
-          <Button
-            onClick={handleConfirmSubmit}
-            variant="contained"
-            color="primary"
-          >
+          <Button onClick={handleFinalSubmission} variant="contained">
             Yes, Submit
           </Button>
         </DialogActions>

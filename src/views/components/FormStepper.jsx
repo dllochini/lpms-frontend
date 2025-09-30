@@ -1,7 +1,12 @@
 import React from "react";
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 
-const steps = ["Farmer Details", "Land Details", "Document Upload","Submission"];
+const steps = [
+  "Farmer Details",
+  "Land Details",
+  "Document Upload",
+  "Submission",
+];
 
 const FormStepper = ({ activeStep }) => {
   return (

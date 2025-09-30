@@ -1,4 +1,5 @@
-import { useState } from "react";
+// File: LandRegistrationUpload.jsx
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -8,18 +9,37 @@ import {
   Button,
   Divider,
   Grid,
-  Checkbox,
-  FormControlLabel,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import FormStepper from "../components/FormStepper.jsx";
 import { useNavigate } from "react-router-dom";
+import { saveFile, getAllFiles, deleteFile } from "../../utils/db.js";
+import {
+  getWithExpiry,
+  setWithExpiry,
+} from "../../utils/localStorageHelpers.js";
+
+const FILE_KEYS = {
+  titleDeed: "titleDeed_file",
+  extract: "extract_file",
+  surveyPlan: "surveyPlan_file",
+  taxReceipts: "taxReceipts_file",
+  streetLine: "streetLine_file",
+  certificate: "certificate_file",
+  zoning: "zoning_file",
+};
 
 const documentFields = [
   { name: "titleDeed", label: "Title Deed* (Ownership Deed)" },
-  { name: "extract", label: "Extract (Bim Saha Lipi) from Land Registry (Certified Copy)*" },
-  { name: "surveyPlan", label: "Survey Plan (Document of Licensed Surveyor’s Plan)*" },
+  {
+    name: "extract",
+    label: "Extract (Bim Saha Lipi) from Land Registry (Certified Copy)*",
+  },
+  {
+    name: "surveyPlan",
+    label: "Survey Plan (Document of Licensed Surveyor’s Plan)*",
+  },
   { name: "taxReceipts", label: "Tax Receipts & Assessment Extracts*" },
   { name: "streetLine", label: "Street Line / Building Line*" },
   { name: "certificate", label: "Certificate of Non-Vesting*" },
@@ -30,28 +50,87 @@ const LandRegistrationUpload = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState({});
 
-  const handleFileChange = (name, file) => {
-    setFiles((prev) => ({ ...prev, [name]: file }));
+  // Load files from IndexedDB on mount
+  useEffect(() => {
+    const loadFiles = async () => {
+      try {
+        const storedFiles = await getAllFiles();
+        setFiles(storedFiles || {});
+      } catch (err) {
+        console.error("Failed to load files from IndexedDB:", err);
+      }
+    };
+    loadFiles();
+  }, []);
+
+  // Save file and store reference with expiry
+  const handleFileChange = async (name, file) => {
+    if (!file) return;
+    const key = FILE_KEYS[name];
+
+    // update UI state
+    setFiles((prev) => ({ ...prev, [key]: file }));
+
+    try {
+      await saveFile(key, file);
+
+      // keep track of multiple files
+      const existing = getWithExpiry("landForm3") || {};
+      const newFiles = { ...(existing.files || {}), [name]: key };
+
+      setWithExpiry(
+        "landForm3",
+        { ...(existing || {}), files: newFiles },
+        30 * 60 * 1000
+      );
+    } catch (err) {
+      console.error(`Failed to save file ${name}:`, err);
+    }
   };
+
+  // Optional: cleanup expired files
+  useEffect(() => {
+    const cleanupExpiredFiles = async () => {
+      const expired = !getWithExpiry("landForm3");
+      if (expired) {
+        for (const key of Object.values(FILE_KEYS)) {
+          await deleteFile(key);
+        }
+        setFiles({});
+      }
+    };
+    cleanupExpiredFiles();
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Uploaded files:", files);
-    navigate("/fieldOfficer/LandRegistration4");
+
+    // Ensure all required documents are uploaded (use FILE_KEYS)
+    const missing = documentFields.filter(
+      (doc) => !files[FILE_KEYS[doc.name]]
+    );
+    if (missing.length) {
+      alert(
+        `Please upload all required documents: ${missing
+          .map((m) => m.label)
+          .join(", ")}`
+      );
+      return;
+    }
+
+    // Navigate to next step
+    navigate("/fieldOfficer/landRegistration4");
   };
 
   return (
     <Box sx={{ minHeight: "100vh" }}>
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
-        {/* Header */}
         <Typography variant="h5" gutterBottom>
           Farmer and Land Registration
         </Typography>
 
-        {/* Stepper */}
         <FormStepper activeStep={2} />
 
-        {/* Breadcrumbs */}
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
           <Link underline="hover" color="inherit" href="/">
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
@@ -61,7 +140,6 @@ const LandRegistrationUpload = () => {
         </Breadcrumbs>
       </Box>
 
-      {/* Upload Form */}
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -69,7 +147,7 @@ const LandRegistrationUpload = () => {
       >
         <Paper
           elevation={5}
-          sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 5 }}
+          sx={{ maxWidth: "70%", mx: "auto", px: 10, py: 5, borderRadius: 5 }}
         >
           <Typography variant="h6" gutterBottom>
             Document Upload
@@ -80,7 +158,12 @@ const LandRegistrationUpload = () => {
             {documentFields.map((doc) => (
               <Grid
                 key={doc.name}
-                sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  width: "100%",
+                }}
               >
                 <Typography sx={{ minWidth: 280 }}>{doc.label}</Typography>
                 <Button
@@ -89,7 +172,7 @@ const LandRegistrationUpload = () => {
                   startIcon={<UploadFileIcon />}
                   sx={{ flex: 1, textAlign: "left" }}
                 >
-                  {files[doc.name]?.name || "Link or drag and drop"}
+                  {files[FILE_KEYS[doc.name]]?.name || "Link or drag and drop"}
                   <input
                     type="file"
                     hidden
@@ -103,32 +186,17 @@ const LandRegistrationUpload = () => {
             ))}
           </Grid>
 
-          {/* Checkbox + Buttons */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mt: 3,
-            }}
-          >
-            <FormControlLabel
-              control={<Checkbox />}
-              label="All above approved by Legal Officer"
-            />
+          <Box sx={{ display: "flex", gap: 2, mt: 4 }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate("/fieldOfficer/landRegistration2")}
+            >
+              Back
+            </Button>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={() => navigate("/fieldOfficer/LandRegistration2")}
-              >
-                Back
-              </Button>
-
-              <Button variant="contained" type="submit">
-                Next
-              </Button>
-            </Box>
+            <Button variant="contained" type="submit">
+              Next
+            </Button>
           </Box>
         </Paper>
       </Box>
