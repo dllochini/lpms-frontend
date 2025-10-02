@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FormStepper from "../components/FormStepper.jsx";
+import FormStepper from "../../components/fieldOfficer/CreateLandFormStepper.jsx";
 import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
