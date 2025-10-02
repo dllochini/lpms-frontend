@@ -6,13 +6,13 @@ import {
   Route,
   useNavigate,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
 import Login from "./views/Login";
-import ResetPw from "./views/ResetPw"; 
-import Home from "./views/Home";
+import ResetPw from "./views/ResetPw";
 import NoPage from "./views/NoPage";
 import Profile from "./views/Profile";
 
@@ -68,14 +68,14 @@ const AppWrapper = () => {
 
   return (
     <Routes>
+
+      <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<Login />} />
       <Route path="/resetPassword" element={<ResetPw />} />
 
-      <Route index element={<Home />} />
-      <Route path="*" element={<NoPage />} />
-
       {/* Admin */}
       <Route path="/admin/" element={<AdminLayout />}>
+        <Route path="*" element={<NoPage />} />
         <Route path="profile" element={<Profile />} />
         <Route path="" element={<AdminDashboard />} />
         <Route path="register" element={<UserRegistration />} />
@@ -84,6 +84,7 @@ const AppWrapper = () => {
 
       {/* Field Officer */}
       <Route path="/fieldOfficer/" element={<FieldOfficerLayout />}>
+        <Route path="*" element={<NoPage />} />
         <Route path="profile" element={<Profile />} />
         <Route path="" element={<FieldOfficerDashboard />} />
         <Route path="fieldOperations" element={<FieldOperations />} />
@@ -94,6 +95,7 @@ const AppWrapper = () => {
 
       {/* Manager */}
       <Route path="/manager/" element={<ManagerLayout />}>
+        <Route path="*" element={<NoPage />} />
         <Route path="profile" element={<Profile />} />
         <Route path="" element={<Dashboard />} />
         <Route path="approveOperations" element={<ApproveOperations />} />
@@ -102,6 +104,7 @@ const AppWrapper = () => {
       </Route>
 
       <Route path="/higherManager/" element={<HigherManagerLayout />}>
+        <Route path="*" element={<NoPage />} />
         <Route path="profile" element={<Profile />} />
         <Route path="" element={<HigherManagerDashboard />} />
         <Route path="landProgress" element={<HigherManagerLandProgress />} />
