@@ -27,6 +27,10 @@ import FieldOperations from "./views/fieldOfficer/FieldOperations";
 import FarmResources from "./views/fieldOfficer/FarmResources";
 import LandRegistry from "./views/fieldOfficer/LandRegistry";
 import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress";
+import LandRegistrationPage1 from "./views/fieldOfficer/LandRegistration1";
+import LandRegistrationPage2 from "./views/fieldOfficer/LandRegistration2";
+import LandRegistrationPage3 from "./views/fieldOfficer/LandRegistration3";
+import LandRegistrationPage4 from "./views/fieldOfficer/LandRegistration4";
 
 // Higher Manager
 import HigherManagerDashboard from "./views/higherManager/Dashboard";
@@ -91,6 +95,11 @@ const AppWrapper = () => {
         <Route path="farmResources" element={<FarmResources />} />
         <Route path="landRegistry" element={<LandRegistry />} />
         <Route path="assignedLandProgress" element={<AssignedLandProgress />} />
+        {/* Land Registration */}
+        <Route path="landRegistration1" element={<LandRegistrationPage1 />} />
+        <Route path="landRegistration2" element={<LandRegistrationPage2 />} />
+        <Route path="landRegistration3" element={<LandRegistrationPage3 />} />
+        <Route path="landRegistration4" element={<LandRegistrationPage4 />} />
       </Route>
 
       {/* Manager */}
