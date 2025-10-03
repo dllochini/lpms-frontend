@@ -27,10 +27,14 @@ import FieldOperations from "./views/fieldOfficer/FieldOperations";
 import FarmResources from "./views/fieldOfficer/FarmResources";
 import LandRegistry from "./views/fieldOfficer/LandRegistry";
 import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress";
-import LandRegistrationPage1 from "./views/fieldOfficer/LandRegistration1";
-import LandRegistrationPage2 from "./views/fieldOfficer/LandRegistration2";
-import LandRegistrationPage3 from "./views/fieldOfficer/LandRegistration3";
-import LandRegistrationPage4 from "./views/fieldOfficer/LandRegistration4";
+import LandRegistrationPage1 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration1";
+import LandRegistrationPage2 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration2";
+import LandRegistrationPage3 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration3";
+import LandRegistrationPage4 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration4";
+import LandEditPage1 from "./views/fieldOfficer/FarmerLandEdit/LandEdit1";
+import LandEditPage2 from "./views/fieldOfficer/FarmerLandEdit/LandEdit2";
+import LandEditPage3 from "./views/fieldOfficer/FarmerLandEdit/LandEdit3";
+import LandEditPage4 from "./views/fieldOfficer/FarmerLandEdit/LandEdit4";
 
 // Higher Manager
 import HigherManagerDashboard from "./views/higherManager/Dashboard";
@@ -100,6 +104,11 @@ const AppWrapper = () => {
         <Route path="landRegistration2" element={<LandRegistrationPage2 />} />
         <Route path="landRegistration3" element={<LandRegistrationPage3 />} />
         <Route path="landRegistration4" element={<LandRegistrationPage4 />} />
+
+        <Route path="landEdit1/:id" element={<LandEditPage1 />} />
+        <Route path="landEdit2/:id" element={<LandEditPage2 />} />
+        <Route path="landEdit3/:id" element={<LandEditPage3 />} />
+        <Route path="landEdit4/:id" element={<LandEditPage4 />} />
       </Route>
 
       {/* Manager */}

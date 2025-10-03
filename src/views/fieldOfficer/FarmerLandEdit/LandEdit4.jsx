@@ -21,14 +21,14 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FormStepper from "../components/FormStepper.jsx";
+import FormStepper from "../../../components/fieldOfficer/CreateLandFormStepper.jsx";
 import { useNavigate } from "react-router-dom";
-import { getAllFiles, deleteFile } from "../../utils/db.js";
+import { getAllFiles, deleteFile } from "../../../utils/db.js";
 import {
   getWithExpiry,
   setWithExpiry,
-} from "../../utils/localStorageHelpers.js";
-import { createUserLand } from "../../api/land.js";
+} from "../../../utils/localStorageHelpers.js";
+import { createUserLand } from "../../../api/land.js";
 
 const LandRegistrationSubmission = () => {
   const navigate = useNavigate();

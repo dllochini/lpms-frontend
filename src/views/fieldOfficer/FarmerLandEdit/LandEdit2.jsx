@@ -15,18 +15,18 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FormStepper from "../components/FormStepper.jsx";
+import FormStepper from "../../../components/fieldOfficer/CreateLandFormStepper.jsx";
 import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { getDivisions } from "../../api/division";
-import { getUnits } from "../../api/unit.js";
+import { getDivisions } from "../../../api/division.js";
+import { getUnits } from "../../../api/unit.js";
 import * as yup from "yup";
 import {
   setWithExpiry,
   getWithExpiry,
-} from "../../utils/localStorageHelpers.js";
-import { saveFile, getAllFiles } from "../../utils/db.js";
+} from "../../../utils/localStorageHelpers.js";
+import { saveFile, getAllFiles } from "../../../utils/db.js";
 
 const FILE_KEY = "landForm2_file";
 
