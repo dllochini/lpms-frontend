@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Typography,
@@ -32,8 +31,20 @@ import { DataGrid } from "@mui/x-data-grid";
 
 export default function ProgressTrack() {
   const [tasks, setTasks] = useState([
-    { id: 1, name: "Bush Clearing", progress: 100, done: false, approval: "Pending" },
-    { id: 2, name: "Ploughing", progress: 50, done: false, approval: "Pending" },
+    {
+      id: 1,
+      name: "Bush Clearing",
+      progress: 100,
+      done: false,
+      approval: "Pending",
+    },
+    {
+      id: 2,
+      name: "Ploughing",
+      progress: 50,
+      done: false,
+      approval: "Pending",
+    },
   ]);
 
   const [expandedTaskId, setExpandedTaskId] = useState(null);
@@ -63,12 +74,48 @@ export default function ProgressTrack() {
   });
 
   const columns = [
-    { field: "id", headerName: "Task ID", width: 120, headerAlign: "center", align: "center" },
-    { field: "date", headerName: "Date", width: 150, headerAlign: "center", align: "center" },
-    { field: "machine", headerName: "Type of Machine", width: 180, headerAlign: "center", align: "center" },
-    { field: "unit", headerName: "Unit of Measure", width: 140, headerAlign: "center", align: "center" },
-    { field: "todayProgress", headerName: "Today Progress", width: 150, headerAlign: "center", align: "center" },
-    { field: "note", headerName: "Note", width: 220, headerAlign: "center", align: "center" },
+    {
+      field: "id",
+      headerName: "Task ID",
+      width: 120,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "date",
+      headerName: "Date",
+      width: 150,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "machine",
+      headerName: "Type of Machine",
+      width: 180,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "unit",
+      headerName: "Unit of Measure",
+      width: 140,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "todayProgress",
+      headerName: "Today Progress",
+      width: 150,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "note",
+      headerName: "Note",
+      width: 220,
+      headerAlign: "center",
+      align: "center",
+    },
   ];
 
   const toggleExpand = (taskId) => {
@@ -130,7 +177,9 @@ export default function ProgressTrack() {
 
     setSampleTableRowsByTask((prev) => {
       const copy = { ...prev };
-      const existing = Array.isArray(copy[selectedTask.id]) ? copy[selectedTask.id] : [];
+      const existing = Array.isArray(copy[selectedTask.id])
+        ? copy[selectedTask.id]
+        : [];
       copy[selectedTask.id] = [...existing, newRow];
       return copy;
     });
@@ -163,7 +212,7 @@ export default function ProgressTrack() {
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
           <Link
             component={RouterLink}
-            to="/"
+            to="/fieldOfficer"
             underline="hover"
             color="inherit"
             sx={{ display: "flex", alignItems: "center" }}
@@ -204,11 +253,20 @@ export default function ProgressTrack() {
       </Box>
 
       {/* Task List */}
-      <Paper elevation={3} sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 3 }}>
+      <Paper
+        elevation={3}
+        sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 3 }}
+      >
         <Stack spacing={2}>
           {tasks.map((task) => (
             <Paper key={task.id} sx={{ p: 2, borderRadius: 2 }} elevation={1}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <Avatar>{task.name.charAt(0)}</Avatar>
                   <Typography variant="body1">{task.name}</Typography>
@@ -224,12 +282,20 @@ export default function ProgressTrack() {
                   {task.progress}%
                 </Typography>
                 <IconButton onClick={() => toggleExpand(task.id)}>
-                  {expandedTaskId === task.id ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                  {expandedTaskId === task.id ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )}
                 </IconButton>
               </Box>
 
               {/* Collapse DataGrid */}
-              <Collapse in={expandedTaskId === task.id} timeout="auto" unmountOnExit>
+              <Collapse
+                in={expandedTaskId === task.id}
+                timeout="auto"
+                unmountOnExit
+              >
                 <Box sx={{ mt: 2 }}>
                   <DataGrid
                     autoHeight
@@ -277,7 +343,9 @@ export default function ProgressTrack() {
                       <FormControl size="small" sx={{ minWidth: 160 }}>
                         <Select
                           value={task.approval || "Pending"}
-                          onChange={(e) => handleApprovalChange(task.id, e.target.value)}
+                          onChange={(e) =>
+                            handleApprovalChange(task.id, e.target.value)
+                          }
                         >
                           <MenuItem value="Approved">Approved</MenuItem>
                           <MenuItem value="Not Approved">Not Approved</MenuItem>
@@ -313,23 +381,43 @@ export default function ProgressTrack() {
         </Stack>
 
         {/* Add New Operation Buttons */}
-        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 3, gap: 2 }}>
-          <Button variant="contained" color="primary" startIcon={<AddIcon />} onClick={handleDialogOpen}>
+        <Box
+          sx={{ display: "flex", justifyContent: "flex-end", mt: 3, gap: 2 }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleDialogOpen}
+          >
             ADD NEW PROGRESS
           </Button>
-          <Button variant="outlined" color="success" startIcon={<CheckCircleIcon />}>
+          <Button
+            variant="outlined"
+            color="success"
+            startIcon={<CheckCircleIcon />}
+          >
             DONE
           </Button>
         </Box>
       </Paper>
 
       {/* Add New Operation Dialog */}
-      <Dialog open={openDialog} onClose={handleDialogClose} fullWidth maxWidth="sm">
+      <Dialog
+        open={openDialog}
+        onClose={handleDialogClose}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Add New Operation</DialogTitle>
         <DialogContent dividers>
           <FormControl fullWidth margin="dense">
             <InputLabel>Operation</InputLabel>
-            <Select name="operation" value={form.operation} onChange={handleFormChange}>
+            <Select
+              name="operation"
+              value={form.operation}
+              onChange={handleFormChange}
+            >
               <MenuItem value="Ploughing">Ploughing</MenuItem>
               <MenuItem value="Bush Clearing">Bush Clearing</MenuItem>
               <MenuItem value="Harrowing">Harrowing</MenuItem>
@@ -395,7 +483,12 @@ export default function ProgressTrack() {
       </Dialog>
 
       {/* Add New Task Dialog */}
-      <Dialog open={taskDialogOpen} onClose={handleTaskDialogClose} fullWidth maxWidth="sm">
+      <Dialog
+        open={taskDialogOpen}
+        onClose={handleTaskDialogClose}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Add New Progress</DialogTitle>
         <DialogContent dividers>
           <TextField
@@ -408,7 +501,11 @@ export default function ProgressTrack() {
 
           <FormControl fullWidth margin="dense">
             <InputLabel>Type of Machine</InputLabel>
-            <Select name="machine" value={taskForm.machine} onChange={handleTaskFormChange}>
+            <Select
+              name="machine"
+              value={taskForm.machine}
+              onChange={handleTaskFormChange}
+            >
               <MenuItem value="Tractor 4WD">Tractor 4WD (75HP-90HP)</MenuItem>
               <MenuItem value="Tractor 2WD">Tractor 2WD (45HP)</MenuItem>
               <MenuItem value="Tractor 45HP">Tractor 45HP</MenuItem>
@@ -488,7 +585,11 @@ export default function ProgressTrack() {
 
         <DialogActions>
           <Button onClick={handleTaskDialogClose}>Cancel</Button>
-          <Button onClick={handleAddTaskRow} variant="contained" color="primary">
+          <Button
+            onClick={handleAddTaskRow}
+            variant="contained"
+            color="primary"
+          >
             ADD TASK
           </Button>
         </DialogActions>
