@@ -56,6 +56,7 @@ function getFriendlyErrorMessage(
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
+  const identifier = searchParams.get("identifier") || "Forgot"; // default
 
   const {
     control,
@@ -78,49 +79,35 @@ export default function ResetPasswordPage() {
     err?.message ||
     null;
 
+  // ResetPw.jsx -> onSubmit
   const onSubmit = async (data) => {
-    setLoading(true);
-    setMessage("");
-    setError("");
+  setLoading(true);
+  setError("");
+  setMessage("");
 
-    if (!token) {
-      setLoading(false);
-      setError("Reset token missing. Please use the link from your email.");
-      if (process.env.NODE_ENV === "development")
-        console.error("Reset token missing in URL (searchParams).");
-      return;
-    }
+  if (!token) {
+    setError("Reset token missing. Please use the link from your email.");
+    setLoading(false);
+    return;
+  }
 
-    try {
-      if (process.env.NODE_ENV === "development")
-        console.log("Submitting reset with token:", token);
+  try {
+    // Call API
+    const loggedUserId = localStorage.getItem("loggedUserId") || null;
 
-      const response = await resetPassword(token, data.password);
+    console.log("Input for reset", token, data.password, identifier, loggedUserId);
+    const response = await resetPassword(token, data.password, identifier, loggedUserId);
 
-      if (response?.status === 200 || response?.status === 204) {
-        setSuccess(true);
-        setMessage(
-          response.data?.message ||
-            "Password reset successful! Please log in again."
-        );
-        reset();
-      } else {
-        const serverMsg =
-          response?.data?.message ||
-          response?.data?.error ||
-          "Something went wrong.";
-        setError(getFriendlyErrorMessage(serverMsg));
-      }
-    } catch (err) {
-      if (process.env.NODE_ENV === "development")
-        console.error("resetPassword error (full):", err);
+    setSuccess(true);
+    setMessage(response.data?.message || "Password reset successful!");
+    reset(); // clear form
+  } catch (err) {
+    setError(getFriendlyErrorMessage(err?.response?.data?.error));
+  } finally {
+    setLoading(false);
+  }
+};
 
-      const serverMsg = extractServerMessage(err);
-      setError(getFriendlyErrorMessage(serverMsg));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Box
