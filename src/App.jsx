@@ -96,7 +96,7 @@ const AppWrapper = () => {
       <Route path="/manager/" element={<ManagerLayout />}>
         <Route path="profile" element={<Profile />} />
         <Route path="" element={<Dashboard />} />
-        <Route path="approveOperations" element={<ApproveOperations />} />
+        <Route path="approveOperations" element={<ApproveOperations/>} />
         <Route path="approvePayments" element={<ManagerApprovePayments />} />
         <Route path="divisionProgress" element={<DivisionProgress />} />
       </Route>
