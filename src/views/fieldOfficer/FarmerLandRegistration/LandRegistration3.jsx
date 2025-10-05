@@ -1,4 +1,4 @@
-// File: LandRegistrationUpload.jsx
+// File: LandRegistration3.jsx
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -12,13 +12,13 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FormStepper from "../components/FormStepper.jsx";
+import FormStepper from "../../../components/fieldOfficer/CreateLandFormStepper.jsx";
 import { useNavigate } from "react-router-dom";
-import { saveFile, getAllFiles, deleteFile } from "../../utils/db.js";
+import { saveFile, getAllFiles, deleteFile } from "../../../utils/db.js";
 import {
   getWithExpiry,
   setWithExpiry,
-} from "../../utils/localStorageHelpers.js";
+} from "../../../utils/localStorageHelpers.js";
 
 const FILE_KEYS = {
   titleDeed: "titleDeed_file",
@@ -46,7 +46,7 @@ const documentFields = [
   { name: "zoning", label: "Development / Zoning Certificates*" },
 ];
 
-const LandRegistrationUpload = () => {
+const LandRegistration3 = () => {
   const navigate = useNavigate();
   const [files, setFiles] = useState({});
 
@@ -75,11 +75,11 @@ const LandRegistrationUpload = () => {
       await saveFile(key, file);
 
       // keep track of multiple files
-      const existing = getWithExpiry("landForm3") || {};
+      const existing = getWithExpiry("landRegForm3") || {};
       const newFiles = { ...(existing.files || {}), [name]: key };
 
       setWithExpiry(
-        "landForm3",
+        "landRegForm3",
         { ...(existing || {}), files: newFiles },
         30 * 60 * 1000
       );
@@ -91,7 +91,7 @@ const LandRegistrationUpload = () => {
   // Optional: cleanup expired files
   useEffect(() => {
     const cleanupExpiredFiles = async () => {
-      const expired = !getWithExpiry("landForm3");
+      const expired = !getWithExpiry("landRegForm3");
       if (expired) {
         for (const key of Object.values(FILE_KEYS)) {
           await deleteFile(key);
@@ -106,9 +106,7 @@ const LandRegistrationUpload = () => {
     e.preventDefault();
 
     // Ensure all required documents are uploaded (use FILE_KEYS)
-    const missing = documentFields.filter(
-      (doc) => !files[FILE_KEYS[doc.name]]
-    );
+    const missing = documentFields.filter((doc) => !files[FILE_KEYS[doc.name]]);
     if (missing.length) {
       alert(
         `Please upload all required documents: ${missing
@@ -204,4 +202,4 @@ const LandRegistrationUpload = () => {
   );
 };
 
-export default LandRegistrationUpload;
+export default LandRegistration3;
