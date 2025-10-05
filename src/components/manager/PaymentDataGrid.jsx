@@ -14,7 +14,7 @@ export default function PaymentDataGrid({ payments = [] }) {
   const columns = [
     { field: "billId", headerName: "Bill ID", flex: 1.5 },
     { field: "officer", headerName: "Field Officer", flex: 2 },
-    { field: "accountant", headerName: "Accountant", flex: 2 },
+    { field: "amount", headerName: "Total (LKR)", flex: 2 },
     { field: "date", headerName: "Requested Date", flex: 2 },
   ];
 
