@@ -10,7 +10,9 @@ export const getLandsByFieldOfficerId = (fieldOfficerId) => {
   return axiosBackend.get(`/lands/fieldOfficer/${fieldOfficerId}`);
 }
 
-export const getLandById = (landId) => axiosBackend.get(`/lands/${landId}`);
+export const getLandById = (landId) => {
+  return axiosBackend.get(`/lands/${landId}`)
+};
 
 export const updateLandById = (landId, updatedData) =>
   axiosBackend.put(`/lands/${landId}`, updatedData);

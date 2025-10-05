@@ -105,10 +105,10 @@ const AppWrapper = () => {
         <Route path="landRegistration3" element={<LandRegistrationPage3 />} />
         <Route path="landRegistration4" element={<LandRegistrationPage4 />} />
 
-        <Route path="landEdit1/:id" element={<LandEditPage1 />} />
-        <Route path="landEdit2/:id" element={<LandEditPage2 />} />
-        <Route path="landEdit3/:id" element={<LandEditPage3 />} />
-        <Route path="landEdit4/:id" element={<LandEditPage4 />} />
+        <Route path="landEdit1/:landId" element={<LandEditPage1 />} />
+        <Route path="landEdit2/:landId" element={<LandEditPage2 />} />
+        <Route path="landEdit3/:landId" element={<LandEditPage3 />} />
+        <Route path="landEdit4/:landId" element={<LandEditPage4 />} />
       </Route>
 
       {/* Manager */}

@@ -29,9 +29,9 @@ import {
 } from "../../../utils/localStorageHelpers.js";
 import { saveFile, getAllFiles, deleteFile } from "../../../utils/db.js"; // matches your db.js
 
-const FILE_KEY = "landForm1_file";
+const FILE_KEY = "landRegForm1_file";
 
-const LandRegistration = () => {
+const LandRegistration1 = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [farmers, setFarmers] = useState([]);
@@ -51,7 +51,7 @@ const LandRegistration = () => {
     fullName: yup.string().required("Full name is required"),
     nic: yup.string().required("NIC / Passport No. is required"),
     address: yup.string().required("Address is required"),
-    contact_no: yup
+    contactNo: yup
       .string()
       .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits")
       .required("Contact no. is required"),
@@ -61,12 +61,13 @@ const LandRegistration = () => {
   });
 
   // Use saved values if present (note: this must remain synchronous for useForm)
-  const savedForm = getWithExpiry("landForm1") || null;
+  const savedForm = getWithExpiry("landRegForm1") || null;
 
   const {
     control,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm({
     defaultValues: savedForm?.data || {
@@ -74,7 +75,7 @@ const LandRegistration = () => {
       fullName: "",
       nic: "",
       address: "",
-      contact_no: "",
+      contactNo: "",
       accountNo: "",
       bank: "",
       branch: "",
@@ -82,12 +83,40 @@ const LandRegistration = () => {
     resolver: yupResolver(schema),
   });
 
+  useEffect(() => {
+    const stored = getWithExpiry("landRegForm1");
+    if (!stored) {
+      // clear react-hook-form state
+      reset({
+        designation: "",
+        fullName: "",
+        nic: "",
+        address: "",
+        contactNo: "",
+        accountNo: "",
+        bank: "",
+        branch: "",
+      });
+      // clear uploaded file preview in UI
+      setFile(null);
+
+      // optionally delete the stored indexedDB file key to be safe
+      // (no need to await, it's best-effort)
+      if (typeof deleteFile === "function") {
+        deleteFile(FILE_KEY).catch(() => {
+          /* ignore */
+        });
+      }
+    }
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Load previously uploaded file from IndexedDB (async) using getAllFiles()
   useEffect(() => {
     let mounted = true;
     const loadFile = async () => {
       try {
-        const stored = getWithExpiry("landForm1");
+        const stored = getWithExpiry("landRegForm1");
         const desiredKey = stored?.fileKey || FILE_KEY;
         if (typeof getAllFiles === "function") {
           const files = await getAllFiles(); // returns an object { key: file }
@@ -101,6 +130,8 @@ const LandRegistration = () => {
     loadFile();
     return () => (mounted = false);
   }, []);
+
+  // If localStorage snapshot was removed, clear form + file state
 
   // Fetch farmers
   useEffect(() => {
@@ -131,7 +162,7 @@ const LandRegistration = () => {
         "fullName",
         "nic",
         "address",
-        "contact_no",
+        "contactNo",
         "accountNo",
         "bank",
         "branch",
@@ -141,7 +172,7 @@ const LandRegistration = () => {
       // Persist into your localStorage helper. We store the form data under a single key
       // and keep the file in IndexedDB (referenced by fileKey) to avoid serializing binaries.
       setWithExpiry(
-        "landForm1",
+        "landRegForm1",
         {
           data: {
             ...fields.reduce(
@@ -172,9 +203,9 @@ const LandRegistration = () => {
       }
 
       // Update the stored form reference (preserve existing data if any)
-      const existing = getWithExpiry("landForm1") || {};
+      const existing = getWithExpiry("landRegForm1") || {};
       setWithExpiry(
-        "landForm1",
+        "landRegForm1",
         { ...(existing || {}), data: existing.data || {}, fileKey: FILE_KEY },
         30 * 60 * 1000
       );
@@ -191,7 +222,7 @@ const LandRegistration = () => {
       }
 
       setWithExpiry(
-        "landForm1",
+        "landRegForm1",
         { data, fileKey: file ? FILE_KEY : undefined },
         30 * 60 * 1000
       );
@@ -394,15 +425,15 @@ const LandRegistration = () => {
             <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Contact No :</InputLabel>
               <Controller
-                name="contact_no"
+                name="contactNo"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     size="small"
                     sx={{ flex: 1 }}
-                    error={!!errors.contact_no}
-                    helperText={errors.contact_no?.message || " "}
+                    error={!!errors.contactNo}
+                    helperText={errors.contactNo?.message || " "}
                   />
                 )}
               />
@@ -476,4 +507,4 @@ const LandRegistration = () => {
   );
 };
 
-export default LandRegistration;
+export default LandRegistration1;

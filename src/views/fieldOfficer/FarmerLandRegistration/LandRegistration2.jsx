@@ -28,7 +28,7 @@ import {
 } from "../../../utils/localStorageHelpers.js";
 import { saveFile, getAllFiles } from "../../../utils/db.js";
 
-const FILE_KEY = "landForm2_file";
+const FILE_KEY = "landRegForm2_file";
 
 const LandRegistration2 = () => {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ const LandRegistration2 = () => {
   });
 
   // Read saved wrapper object { data: {...}, fileKey: 'land_image' }
-  const savedWrapper = getWithExpiry("landForm2") || null;
+  const savedWrapper = getWithExpiry("landRegForm2") || null;
 
   const fetchData = async () => {
     try {
@@ -105,9 +105,9 @@ const LandRegistration2 = () => {
       }
 
       // Update the stored form reference (preserve existing data if any)
-      const existing = getWithExpiry("landForm2") || {};
+      const existing = getWithExpiry("landRegForm2") || {};
       setWithExpiry(
-        "landForm2",
+        "landRegForm2",
         { ...(existing || {}), data: existing.data || {}, fileKey: FILE_KEY },
         30 * 60 * 1000 // 30 min expiry
       );
@@ -137,7 +137,7 @@ const LandRegistration2 = () => {
   useEffect(() => {
     const loadFile = async () => {
       try {
-        const stored = getWithExpiry("landForm2");
+        const stored = getWithExpiry("landRegForm2");
         const key = stored?.fileKey || null;
         if (!key) return;
         if (typeof getAllFiles === "function") {
@@ -173,7 +173,7 @@ const LandRegistration2 = () => {
         await saveFile(fileKey, file);
       }
 
-      setWithExpiry("landForm2", { data, fileKey }, 60 * 60 * 1000);
+      setWithExpiry("landRegForm2", { data, fileKey }, 60 * 60 * 1000);
 
       // Send payload to backend (example API call)
       // await api.saveLand(payload);
@@ -219,7 +219,6 @@ const LandRegistration2 = () => {
           <Divider sx={{ mb: 2 }} />
 
           <Grid container spacing={2}>
-            
             {/* Division */}
             <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Division :</InputLabel>
