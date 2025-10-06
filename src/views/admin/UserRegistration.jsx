@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Box,
   TextField,
@@ -9,7 +9,6 @@ import {
   Paper,
   MenuItem,
   Breadcrumbs,
-  Link,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -20,21 +19,32 @@ import {
 } from "@mui/material";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import HomeIcon from "@mui/icons-material/Home";
 import { createUser } from "../../api/user";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { getRoles } from "../../api/role";
 import { getDivisions } from "../../api/division";
+import getUserSchema from "../validations/userSchemas.js";
 
 const UserRegistration = () => {
   const [openConfirm, setOpenConfirm] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [formData, setFormData] = useState(null);
-  const navigate = useNavigate();
   const [roles, setRoles] = useState([]);
   const [divisions, setDivisions] = useState([]);
+  const navigate = useNavigate();
+
+  const designations = [
+    { value: "Mr.", label: "Mr." },
+    { value: "Mrs.", label: "Mrs." },
+    { value: "Miss.", label: "Miss." },
+    { value: "Ms.", label: "Ms." },
+    { value: "Dr.", label: "Dr." },
+    { value: "Prof.", label: "Prof." },
+    { value: "Mx.", label: "Mx." },
+    { value: "Rev.", label: "Rev." },
+  ];
 
   // Fetch roles
   const fetchRoles = async () => {
@@ -67,61 +77,15 @@ const UserRegistration = () => {
   };
 
   useEffect(() => {
-    fetchDivisions();
     fetchRoles();
+    fetchDivisions();
   }, []);
 
-  const designations = [
-    { value: "Mr.", label: "Mr." },
-    { value: "Mrs.", label: "Mrs." },
-    { value: "Miss.", label: "Miss." },
-    { value: "Ms.", label: "Ms." },
-    { value: "Dr.", label: "Dr." },
-    { value: "Prof.", label: "Prof." },
-    { value: "Mx.", label: "Mx." },
-    { value: "Rev.", label: "Rev." },
-  ];
-
-  // Yup schema
-  const schema = yup.object({
-    designation: yup.string().required("Choose a designation"),
-    role: yup.string().required("Choose a role"),
-    division: yup
-      .string()
-      .test("division-required", "Choose a division", function (value) {
-        const { role } = this.parent; // get role from form
-        // get role object safely
-        const selectedRole = roles.find((r) => r._id === role);
-        if (!selectedRole) return true; // no role yet → don’t validate
-        if (["Admin", "Higher Management"].includes(selectedRole.name)) {
-          return true; // division not required
-        }
-        return !!value; // must be filled
-      }),
-    fullName: yup.string().required("Full name is required"),
-    email: yup.string().email(),
-    nic: yup
-      .string()
-      .matches(
-        /^([0-9]{9}[vV]|[0-9]{12})$/,
-        "Invalid NIC format. Must be 12 digits or 9 digits with 'V'/'v'"
-      ),
-    contact_no: yup
-      .string()
-      .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits"),
-    password: yup
-      .string()
-      .required("Password is required")
-      .min(8, "Password must be at least 8 characters")
-      .matches(/[a-z]/, "At least one lowercase letter")
-      .matches(/[A-Z]/, "At least one uppercase letter")
-      .matches(/[0-9]/, "At least one number")
-      .matches(/[@$!%*?&]/, "At least one special character"),
-    confirmPassword: yup
-      .string()
-      .required("Please confirm your password")
-      .oneOf([yup.ref("password"), null], "Passwords must match"),
-  });
+  // Dynamic validation schema based on roles
+  const schema = useMemo(() => {
+    if (!roles || roles.length === 0) return null;
+    return getUserSchema(roles, { isEdit: true });
+  }, [roles]);
 
   const {
     control,
@@ -141,8 +105,12 @@ const UserRegistration = () => {
       password: "",
       confirmPassword: "",
     },
-    resolver: yupResolver(schema),
+    resolver: schema ? yupResolver(schema) : undefined,
   });
+
+  if (!schema) {
+    return <Typography sx={{ p: 3 }}>Loading...</Typography>;
+  }
 
   const selectedRoleId = watch("role");
   const selectedRoleObj = roles.find((r) => r._id === selectedRoleId);
@@ -150,17 +118,15 @@ const UserRegistration = () => {
     selectedRoleObj &&
     !["Admin", "Higher Management"].includes(selectedRoleObj.name);
 
-  // Form submit (open confirmation)
   const onSubmit = (data) => {
     setFormData(data);
     setOpenConfirm(true);
   };
 
-  // Confirmed submit
   const handleConfirmSubmit = async () => {
     setOpenConfirm(false);
     try {
-      const response = await createUser(formData);
+      await createUser(formData);
       setOpenSnackbar(true);
       reset();
       setTimeout(() => {
@@ -180,17 +146,21 @@ const UserRegistration = () => {
           </Typography>
 
           <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-            <Link underline="hover" color="inherit" href="/admin">
-              <HomeIcon
-                sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }}
-              />{" "}
-              Home
-            </Link>
+            <RouterLink
+              to="/admin"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                textDecoration: "none",
+                color: "inherit",
+              }}
+            >
+              <HomeIcon sx={{ mr: 0.5, fontSize: 18 }} /> Home
+            </RouterLink>
             <Typography color="text.primary">Add New User</Typography>
           </Breadcrumbs>
         </Box>
 
-        {/* Form */}
         <Box
           component="form"
           sx={{ marginBottom: 3, justifyContent: "center", display: "flex" }}
@@ -202,12 +172,17 @@ const UserRegistration = () => {
             elevation={5}
             sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 5 }}
           >
-            <Grid sx={{ margin: 3 }}>
+            <Grid
+              sx={{
+                margin: 3,
+                display: "flex",
+                flexDirection: "column",
+                gap: 2,
+              }}
+            >
               {/* Designation */}
               <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                  Designation :
-                </InputLabel>
+                <InputLabel sx={{ minWidth: 130 }}>Designation :</InputLabel>
                 <Controller
                   name="designation"
                   control={control}
@@ -232,9 +207,7 @@ const UserRegistration = () => {
 
               {/* Role */}
               <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                  Role :
-                </InputLabel>
+                <InputLabel sx={{ minWidth: 130 }}>Role :</InputLabel>
                 <Controller
                   name="role"
                   control={control}
@@ -262,9 +235,7 @@ const UserRegistration = () => {
               {/* Division */}
               {showDivision && (
                 <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                    Division:
-                  </InputLabel>
+                  <InputLabel sx={{ minWidth: 130 }}>Division :</InputLabel>
                   <Controller
                     name="division"
                     control={control}
@@ -288,11 +259,9 @@ const UserRegistration = () => {
                 </Grid>
               )}
 
-              {/* Full name */}
+              {/* Full Name */}
               <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                  Full Name :
-                </InputLabel>
+                <InputLabel sx={{ minWidth: 130 }}>Full Name :</InputLabel>
                 <Controller
                   name="fullName"
                   control={control}
@@ -310,9 +279,7 @@ const UserRegistration = () => {
 
               {/* NIC */}
               <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                  NIC :
-                </InputLabel>
+                <InputLabel sx={{ minWidth: 130 }}>NIC :</InputLabel>
                 <Controller
                   name="nic"
                   control={control}
@@ -330,9 +297,7 @@ const UserRegistration = () => {
 
               {/* Email */}
               <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                  Email :
-                </InputLabel>
+                <InputLabel sx={{ minWidth: 130 }}>Email :</InputLabel>
                 <Controller
                   name="email"
                   control={control}
@@ -349,9 +314,7 @@ const UserRegistration = () => {
 
               {/* Contact */}
               <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                  Contact No :
-                </InputLabel>
+                <InputLabel sx={{ minWidth: 130 }}>Contact No :</InputLabel>
                 <Controller
                   name="contact_no"
                   control={control}
@@ -369,14 +332,9 @@ const UserRegistration = () => {
               <Divider sx={{ mb: 2 }} />
 
               {/* Passwords */}
-              <Grid sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
-                <Grid
-                  item
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                >
-                  <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
-                    New Password :
-                  </InputLabel>
+              <Grid sx={{ display: "flex", gap: 2 }}>
+                <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <InputLabel sx={{ minWidth: 130 }}>New Password :</InputLabel>
                   <Controller
                     name="password"
                     control={control}
@@ -392,12 +350,8 @@ const UserRegistration = () => {
                     )}
                   />
                 </Grid>
-
-                <Grid
-                  item
-                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                >
-                  <InputLabel sx={{ paddingBottom: 3, minWidth: 130 }}>
+                <Grid sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <InputLabel sx={{ minWidth: 130 }}>
                     Confirm New Password :
                   </InputLabel>
                   <Controller

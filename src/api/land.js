@@ -2,9 +2,17 @@ import axiosBackend from "../configs/axios-config";
 
 export const getLands = () => axiosBackend.get("/lands");
 
-export const createLand = (landData) => axiosBackend.post("/lands", landData);
+export const createUserLand = (formData) => axiosBackend.post("/createUserLand/submit", formData, {
+  headers: { "Content-Type": "multipart/form-data" }
+});
 
-export const getLandById = (landId) => axiosBackend.get(`/lands/${landId}`);
+export const getLandsByFieldOfficerId = (fieldOfficerId) => { 
+  return axiosBackend.get(`/lands/fieldOfficer/${fieldOfficerId}`);
+}
+
+export const getLandById = (landId) => {
+  return axiosBackend.get(`/lands/${landId}`)
+};
 
 export const updateLandById = (landId, updatedData) =>
   axiosBackend.put(`/lands/${landId}`, updatedData);
@@ -15,7 +23,7 @@ export const deleteLandById = (landId) => {
 
 export default {
   getLands,
-  createLand,
+  createUserLand,
   getLandById,
   updateLandById,
   deleteLandById,
