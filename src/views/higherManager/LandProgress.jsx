@@ -134,7 +134,7 @@ export default function LandProgress() {
   ];
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: "auto", p: 3 }}>
+    <Box sx={{ maxWidth: 1150, mx: "auto", p: 3 }}>
       <Typography variant="h5" gutterBottom>
         Land Progress
       </Typography>
