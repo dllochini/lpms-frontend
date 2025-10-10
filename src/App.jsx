@@ -27,7 +27,7 @@ import UserRegistration from "./views/admin/UserRegistration";
 import UserEdit from "./views/admin/UserEdit";
 
 // FieldOfficer
-import FieldOfficerDashboard from "./views/fieldOfficer/Dashboard";
+//import FieldOfficerDashboard from "./views/fieldOfficer/Dashboard";
 import FieldOperations from "./views/fieldOfficer/FieldOperations";
 import FarmResources from "./views/fieldOfficer/FarmResources";
 import LandRegistry from "./views/fieldOfficer/LandRegistry";
