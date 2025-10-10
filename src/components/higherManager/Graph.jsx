@@ -15,13 +15,13 @@ import {
 } from "recharts";
 
 const barData = [
-  { name: "DivA", total: 30, progress: 10 },
-  { name: "DivB", total: 60, progress: 25 },
-  { name: "DivC", total: 30, progress: 20 },
-  { name: "DivD", total: 60, progress: 15 },
-  { name: "DivE", total: 30, progress: 20 },
-  { name: "DivF", total: 60, progress: 25 },
-  { name: "DivG", total: 30, progress: 15 },
+  // { name: "DivA", total: 30, progress: 10 },
+  // { name: "DivB", total: 60, progress: 25 },
+  // { name: "DivC", total: 30, progress: 20 },
+  // { name: "DivD", total: 60, progress: 15 },
+  // { name: "DivE", total: 30, progress: 20 },
+  // { name: "DivF", total: 60, progress: 25 },
+  // { name: "DivG", total: 30, progress: 15 },
 ];
 
 

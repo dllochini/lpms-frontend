@@ -14,10 +14,10 @@ import {
 } from "recharts";
 
 const pieData = [
-  { name: "DivA", value: 100 },
-  { name: "DivB", value: 80 },
-  { name: "DivC", value: 90 },
-  { name: "DivD", value: 120 },
+  // { name: "DivA", value: 100 },
+  // { name: "DivB", value: 80 },
+  // { name: "DivC", value: 90 },
+  // { name: "DivD", value: 120 },
 ];
 
 const COLORS = ["#FF00FF", "#00BFFF", "#20B2AA", "#8A2BE2"];
