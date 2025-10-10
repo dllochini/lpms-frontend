@@ -15,14 +15,23 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FormStepper from "../components/FormStepper.jsx";
+import FormStepper from "../../../components/fieldOfficer/CreateLandFormStepper.jsx";
 import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { getUserById, getUsers } from "../../api/user.js";
+import { getUserById, getUsers } from "../../../api/user.js";
 
-const LandRegistration = () => {
+// Use your helpers
+import {
+  getWithExpiry,
+  setWithExpiry,
+} from "../../../utils/localStorageHelpers.js";
+import { saveFile, getAllFiles, deleteFile } from "../../../utils/db.js"; // matches your db.js
+
+const FILE_KEY = "landRegForm1_file";
+
+const LandRegistration1 = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [farmers, setFarmers] = useState([]);
@@ -36,49 +45,37 @@ const LandRegistration = () => {
     { value: "Rev", label: "Rev" },
   ];
 
-  const setWithExpiry = (key, value, ttl) => {
-    const now = new Date();
-    const item = { value, expiry: now.getTime() + ttl };
-    localStorage.setItem(key, JSON.stringify(item));
-  };
-
-  const getWithExpiry = (key) => {
-    const itemStr = localStorage.getItem(key);
-    if (!itemStr) return null;
-    const item = JSON.parse(itemStr);
-    if (new Date().getTime() > item.expiry) {
-      localStorage.removeItem(key);
-      return null;
-    }
-    return item.value;
-  };
-
+  // Validation schema
   const schema = yup.object({
     designation: yup.string().required("Choose a designation"),
     fullName: yup.string().required("Full name is required"),
     nic: yup.string().required("NIC / Passport No. is required"),
     address: yup.string().required("Address is required"),
-    contact_no: yup
+    contactNo: yup
       .string()
       .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits")
-      .required(),
+      .required("Contact no. is required"),
     accountNo: yup.string().required("Account number is required"),
     bank: yup.string().required("Bank is required"),
     branch: yup.string().required("Branch is required"),
   });
 
+  // Use saved values if present (note: this must remain synchronous for useForm)
+  const savedForm = getWithExpiry("landRegForm1") || null;
+
   const {
     control,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm({
-    defaultValues: getWithExpiry("landForm1") || {
+    defaultValues: savedForm?.data || {
       designation: "",
       fullName: "",
       nic: "",
       address: "",
-      contact_no: "",
+      contactNo: "",
       accountNo: "",
       bank: "",
       branch: "",
@@ -87,12 +84,63 @@ const LandRegistration = () => {
   });
 
   useEffect(() => {
+    const stored = getWithExpiry("landRegForm1");
+    if (!stored) {
+      // clear react-hook-form state
+      reset({
+        designation: "",
+        fullName: "",
+        nic: "",
+        address: "",
+        contactNo: "",
+        accountNo: "",
+        bank: "",
+        branch: "",
+      });
+      // clear uploaded file preview in UI
+      setFile(null);
+
+      // optionally delete the stored indexedDB file key to be safe
+      // (no need to await, it's best-effort)
+      if (typeof deleteFile === "function") {
+        deleteFile(FILE_KEY).catch(() => {
+          /* ignore */
+        });
+      }
+    }
+    // run once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  // Load previously uploaded file from IndexedDB (async) using getAllFiles()
+  useEffect(() => {
+    let mounted = true;
+    const loadFile = async () => {
+      try {
+        const stored = getWithExpiry("landRegForm1");
+        const desiredKey = stored?.fileKey || FILE_KEY;
+        if (typeof getAllFiles === "function") {
+          const files = await getAllFiles(); // returns an object { key: file }
+          const f = files[desiredKey] || files[FILE_KEY] || null;
+          if (mounted && f) setFile(f);
+        }
+      } catch (err) {
+        console.error("Failed to load file from indexedDB:", err);
+      }
+    };
+    loadFile();
+    return () => (mounted = false);
+  }, []);
+
+  // If localStorage snapshot was removed, clear form + file state
+
+  // Fetch farmers
+  useEffect(() => {
     let canceled = false;
     const fetchFarmers = async () => {
       setFarmersLoading(true);
       try {
         const res = await getUsers();
-        setFarmers(Array.isArray(res.data) ? res.data : []);
+        if (!canceled) setFarmers(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Failed to load farmers:", err);
       } finally {
@@ -103,35 +151,90 @@ const LandRegistration = () => {
     return () => (canceled = true);
   }, []);
 
-  const onSubmit = (data) => {
-    const formData = { ...data, file };
-    setWithExpiry("landForm1", formData, 30 * 60 * 1000);
-    navigate("/fieldOfficer/LandRegistration2");
-  };
-
+  // Handle farmer search
   const handleSearchFarmer = async () => {
     if (!selectedFarmer?._id) return;
     try {
       const res = await getUserById(selectedFarmer._id);
-      const farmerData = res.data;
+      const farmerData = res.data || {};
       const fields = [
         "designation",
         "fullName",
         "nic",
         "address",
-        "contact_no",
+        "contactNo",
         "accountNo",
         "bank",
         "branch",
       ];
       fields.forEach((f) => setValue(f, farmerData[f] ?? ""));
+
+      // Persist into your localStorage helper. We store the form data under a single key
+      // and keep the file in IndexedDB (referenced by fileKey) to avoid serializing binaries.
       setWithExpiry(
-        "landForm1",
-        fields.reduce((acc, f) => ({ ...acc, [f]: farmerData[f] ?? "" }), {}),
+        "landRegForm1",
+        {
+          data: {
+            ...fields.reduce(
+              (acc, k) => ({ ...acc, [k]: farmerData[k] ?? "" }),
+              {}
+            ),
+          },
+          fileKey: file ? FILE_KEY : undefined,
+        },
         30 * 60 * 1000
       );
     } catch (err) {
       console.error("Error fetching farmer:", err);
+    }
+  };
+
+  // Save file to IndexedDB helper (and update local state + localStorage reference)
+  const handleFileChange = async (fileObj) => {
+    if (!fileObj) return;
+    setFile(fileObj);
+    try {
+      if (typeof saveFile === "function") {
+        await saveFile(FILE_KEY, fileObj);
+      } else {
+        console.warn(
+          "indexedDb.saveFile not available; file will not persist across reloads"
+        );
+      }
+
+      // Update the stored form reference (preserve existing data if any)
+      const existing = getWithExpiry("landRegForm1") || {};
+      setWithExpiry(
+        "landRegForm1",
+        { ...(existing || {}), data: existing.data || {}, fileKey: FILE_KEY },
+        30 * 60 * 1000
+      );
+    } catch (err) {
+      console.error("Failed to save file to indexedDB:", err);
+    }
+  };
+
+  // Handle form submit
+  const onSubmit = async (data) => {
+    try {
+      if (file && typeof saveFile === "function") {
+        await saveFile(FILE_KEY, file);
+      }
+
+      setWithExpiry(
+        "landRegForm1",
+        { data, fileKey: file ? FILE_KEY : undefined },
+        30 * 60 * 1000
+      );
+
+      // Clear file from IndexedDB after submission
+      // if (typeof deleteFile === "function") {
+      //   await deleteFile(FILE_KEY);
+      // }
+
+      navigate("/fieldOfficer/landRegistration2");
+    } catch (err) {
+      console.error("Error on submit:", err);
     }
   };
 
@@ -141,6 +244,7 @@ const LandRegistration = () => {
         <Typography variant="h5" gutterBottom>
           Farmer and Land Registration
         </Typography>
+
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
           <Link underline="hover" color="inherit" href="/">
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />{" "}
@@ -148,6 +252,7 @@ const LandRegistration = () => {
           </Link>
           <Typography color="text.primary">Add New Farmer & Land</Typography>
         </Breadcrumbs>
+
         <Box sx={{ mt: 4 }}>
           <FormStepper activeStep={0} />
         </Box>
@@ -172,6 +277,7 @@ const LandRegistration = () => {
           <Typography variant="h6" gutterBottom>
             Farmer Details
           </Typography>
+
           <Divider sx={{ mb: 2 }} />
 
           <Grid container spacing={2}>
@@ -282,16 +388,19 @@ const LandRegistration = () => {
                 component="label"
                 variant="outlined"
                 startIcon={<UploadFileIcon />}
+                sx={{ flex: 1 }}
               >
-                Upload File
+                {file?.name || "Upload File"}
                 <input
                   type="file"
                   hidden
-                  accept="image/*"
-                  onChange={(e) => setFile(e.target.files[0])}
+                  accept="image/*,.pdf"
+                  onChange={async (e) => {
+                    const f = e.target.files && e.target.files[0];
+                    await handleFileChange(f);
+                  }}
                 />
               </Button>
-              {file && <Typography>{file.name}</Typography>}
             </Grid>
 
             {/* Address */}
@@ -316,15 +425,15 @@ const LandRegistration = () => {
             <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Contact No :</InputLabel>
               <Controller
-                name="contact_no"
+                name="contactNo"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     size="small"
                     sx={{ flex: 1 }}
-                    error={!!errors.contact_no}
-                    helperText={errors.contact_no?.message || " "}
+                    error={!!errors.contactNo}
+                    helperText={errors.contactNo?.message || " "}
                   />
                 )}
               />
@@ -398,4 +507,4 @@ const LandRegistration = () => {
   );
 };
 
-export default LandRegistration;
+export default LandRegistration1;

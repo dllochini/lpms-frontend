@@ -13,6 +13,7 @@ import DataGrid from "../../components/fieldOfficer/ResourceDataGrid";
 import ResourceDialog from "../../components/fieldOfficer/ResourceDialogBox";
 import { getResources } from "../../api/resources";
 import { getUnits } from "../../api/unit";
+import HomeIcon from "@mui/icons-material/Home";
 
 export default function FarmResources() {
   const [responseData, setResponseData] = useState([]);
@@ -77,11 +78,9 @@ export default function FarmResources() {
           Resources
         </Typography>
           <Breadcrumbs aria-label="breadcrumb">
-            <Link underline="hover" color="inherit" href="/">
+             <Link underline="hover" color="inherit" href="/fieldOfficer">
+             <HomeIcon sx={{ mr: 0.5, fontSize: 18 }} />
               Home
-            </Link>
-             <Link underline="hover" color="inherit" href="./views/fieldOfficer/FieldOfficer">
-              Dashboard
             </Link>
             <Typography sx={{ color: 'text.primary' }}>Resources</Typography>
           </Breadcrumbs>
