@@ -1,50 +1,55 @@
+
+// src/components/higherManager/Coverage.jsx
 import React from "react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  CartesianGrid,
   PieChart,
   Pie,
   Cell,
+  Legend,
   ResponsiveContainer,
+  Tooltip,
 } from "recharts";
+import { Box, Typography, CircularProgress } from "@mui/material";
 
-const pieData = [
-  // { name: "DivA", value: 100 },
-  // { name: "DivB", value: 80 },
-  // { name: "DivC", value: 90 },
-  // { name: "DivD", value: 120 },
-];
+const COLORS = ["#FF00FF", "#00BFFF", "#20B2AA", "#8A2BE2", "#FFA500", "#8B0000"];
 
-const COLORS = ["#FF00FF", "#00BFFF", "#20B2AA", "#8A2BE2"];
+const Coverage = ({ data = [], loading = false }) => {
+  // data expected: [{ name, value }]
+  return (
+    <Box sx={{ width: "100%" }}>
+      <Typography variant="h6" sx={{ mb: 2 }}>
+        Land Coverage
+      </Typography>
 
-const Coverage = () => {
-    return (
-        <div className="bg-white rounded-2xl shadow-md p-4">
-                <h2 className="text-lg font-semibold mb-4">Land Coverage</h2>
-                <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                    <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    label
-                    dataKey="value"
-                    >
-                    {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                    </Pie>
-                    <Legend />
-                </PieChart>
-                </ResponsiveContainer>
-            </div>
-        );
+      {loading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <CircularProgress />
+        </Box>
+      ) : data.length === 0 ? (
+        <Box sx={{ textAlign: "center", py: 6 }}>No coverage data available</Box>
+      ) : (
+        <ResponsiveContainer width="100%" height={300}>
+          <PieChart>
+            <Pie
+              data={data}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              outerRadius={100}
+              label
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+      )}
+    </Box>
+  );
 };
 
 export default Coverage;
