@@ -1,5 +1,3 @@
-
-// src/views/higherManager/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import {
   Typography,
@@ -16,10 +14,15 @@ import HomeIcon from "@mui/icons-material/Home";
 
 import Graph from "../../components/higherManager/Graph";
 import Coverage from "../../components/higherManager/Coverage";
-import { fetchAndMapDashboard } from "../../api/higherManager";
+// Make sure this function exists in ../../api/higherManager
+import { getHigherManagerDashboardCardInfo, /* or fetchAndMapDashboard */ } from "../../api/higherManager";
+import { getUserById } from "../../api/user";
 
-function Dashboard() {
+export default function Dashboard() {
   const [userName, setUserName] = useState("");
+  const [role, setRole] = useState("");
+  const [division, setDivision] = useState("");
+
   const [overview, setOverview] = useState({
     totalLands: 0,
     totalArea: 0,
@@ -32,44 +35,84 @@ function Dashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    setUserName(localStorage.getItem("name") || "");
-  }, []);
+    let cancelled = false;
 
-  useEffect(() => {
-    let mounted = true;
-    const higherManagerId =
-      localStorage.getItem("higherManagerId") ||
-      localStorage.getItem("userId") ||
-      localStorage.getItem("id");
-
-    if (!higherManagerId) {
-      setError("HigherManager ID not found in localStorage.");
-      return;
-    }
-
-    const load = async () => {
+    const fetchDashboard = async () => {
       setLoading(true);
       setError(null);
+
       try {
-        // If you want cancellation you can pass an AbortSignal here via axios options: { signal }
-        const { overview, graph, coverage } = await fetchAndMapDashboard(higherManagerId);
-        if (!mounted) return;
-        setOverview(overview);
-        setGraphData(graph);
-        setCoverageData(coverage);
+        const loggedUserId = localStorage.getItem("loggedUserId") || "";
+        if (!loggedUserId) {
+          setError("No logged user id found");
+          setLoading(false);
+          return;
+        }
+
+        const userRes = await getUserById(loggedUserId);
+        if (!userRes || !userRes.data) {
+          setError("Failed to load user data");
+          setLoading(false);
+          return;
+        }
+
+        const user = userRes.data;
+        if (!cancelled) {
+          setUserName(user.fullName || "");
+          setRole(user.role?.name || "");
+          const divisionId = user.division?._id || "";
+          setDivision(divisionId);
+
+          if (!divisionId) {
+            setError("User has no division assigned");
+            setLoading(false);
+            return;
+          }
+
+          let overviewRes;
+          try {
+            overviewRes = await getHigherManagerDashboardCardInfo(divisionId);
+          } catch (err) {
+            console.error("API call failed:", err?.response?.data || err?.message || err);
+            setError("Failed to load dashboard data");
+            setLoading(false);
+            return;
+          }
+
+          if (!overviewRes || !overviewRes.data) {
+            setError("No dashboard data returned");
+            setLoading(false);
+            return;
+          }
+
+          const data = overviewRes.data;
+
+          // Map API response to local overview shape. Adjust keys to whatever API returns.
+          if (!cancelled) {
+            setOverview({
+              totalLands: data.totalLands ?? 0,
+              totalArea: data.totalArea ?? 0,
+              divisions: data.totalDivisions ?? 0,
+              landsInProgress: data.landsInProgress ?? data.pendingOperations ?? 0,
+            });
+
+            // If your API returns series/coverage objects, map them here
+            setGraphData(data.graphSeries || []);
+            setCoverageData(data.coverage || []);
+          }
+        }
       } catch (err) {
-        console.error("Failed to fetch dashboard:", err);
-        if (!mounted) return;
-        setError(err.message || "Failed to load dashboard data");
+        console.error(err);
+        if (!cancelled) setError("An unexpected error occurred");
       } finally {
-        if (mounted) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    load();
+    fetchDashboard();
 
     return () => {
-      mounted = false;
+      cancelled = true;
     };
   }, []);
 
@@ -205,5 +248,3 @@ function Dashboard() {
     </Box>
   );
 }
-
-export default Dashboard;

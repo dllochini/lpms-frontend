@@ -3,7 +3,7 @@ import axiosBackend from "../configs/axios-config";
 
 /**
  * Calls backend:
- * GET /api/manager/:higherManagerId/dashboard
+ * GET /api/manager/:divisionId/dashboard
  *
  * Expected backend shape:
  * {
@@ -14,12 +14,12 @@ import axiosBackend from "../configs/axios-config";
  */
 
 /** Raw call - returns axios response data */
-export const getHigherManagerDashboard = (higherManagerId, options = {}) => {
-  if (!higherManagerId) {
-    return Promise.reject(new Error("higherManagerId is required"));
+export const getHigherManagerDashboardCardInfo = (divisionId, options = {}) => {
+  if (!divisionId) {
+    return Promise.reject(new Error("divisionId is required"));
   }
   // axios supports passing { signal } in modern versions if you want cancellation
-  return axiosBackend.get(`/api/manager/${higherManagerId}/dashboard`, options).then(res => res.data);
+  return axiosBackend.get(`/api/manager/${divisionId}/dashboard`, options).then(res => res.data);
 };
 
 /**
@@ -28,8 +28,8 @@ export const getHigherManagerDashboard = (higherManagerId, options = {}) => {
  * - Graph: [{ name, total, progress }]
  * - Coverage: [{ name, value }]
  */
-export const fetchAndMapDashboard = async (higherManagerId, options = {}) => {
-  const data = await getHigherManagerDashboard(higherManagerId, options);
+export const fetchAndMapDashboard = async (divisionId, options = {}) => {
+  const data = await getHigherManagerDashboardCardInfo(divisionId, options);
 
   const ov = data.overview || {};
   const overview = {
@@ -56,6 +56,6 @@ export const fetchAndMapDashboard = async (higherManagerId, options = {}) => {
 };
 
 export default {
-  getHigherManagerDashboard,
+  getHigherManagerDashboardCardInfo,
   fetchAndMapDashboard,
 };
