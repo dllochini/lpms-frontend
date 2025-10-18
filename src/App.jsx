@@ -8,6 +8,10 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
 import { useEffect } from "react";
 import { isTokenExpired, clearAuth } from "./utils/auth"; // import helpers
 
@@ -135,9 +139,13 @@ const AppWrapper = () => {
   );
 };
 
+const queryClient = new QueryClient()
+
 const App = () => (
   <BrowserRouter>
-    <AppWrapper />
+    <QueryClientProvider client={queryClient}>
+      <AppWrapper />
+    </QueryClientProvider>
   </BrowserRouter>
 );
 

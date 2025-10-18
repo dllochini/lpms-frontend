@@ -13,25 +13,20 @@ import Typography from "@mui/material/Typography";
  * - Expects fully aggregated `data` from parent (Dashboard)
  * - Displays: Land ID, Area, Current Status, Current Task Progress, Overall Progress, Actions
  */
-const LandDataGrid = ({ data, onUpdate, onDelete }) => {
-  // Edit button
-  const handleEdit = (landId) => {
-    if (onUpdate) onUpdate(landId);
-  };
-
-  // Delete button
-  const handleDelete = (landId) => {
-    if (onDelete) onDelete(landId);
-  };
+const LandDataGrid = ({ data }) => {
 
   const columns = [
-    { field: "landId", headerName: "Land ID", flex: 1, minWidth: 130 },
-    { field: "area", headerName: "Area (acre)", flex: 1, minWidth: 110 },
+    { field: "_id", headerName: "Land ID", flex: 1, minWidth: 130 },
+    { field: "size", headerName: "Area (acre)", flex: 1, minWidth: 110 },
     {
-      field: "currentStatus",
+      field: "taskName",
+      headerName: "Current Task Name",
+      flex: 1.5,
+    },
+    {
+      field: "status",
       headerName: "Current Status",
       flex: 1.5,
-      valueGetter: (params) => params.row.currentTask?.status ?? "No Task",
     },
     {
       field: "taskProgressPercent",
@@ -40,7 +35,7 @@ const LandDataGrid = ({ data, onUpdate, onDelete }) => {
       sortable: false,
       filterable: false,
       renderCell: (params) => {
-        const value = Math.max(0, Math.min(100, params.row.taskProgressPercent ?? 0));
+        const value = Math.max(0, Math.min(100, params?.row.taskProgressPercent ?? 0));
         return (
           <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
             <Box sx={{ flex: 1 }}>
@@ -53,26 +48,26 @@ const LandDataGrid = ({ data, onUpdate, onDelete }) => {
         );
       },
     },
-    {
-      field: "overallProgressPercent",
-      headerName: "Overall Progress",
-      flex: 1.8,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => {
-        const value = Math.max(0, Math.min(100, params.row.overallProgressPercent ?? 0));
-        return (
-          <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
-            <Box sx={{ flex: 1 }}>
-              <LinearProgress variant="determinate" value={value} />
-            </Box>
-            <Box sx={{ minWidth: 40 }}>
-              <Typography variant="body2">{`${Math.round(value)}%`}</Typography>
-            </Box>
-          </Box>
-        );
-      },
-    },
+    // {
+    //   field: "overallProgressPercent",
+    //   headerName: "Overall Progress",
+    //   flex: 1.8,
+    //   sortable: false,
+    //   filterable: false,
+    //   renderCell: (params) => {
+    //     const value = Math.max(0, Math.min(100, params?.row.overallProgressPercent ?? 0));
+    //     return (
+    //       <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
+    //         <Box sx={{ flex: 1 }}>
+    //           <LinearProgress variant="determinate" value={value} />
+    //         </Box>
+    //         <Box sx={{ minWidth: 40 }}>
+    //           <Typography variant="body2">{`${Math.round(value)}%`}</Typography>
+    //         </Box>
+    //       </Box>
+    //     );
+    //   },
+    // },
     {
       field: "actions",
       type: "actions",
@@ -82,15 +77,9 @@ const LandDataGrid = ({ data, onUpdate, onDelete }) => {
         <GridActionsCellItem
           icon={<EditIcon />}
           label="Edit"
-          onClick={() => handleEdit(params.row.landId)}
+          onClick={() => {}}
           key="edit"
-        />,
-        <GridActionsCellItem
-          icon={<DeleteIcon />}
-          label="Delete"
-          onClick={() => handleDelete(params.row.landId)}
-          key="delete"
-        />,
+        />
       ],
       sortable: false,
       filterable: false,

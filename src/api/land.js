@@ -6,8 +6,9 @@ export const createUserLand = (formData) => axiosBackend.post("/createUserLand/s
   headers: { "Content-Type": "multipart/form-data" }
 });
 
-export const getLandsByFieldOfficerId = (fieldOfficerId) => { 
-  return axiosBackend.get(`/lands/fieldOfficer/${fieldOfficerId}`);
+export const getLandsByFieldOfficerId = async (fieldOfficerId) => { 
+  const result = await axiosBackend.get(`/lands/fieldOfficer/${fieldOfficerId}`);
+  return result.data;
 }
 
 export const getLandById = (landId) => {
