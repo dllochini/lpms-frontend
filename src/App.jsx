@@ -31,10 +31,13 @@ import FieldOperations from "./views/fieldOfficer/FieldOperations";
 import FarmResources from "./views/fieldOfficer/FarmResources";
 import LandRegistry from "./views/fieldOfficer/LandRegistry";
 import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress";
+import LandProgressTracking from "./views/fieldOfficer/ProgressTrack/ProgressTrack";
+
 import LandRegistrationPage1 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration1";
 import LandRegistrationPage2 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration2";
 import LandRegistrationPage3 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration3";
 import LandRegistrationPage4 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration4";
+
 import LandEditPage1 from "./views/fieldOfficer/FarmerLandEdit/LandEdit1";
 import LandEditPage2 from "./views/fieldOfficer/FarmerLandEdit/LandEdit2";
 import LandEditPage3 from "./views/fieldOfficer/FarmerLandEdit/LandEdit3";
@@ -103,6 +106,7 @@ const AppWrapper = () => {
         <Route path="farmResources" element={<FarmResources />} />
         <Route path="landRegistry" element={<LandRegistry />} />
         <Route path="assignedLandProgress" element={<AssignedLandProgress />} />
+        <Route path="landProgressTracking/:landId" element={<LandProgressTracking />} />
         {/* Land Registration */}
         <Route path="landRegistration1" element={<LandRegistrationPage1 />} />
         <Route path="landRegistration2" element={<LandRegistrationPage2 />} />

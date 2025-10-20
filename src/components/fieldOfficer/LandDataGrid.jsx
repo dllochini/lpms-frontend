@@ -6,6 +6,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import LinearProgress from "@mui/material/LinearProgress";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { useNavigate } from "react-router-dom";
 
 /**
  * LandDataGrid
@@ -14,6 +15,8 @@ import Typography from "@mui/material/Typography";
  * - Displays: Land ID, Area, Current Status, Current Task Progress, Overall Progress, Actions
  */
 const LandDataGrid = ({ data }) => {
+
+  const navigate = useNavigate();
 
   const columns = [
     { field: "_id", headerName: "Land ID", flex: 1, minWidth: 130 },
@@ -77,7 +80,7 @@ const LandDataGrid = ({ data }) => {
         <GridActionsCellItem
           icon={<EditIcon />}
           label="Edit"
-          onClick={() => {}}
+          onClick={() => navigate(`/fieldOfficer/landProgressTracking/${params.row._id}`)}
           key="edit"
         />
       ],
