@@ -28,7 +28,6 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
   const [localStatus, setLocalStatus] = useState(task?.status ?? "In Progress");
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  
   const { mutate: updateTaskStatus, isLoading: updatingStatusLoading } = useUpdateTask({
     onSuccess: (updatedTask) => {
       const newStatus = updatedTask?.status ?? "Sent for approval";
@@ -124,7 +123,7 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
 
     // call mutation; mutate accepts (variables, options)
     updateTaskStatus(
-      { taskId: taskKey, updatedData: { status: "Sent for approval" } },
+      { taskId: taskKey, updatedData: { status: "Sent for approval", endDate: new Date().toISOString(), } },
       {
         onSettled: () => {
           setUpdatingStatus(false);

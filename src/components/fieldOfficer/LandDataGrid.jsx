@@ -8,12 +8,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useNavigate } from "react-router-dom";
 
-/**
- * LandDataGrid
- * - Purely presentational DataGrid
- * - Expects fully aggregated `data` from parent (Dashboard)
- * - Displays: Land ID, Area, Current Status, Current Task Progress, Overall Progress, Actions
- */
 const LandDataGrid = ({ data }) => {
 
   const navigate = useNavigate();
@@ -51,26 +45,6 @@ const LandDataGrid = ({ data }) => {
         );
       },
     },
-    // {
-    //   field: "overallProgressPercent",
-    //   headerName: "Overall Progress",
-    //   flex: 1.8,
-    //   sortable: false,
-    //   filterable: false,
-    //   renderCell: (params) => {
-    //     const value = Math.max(0, Math.min(100, params?.row.overallProgressPercent ?? 0));
-    //     return (
-    //       <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
-    //         <Box sx={{ flex: 1 }}>
-    //           <LinearProgress variant="determinate" value={value} />
-    //         </Box>
-    //         <Box sx={{ minWidth: 40 }}>
-    //           <Typography variant="body2">{`${Math.round(value)}%`}</Typography>
-    //         </Box>
-    //       </Box>
-    //     );
-    //   },
-    // },
     {
       field: "actions",
       type: "actions",

@@ -1,29 +1,14 @@
 // LandProgressTracking.jsx
-import React, { useState, useEffect } from "react";
-import { Typography, Box, Paper, Button, Breadcrumbs, CircularProgress } from "@mui/material";
-// import AddIcon from "@mui/icons-material/Add";
+import React, { useState, useMemo } from "react";
+import { Typography, Box, Paper, Breadcrumbs, CircularProgress, Snackbar, Alert } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-// import { useNavigate } from "react-router-dom";
 import LandDataGrid from "../../components/fieldOfficer/LandDataGrid";
-import {Snackbar, Alert} from "@mui/material";
-// Import your API helpers
-import workdone, {getWorkDoneByTaskId} from "../../api/workdone";
-import { getOperations } from "../../api/operation";
 import { useGetFieldOfficerLands } from "../../hooks/land.hooks";
-import { useMemo } from "react";
 import { useGetAllTasks } from "../../hooks/task.hooks";
 import { useGetAllWorkDone } from "../../hooks/workdone.hooks";
 
 export default function AssignedLandProgress() {
-  // const navigate = useNavigate();
 
-  // Stores aggregated land data for the DataGrid
-  // const [lands, setLands] = useState([]);
-
-  // Loading state for spinner
-  const [loading, setLoading] = useState(true);
-
-  // Snackbar state for messages
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -73,26 +58,6 @@ export default function AssignedLandProgress() {
     });      
   }, [foLandData, taskData, workDoneData]);
 
-    const handleUpdate = async (landId) => {};
-
-  // // Handle update
-  // const handleUpdate = async (landId) => {
-  //   try {
-  //     const payload = {}; // Put actual fields to update
-  //     await updateLand(landId, payload);
-  //     setSnackbarMessage(`Land ${landId} updated`);
-  //     setSnackbarSeverity("success");
-  //     setSnackbarOpen(true);
-  //     // Refresh after update
-  //     await fetchAggregatedLands();
-  //   } catch (err) {
-  //     console.error("Failed to update land", err);
-  //     setSnackbarMessage(`Failed to update land ${landId}`);
-  //     setSnackbarSeverity("error");
-  //     setSnackbarOpen(true);
-  //   }
-  // };
-
   return (
     <Box sx={{ mb: 1.8 }}>
       {/* Header & breadcrumb */}
@@ -116,7 +81,7 @@ export default function AssignedLandProgress() {
             <CircularProgress />
           </Box>
         ) : (
-          <LandDataGrid data={lands} onUpdate={handleUpdate} />
+          <LandDataGrid data={lands} />
         )}
       </Paper>
 

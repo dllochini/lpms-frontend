@@ -11,6 +11,12 @@ export const getAllTasks = async() => {
 
 export const getTasksByLandId = (landId) => axiosBackend.get(`/tasks/${landId}`);
 
+export const getTasksByDiv = async (userId) => {
+  console.log("id",userId)
+  const res = await axiosBackend.get(`/tasks/manager/${userId}`)
+  return res.data;
+};
+
 export const updateTaskById = async (taskId, updatedData) => {
   if (!taskId) throw new Error("taskId required");
   const res = await axiosBackend.put(`/tasks/${taskId}`, updatedData);

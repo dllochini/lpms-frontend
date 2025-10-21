@@ -41,19 +41,17 @@ const ProcessOverview = ({ process }) => {
   const [form, setForm] = useState(defaultForm);
   const optimisticRef = useRef(null);
 
-  
-    const isAnyTaskPendingApproval = tasks.some(t => t.status === "Sent for approval");
+  const isAnyTaskPendingApproval = tasks.some(
+    (t) => t.status === "Sent for approval"
+  );
 
   useEffect(() => {
     setTasks(process?.tasks ? [...process.tasks] : []);
   }, [process]);
 
-  const { data: resources = [], isLoading: loadingResources } =
-    useGetResources();
-  const { data: operations = [], isLoading: loadingOperations } =
-    useGetOperations();
-
-  // createTask hook (your implementation)
+  const { data: resources = [], isLoading: loadingResources } = useGetResources();
+  const { data: operations = [], isLoading: loadingOperations } = useGetOperations();
+  
   const { mutate: createTask, isLoading: creatingTask } = useCreateTask({
     onSuccess: (createdTask) => {
       if (optimisticRef.current) {
@@ -119,8 +117,15 @@ const ProcessOverview = ({ process }) => {
   const handleAddTask = () => {
     if (creatingTask) return;
     // minimal validation
-    if (!form.operation || !form.machine || !form.startDate || !form.expectedEndDate) {
-      alert("Please fill operation, machine, start date and expected end date.");
+    if (
+      !form.operation ||
+      !form.machine ||
+      !form.startDate ||
+      !form.expectedEndDate
+    ) {
+      alert(
+        "Please fill operation, machine, start date and expected end date."
+      );
       return;
     }
 
@@ -145,17 +150,15 @@ const ProcessOverview = ({ process }) => {
       id: tempId,
       assignedTo: userId,
       process: processId,
-      operation:
-        operations.find((o) => o._id === form.operation) || {
-          _id: form.operation,
-          name: form.operation,
-        },
-      resource:
-        resources.find((r) => r._id === form.machine) || {
-          _id: form.machine,
-          name: form.machine,
-          unit: { name: form.unit || "Acre", symbol: "" },
-        },
+      operation: operations.find((o) => o._id === form.operation) || {
+        _id: form.operation,
+        name: form.operation,
+      },
+      resource: resources.find((r) => r._id === form.machine) || {
+        _id: form.machine,
+        name: form.machine,
+        unit: { name: form.unit || "Acre", symbol: "" },
+      },
       name:
         operations.find((o) => o._id === form.operation)?.name ||
         `Operation ${form.operation}`,

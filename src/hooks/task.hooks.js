@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTask, getAllTasks, updateTaskById } from "../api/task.js";
+import { createTask, getAllTasks, getTasksByDiv, updateTaskById } from "../api/task.js";
 
 export const useGetAllTasks = (options = {}) => {
     return useQuery({
@@ -8,6 +8,13 @@ export const useGetAllTasks = (options = {}) => {
         ...options
     });
 }
+
+export const useGetTasksByDiv = (userId, options = {}) =>
+  useQuery({
+    queryKey: ["fieldOfficerLands", userId],
+    queryFn: () => getTasksByDiv(userId),
+    ...options,
+  });
 
 export const useCreateTask = (options = {}) => {
   const queryClient = useQueryClient();
