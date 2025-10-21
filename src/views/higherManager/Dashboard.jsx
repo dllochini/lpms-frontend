@@ -21,7 +21,7 @@ import { getUserById } from "../../api/user";
 export default function Dashboard() {
   const [userName, setUserName] = useState("");
   const [role, setRole] = useState("");
-  const [division, setDivision] = useState("");
+  const [land, setLand] = useState("");
 
   const [overview, setOverview] = useState({
     totalLands: 0,
@@ -60,18 +60,18 @@ export default function Dashboard() {
         if (!cancelled) {
           setUserName(user.fullName || "");
           setRole(user.role?.name || "");
-          const divisionId = user.division?._id || "";
-          setDivision(divisionId);
+          const landId = user.land?._id || "";
+          setLand(landId);
 
-          if (!divisionId) {
-            setError("User has no division assigned");
+          if (!landId) {
+            setError("User has no land assigned");
             setLoading(false);
             return;
           }
 
           let overviewRes;
           try {
-            overviewRes = await getHigherManagerDashboardCardInfo(divisionId);
+            overviewRes = await getHigherManagerDashboardCardInfo(landId);
           } catch (err) {
             console.error("API call failed:", err?.response?.data || err?.message || err);
             setError("Failed to load dashboard data");

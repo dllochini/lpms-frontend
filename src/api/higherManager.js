@@ -3,7 +3,7 @@ import axiosBackend from "../configs/axios-config";
 
 /**
  * Calls backend:
- * GET /api/manager/:divisionId/dashboard
+ * GET /api/manager/:landId/dashboard
  *
  * Expected backend shape:
  * {
@@ -14,12 +14,12 @@ import axiosBackend from "../configs/axios-config";
  */
 
 /** Raw call - returns axios response data */
-export const getHigherManagerDashboardCardInfo = (divisionId, options = {}) => {
-  if (!divisionId) {
-    return Promise.reject(new Error("divisionId is required"));
+export const getHigherManagerDashboardCardInfo = (landId, options = {}) => {
+  if (!landId) {
+    return Promise.reject(new Error("landId is required"));
   }
   // axios supports passing { signal } in modern versions if you want cancellation
-  return axiosBackend.get(`/api/manager/${divisionId}/dashboard`, options).then(res => res.data);
+  return axiosBackend.get(`/api/manager/${landId}/dashboard`, options).then(res => res.data);
 };
 
 /**
@@ -28,8 +28,8 @@ export const getHigherManagerDashboardCardInfo = (divisionId, options = {}) => {
  * - Graph: [{ name, total, progress }]
  * - Coverage: [{ name, value }]
  */
-export const fetchAndMapDashboard = async (divisionId, options = {}) => {
-  const data = await getHigherManagerDashboardCardInfo(divisionId, options);
+export const fetchAndMapDashboard = async (landId, options = {}) => {
+  const data = await getHigherManagerDashboardCardInfo(landId, options);
 
   const ov = data.overview || {};
   const overview = {
@@ -48,7 +48,7 @@ export const fetchAndMapDashboard = async (divisionId, options = {}) => {
 
   const rawCoverage = Array.isArray(data.coverage) ? data.coverage : [];
   const coverage = rawCoverage.map((c) => ({
-    name: c.division ?? c._id ?? c.name ?? "Unknown",
+    name: c.land ?? c._id ?? c.name ?? "Unknown",
     value: typeof c.area === "number" ? c.area : (c.value ?? 0),
   }));
 
