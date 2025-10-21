@@ -1,144 +1,62 @@
 // LandProgressTracking.jsx
-import React, { useState, useEffect } from "react";
-import { Typography, Box, Paper, Button, Breadcrumbs, CircularProgress } from "@mui/material";
-// import AddIcon from "@mui/icons-material/Add";
+import React, { useState, useMemo } from "react";
+import { Typography, Box, Paper, Breadcrumbs, CircularProgress, Snackbar, Alert } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-// import { useNavigate } from "react-router-dom";
 import LandDataGrid from "../../components/fieldOfficer/LandDataGrid";
-import {Snackbar, Alert} from "@mui/material";
-// Import your API helpers
-import { getLands } from "../../api/land";
-import { getTasksByLandId } from "../../api/task";
-import {getWorkDoneByTaskId} from "../../api/workdone";
-import { getOperations } from "../../api/operation";
+import { useGetFieldOfficerLands } from "../../hooks/land.hooks";
+import { useGetAllTasks } from "../../hooks/task.hooks";
+import { useGetAllWorkDone } from "../../hooks/workdone.hooks";
 
 export default function AssignedLandProgress() {
-  // const navigate = useNavigate();
 
-  // Stores aggregated land data for the DataGrid
-  const [lands, setLands] = useState([]);
-
-  // Loading state for spinner
-  const [loading, setLoading] = useState(true);
-
-  // Snackbar state for messages
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
-  // Fetch all lands + tasks + workdone + operations
-  const fetchAggregatedLands = async () => {
-    setLoading(true);
-    try {
-      // 1️⃣ Fetch lands
-      const landsRes = await getLands();
-      console.log("Fetched lands:", landsRes);
-      const landsData = landsRes?.data ?? landsRes ?? [];
+  const {data: foLandData = [], isLoading} = useGetFieldOfficerLands(localStorage.getItem("loggedUserId"), {
+    onSuccess: (data) => {
+      console.log("Lands for field officer:", data);
+    },
+    onError: (error) => {
+      console.error("Failed to fetch lands for field officer", error);
+    },
+  });
 
-      // 2️⃣ Fetch operations (for overall progress)
-      const operationsRes = await getOperations();
-      const operations = operationsRes?.data ?? operationsRes ?? [];
+  const { data: taskData = [], isLoading: isLoadingTasks } = useGetAllTasks(localStorage.getItem("loggedUserId"), {
+    onSuccess: (data) => {
+      console.log("All tasks data:", data);
+    },
+    onError: (error) => {
+      console.error("Failed to fetch all tasks", error);
+    },
+  });
 
-      // 3️⃣ Fetch tasks and workdone for each land
-      const aggregated = await Promise.all(
-        landsData.map(async (land) => {
-          // Fetch tasks for this land
-          const tasksRes = await getTasksByLandId(land.landId);
-          const tasks = tasksRes?.data ?? [];
+  const { data: workDoneData = [], isLoading: isLoadingWorkDone } = useGetAllWorkDone({
+    onSuccess: (data) => {
+      console.log("All work done data:", data);
+    },
+    onError: (error) => {
+      console.error("Failed to fetch all work done data", error);
+    },
+  });
 
-          // Pick current task: first pending task
-          const currentTask = tasks.find((t) => t.status.toLowerCase() === "pending") ?? null;
+  const lands = useMemo(() => {
+    if(!Array.isArray(foLandData) || !Array.isArray(taskData)) return [];
+    return foLandData.map((land) => {
+      // Find tasks for this land
+      const tasksForLand = taskData.filter((task) => task?.process?.land === land._id).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+      const currentTask = tasksForLand?.[0] ?? null;
+      // current task workdone
+      console.log("all workdone data:", workDoneData);
 
-          // Compute current task progress from WorkDone
-          let taskProgressPercent = 0;
-          if (currentTask) {
-            const workRes = await getWorkDoneByTaskId(currentTask.taskId);
-            const workDoneList = workRes?.data ?? [];
-            // Simple example: amount / expected_amount
-            const totalAmount = workDoneList.reduce((sum, w) => sum + (w.amount ?? 0), 0);
-            const expected = currentTask.expected_amount ?? 100; // fallback
-            taskProgressPercent = Math.min(100, (totalAmount / expected) * 100);
-          }
-
-          // Compute overall progress (weighted by operation if available)
-          let overallProgressPercent = 0;
-          let totalWeight = 0;
-          let weightedSum = 0;
-          for (const task of tasks) {
-            const op = operations.find((o) => o.operationId === task.operationId);
-            const weight = op?.weight ?? 1;
-            let progress = 0;
-            // Fetch workdone for this task to compute task-level progress
-            const workRes = await getWorkDoneByTaskId(task.taskId);
-            const workDoneList = workRes?.data ?? [];
-            const totalAmount = workDoneList.reduce((sum, w) => sum + (w.amount ?? 0), 0);
-            const expected = task.expected_amount ?? 100;
-            progress = Math.min(100, (totalAmount / expected) * 100);
-            weightedSum += (progress / 100) * weight;
-            totalWeight += weight;
-          }
-          overallProgressPercent = totalWeight > 0 ? (weightedSum / totalWeight) * 100 : 0;
-
-          return {
-            ...land,
-            currentTask,
-            taskProgressPercent,
-            overallProgressPercent,
-          };
-        })
-      );
-
-      setLands(aggregated);
-    } catch (err) {
-      console.error("Failed to load aggregated lands", err);
-      setSnackbarMessage("Failed to load lands. See console for details.");
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-      setLands([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAggregatedLands();
-  }, []);
-
-  // Handle deletion
-  const handleDelete = async (landId) => {
-    try {
-      // Call API to delete land
-      await deleteLandById(landId);
-      // Remove from local state
-      setLands((prev) => prev.filter((l) => l.landId !== landId));
-      setSnackbarMessage(`Land ${landId} deleted`);
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-    } catch (err) {
-      console.error("Failed to delete land", err);
-      setSnackbarMessage(`Failed to delete land ${landId}`);
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  };
-
-  // Handle update
-  const handleUpdate = async (landId) => {
-    try {
-      const payload = {}; // Put actual fields to update
-      await updateLand(landId, payload);
-      setSnackbarMessage(`Land ${landId} updated`);
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
-      // Refresh after update
-      await fetchAggregatedLands();
-    } catch (err) {
-      console.error("Failed to update land", err);
-      setSnackbarMessage(`Failed to update land ${landId}`);
-      setSnackbarSeverity("error");
-      setSnackbarOpen(true);
-    }
-  };
+      return {
+        _id: land._id,
+        size: land.size,
+        status: currentTask?.status ?? "No Task",
+        taskName: currentTask?.operation?.name,
+      }
+    });      
+  }, [foLandData, taskData, workDoneData]);
 
   return (
     <Box sx={{ mb: 1.8 }}>
@@ -158,12 +76,12 @@ export default function AssignedLandProgress() {
 
       <Paper elevation={5} sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 5 }}>
 
-        {loading ? (
+        {isLoading || isLoadingTasks ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
             <CircularProgress />
           </Box>
         ) : (
-          <LandDataGrid data={lands} onDelete={handleDelete} onUpdate={handleUpdate} />
+          <LandDataGrid data={lands} />
         )}
       </Paper>
 
