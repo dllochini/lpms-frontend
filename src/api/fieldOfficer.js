@@ -1,4 +1,5 @@
 import axiosBackend from "../configs/axios-config";
 
-export const getFieldOfficerDashboardCardInfo = (landId) =>
-  axiosBackend.get(`/fieldOfficer/land/${landId}/cards`);
+// Fetch Field Officer dashboard data by divisionId
+export const getFieldOfficerDashboardCardInfo = (divisionId) =>
+  axiosBackend.get(`/fieldOfficer/division/${divisionId}/cards`);

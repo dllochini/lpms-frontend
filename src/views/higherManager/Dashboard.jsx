@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import {
   Typography,
@@ -14,15 +15,12 @@ import HomeIcon from "@mui/icons-material/Home";
 
 import Graph from "../../components/higherManager/Graph";
 import Coverage from "../../components/higherManager/Coverage";
-// Make sure this function exists in ../../api/higherManager
-import { getHigherManagerDashboardCardInfo, /* or fetchAndMapDashboard */ } from "../../api/higherManager";
+import { getHigherManagerDashboardCardInfo } from "../../api/higherManager";
 import { getUserById } from "../../api/user";
 
 export default function Dashboard() {
   const [userName, setUserName] = useState("");
   const [role, setRole] = useState("");
-  const [land, setLand] = useState("");
-
   const [overview, setOverview] = useState({
     totalLands: 0,
     totalArea: 0,
@@ -44,14 +42,14 @@ export default function Dashboard() {
       try {
         const loggedUserId = localStorage.getItem("loggedUserId") || "";
         if (!loggedUserId) {
-          setError("No logged user id found");
+          if (!cancelled) setError("No logged user id found");
           setLoading(false);
           return;
         }
 
         const userRes = await getUserById(loggedUserId);
-        if (!userRes || !userRes.data) {
-          setError("Failed to load user data");
+        if (!userRes?.data) {
+          if (!cancelled) setError("Failed to load user data");
           setLoading(false);
           return;
         }
@@ -60,49 +58,47 @@ export default function Dashboard() {
         if (!cancelled) {
           setUserName(user.fullName || "");
           setRole(user.role?.name || "");
-          const landId = user.land?._id || "";
-          setLand(landId);
 
-          if (!landId) {
-            setError("User has no land assigned");
-            setLoading(false);
-            return;
-          }
+          // Use assigned land ID if exists, otherwise fallback to manager ID
+        // in your Dashboard component
+// ...
+        const dashboardParamObj = user.land?._id ? { landId: user.land._id } : { managerId: loggedUserId };
 
-          let overviewRes;
-          try {
-            overviewRes = await getHigherManagerDashboardCardInfo(landId);
-          } catch (err) {
-            console.error("API call failed:", err?.response?.data || err?.message || err);
-            setError("Failed to load dashboard data");
-            setLoading(false);
-            return;
-          }
+        let overviewRes;
+        try {
+          // IMPORTANT: helper now returns data, not axios response
+          overviewRes = await getHigherManagerDashboardCardInfo(dashboardParamObj);
+        } catch (err) {
+          console.error("API call failed:", err?.response?.data ?? err?.message ?? err);
+          if (!cancelled) setError("Failed to load dashboard data");
+          setLoading(false);
+          return;
+        }
 
-          if (!overviewRes || !overviewRes.data) {
-            setError("No dashboard data returned");
-            setLoading(false);
-            return;
-          }
+        if (!overviewRes) {
+          if (!cancelled) setError("No dashboard data returned");
+          setLoading(false);
+          return;
+        }
 
-          const data = overviewRes.data;
+        const data = overviewRes; // NOTE: overviewRes is the data object already
+        // Map API response to local overview shape
+        if (!cancelled) {
+          setOverview({
+            totalLands: data.overview?.totalLands ?? data.overview?.total_lands ?? data.totalLands ?? 0,
+            totalArea: data.overview?.totalArea ?? data.overview?.total_area ?? data.totalArea ?? 0,
+            divisions: data.overview?.divisions ?? data.overview?.totalDivisions ?? data.divisions ?? 0,
+            landsInProgress: data.overview?.landsInProgress ?? data.overview?.pendingOperations ?? data.landsInProgress ?? 0,
+          });
 
-          // Map API response to local overview shape. Adjust keys to whatever API returns.
-          if (!cancelled) {
-            setOverview({
-              totalLands: data.totalLands ?? 0,
-              totalArea: data.totalArea ?? 0,
-              divisions: data.totalDivisions ?? 0,
-              landsInProgress: data.landsInProgress ?? data.pendingOperations ?? 0,
-            });
+          // graphs: prefer mapped `graph` or `graphSeries` or top-level `graph`
+          setGraphData(data.graph ?? data.graphSeries ?? data.series ?? []);
+          setCoverageData(data.coverage ?? []);
+        }
 
-            // If your API returns series/coverage objects, map them here
-            setGraphData(data.graphSeries || []);
-            setCoverageData(data.coverage || []);
-          }
         }
       } catch (err) {
-        console.error(err);
+        console.error("Unexpected error:", err);
         if (!cancelled) setError("An unexpected error occurred");
       } finally {
         if (!cancelled) setLoading(false);
@@ -122,6 +118,7 @@ export default function Dashboard() {
 
   return (
     <Box sx={{ maxWidth: 1150, mx: "auto", p: 3 }}>
+      {/* Greeting */}
       <Paper
         sx={{
           mx: "auto",
@@ -133,13 +130,14 @@ export default function Dashboard() {
         elevation={0}
       >
         <Typography variant="h5" gutterBottom>
-          Hello {userName} 👋
+          Hello {userName || (loading ? <CircularProgress size={20} /> : "User")} 👋
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Welcome back to the Agricultural Land Preparation System Dashboard.
         </Typography>
       </Paper>
 
+      {/* Breadcrumb */}
       <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2 }}>
         <Typography color="text.primary">
           <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
@@ -147,12 +145,14 @@ export default function Dashboard() {
         </Typography>
       </Breadcrumbs>
 
+      {/* Error */}
       {error && (
         <Box sx={{ maxWidth: 925, mx: "auto", mt: 2 }}>
           <Alert severity="error">{error}</Alert>
         </Box>
       )}
 
+      {/* Overview Cards */}
       <Paper
         elevation={5}
         sx={{
@@ -201,6 +201,7 @@ export default function Dashboard() {
         </Grid>
       </Paper>
 
+      {/* Graph and Coverage */}
       <Box
         sx={{
           maxWidth: 1000,
