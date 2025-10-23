@@ -9,29 +9,23 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import Typography from "@mui/icons-material/Add";
 import { useState } from "react";
+import { useGetProcessByLandId } from "../../hooks/process.hook";
 
-// Replace this with your actual resources API
-// import { deleteResourceById } from "../../api/resources";
-
-const OperationGrid= ({ data, onDelete, onEdit, onView }) => {
+const OperationGrid = ({ data, onDelete, onEdit, onView }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
   // Open confirmation dialog
   const handleDeleteClick = (id) => {
     setSelectedId(id);
     setOpenDialog(true);
   };
 
+  console.log(data,"in grid")
   // Confirm delete
   const handleConfirmDelete = async () => {
     if (!selectedId) return;
 
     try {
-      // Call your API to delete the resource
-      // await deleteResourceById(selectedId);
-
-      // Update parent state
       if (onDelete) onDelete(selectedId);
     } catch (error) {
       console.error("Delete failed:", error);
@@ -54,7 +48,7 @@ const OperationGrid= ({ data, onDelete, onEdit, onView }) => {
   };
 
   const columns = [
-    { field: "_id", headerName: "LandID", flex: 2 },
+    { field: "landId", headerName: "LandID", flex: 2 },
     { field: "fieldOfficer", headerName: "Field Officer", flex: 2 },
     { field: "operation", headerName: "Operation", flex: 1.5 },
     { field: "startDate", headerName: "Start Date", flex: 1.5 },
@@ -65,31 +59,34 @@ const OperationGrid= ({ data, onDelete, onEdit, onView }) => {
       headerName: "Action",
       flex: 2,
       getActions: (params) => [
-
-          <Button
-            variant="contained"
-            color="primary"
-            // onClick={handleEditClick}
-            onClick={() => onView(params.row)} // ← call parent handleViewDetails
-            sx={{ mb: 2,display: "flex", alignItems: "center" , justifyContent: "center" }}
-          
-          >
-            view Details
-          </Button>
-
-
-        
+        <Button
+          variant="contained"
+          color="primary"
+          // onClick={handleEditClick}
+          onClick={() => onView(params.row)} // ← call parent handleViewDetails
+          sx={{
+            mb: 2,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          view Details
+        </Button>,
       ],
       sortable: false,
       filterable: false,
     },
   ];
 
-const rows = Array.isArray(data)
+  const rows = Array.isArray(data)
   ? data.map((row) => ({
       id: row._id,
-      ...row,
-      unit: row.unitID?.name || row.unitID || 'N/A', // fallback if name not populated
+      landId: row.process?.land?._id || "-",
+      fieldOfficer: row.createdBy?.fullName || "N/A",
+      operation: row.operation?.name || "N/A",
+      startDate: row.startDate || "N/A",
+      compeledDate: row.endDate || "Pending",
     }))
   : [];
 
@@ -117,7 +114,8 @@ const rows = Array.isArray(data)
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete resource <strong>{selectedId}</strong>?
+          Are you sure you want to delete resource <strong>{selectedId}</strong>
+          ?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">

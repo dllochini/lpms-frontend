@@ -2,12 +2,28 @@ import axiosBackend from "../configs/axios-config";
 
 // export const getTasks = () => axiosBackend.get("/task");
 
-// export const createTask = (taskData) => axiosBackend.post("/task", taskData);
+export const createTask = (taskData) => axiosBackend.post("/tasks", taskData);
 
-export const getTasksByLandId = (landId) => axiosBackend.get(`/task/${landId}`);
+export const getAllTasks = async() => {
+  const result = await axiosBackend.get("/tasks")
+  return result.data;
+};
 
-// export const updateTaskById = (taskId, updatedData) =>
-//   axiosBackend.put(`/task/${taskId}`, updatedData);
+export const getTasksByLandId = (landId) => axiosBackend.get(`/tasks/${landId}`);
+
+export const getTasksByDiv = async (userId) => {
+  console.log("id",userId)
+  const res = await axiosBackend.get(`/tasks/manager/${userId}`)
+  return res.data;
+};
+
+export const updateTaskById = async (taskId, updatedData) => {
+  if (!taskId) throw new Error("taskId required");
+  const res = await axiosBackend.put(`/tasks/${taskId}`, updatedData);
+  return res.data; // return server payload
+};
+
+// export const updateStatusByTask = (taskId, updatedData) => axiosBackend.put(`/tasks/status/${taskId}`, updatedData);
 
 // export const deleteTaskById = (taskId) => {
 //   return axiosBackend.delete(`/task/${taskId}`);
@@ -15,8 +31,8 @@ export const getTasksByLandId = (landId) => axiosBackend.get(`/task/${landId}`);
 
 export default {
   // getTasks,
-  // createTask,
+  createTask,
   getTasksByLandId,
-  // updateTaskById,
+  updateTaskById,
   // deleteTaskById,
 };

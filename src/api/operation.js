@@ -1,7 +1,10 @@
 import axiosBackend from "../configs/axios-config";
 
 // Get all operations
-export const getOperations = () => axiosBackend.get("/operation");
+export const getOperations = async () => {
+  const res = await axiosBackend.get("/operation");
+  return res.data;
+};
 
 // Create a new operation
 export const createOperation = (operationData) =>
