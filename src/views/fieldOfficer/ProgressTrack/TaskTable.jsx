@@ -365,6 +365,12 @@ const TaskTable = ({ task = {}, onTaskStatusChange, onDeleteTask }) => {
     );
   };
 
+  const calculateTaskProgress = (workDones = [], estTotalWork = 1) => {
+  const totalDone = workDones.reduce((sum, w) => sum + Number(w.newWork || 0), 0);
+  return Math.min((totalDone / (Number(estTotalWork) || 1)) * 100, 100);
+};
+ 
+
   return (
     <>
       <Paper sx={{ p: 2, borderRadius: 2 }} elevation={1}>
@@ -374,10 +380,13 @@ const TaskTable = ({ task = {}, onTaskStatusChange, onDeleteTask }) => {
             alignItems: "center",
             justifyContent: "space-between",
             px: 1.5,
+            py: 1,
+            borderBottom: "1px solid #eee",
           }}
         >
+          {/* Left Section — Operation & Machine */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.3 }}>
               <Typography variant="body1" fontWeight={600}>
                 {task?.operation?.name ?? "-"}
               </Typography>
@@ -388,17 +397,48 @@ const TaskTable = ({ task = {}, onTaskStatusChange, onDeleteTask }) => {
             </Box>
           </Box>
 
+          {/* Middle Section — Total Work */}
           <Box
             sx={{
-              flex: 1,
-              mx: 4,
+              minWidth: 150,
               display: "flex",
-              alignItems: "center",
-              gap: 2,
+              flexDirection: "column",
+              alignItems: "flex-end",
+              mr: 3,
             }}
           >
-            <CircularProgressWithLabel value={Number(task?.progress ?? 10)} />
+            <Typography variant="body2" color="text.secondary">
+              Total Estimated Work
+            </Typography>
+            <Typography variant="body1" fontWeight={600}>
+              {task?.estTotalWork ?? 0} {task?.resource?.unit?.name ?? ""}
+            </Typography>
           </Box>
+
+          {/* Right Section — Progress */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              justifyContent: "center",
+              minWidth: 150,
+            }}
+          >
+            <CircularProgressWithLabel
+              size={50}
+              value={calculateTaskProgress(workDones, task?.estTotalWork)}
+            />
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Typography variant="body2" color="text.secondary">
+                Progress
+              </Typography>
+              <Typography variant="body1" fontWeight={600}>
+                {calculateTaskProgress(workDones, task?.estTotalWork).toFixed(1)}%
+              </Typography>
+            </Box>
+          </Box>
+
 
           <Box
             sx={{
