@@ -10,18 +10,16 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import { Link as RouterLink, useParams } from "react-router-dom";
-import ProcessOverview from "./ProcessOverview";
-import { useCreateProcess, useGetProcessByLandId } from "../../../hooks/process.hook";
+import ProcessOverview from "../ProcessOverview/ProcessOverview";
+import { useCreateProcess, useGetProcessByLandId } from "../../../../hooks/process.hook";
 import AddIcon from "@mui/icons-material/Add";
-import ConfirmDialog from "./ConfirmDialog";
-import ErrorDialog from "./ErrorDialog";
-import { QueryClient } from "@tanstack/react-query";
+import ConfirmDialog from "../ConfirmDialog";
+import ErrorDialog from "../ErrorDialog";
 
 export default function ProgressTrack() {
   const { landId } = useParams();
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
-const [errorDialogMessage, setErrorDialogMessage] = useState("");
-
+  const [errorDialogMessage, setErrorDialogMessage] = useState("");
 
   const { data: landProcesses = [], isLoading } = useGetProcessByLandId(
     landId,
@@ -38,49 +36,49 @@ const [errorDialogMessage, setErrorDialogMessage] = useState("");
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [removingIds, setRemovingIds] = useState(new Set()); // optimistic hide set
 
-    const { mutate: createProcess, isLoading: creatingProcess } = useCreateProcess(landId, {
-  onSuccess: () => {
-    setOpenConfirmDialog(false);
-  },
-  onError: (err) => {
-        console.error("Create process failed:", err);
-        setErrorDialogMessage("Failed to create process. Please try again.");
-        setErrorDialogOpen(true);
-        setOpenConfirmDialog(false);
-      },
-});
+  const { mutate: createProcess, isLoading: creatingProcess } = useCreateProcess(landId, {
+    onSuccess: () => {
+      setOpenConfirmDialog(false);
+    },
+    onError: (err) => {
+      console.error("Create process failed:", err);
+      setErrorDialogMessage("Failed to create process. Please try again.");
+      setErrorDialogOpen(true);
+      setOpenConfirmDialog(false);
+    },
+  });
 
 
-    if (isLoading) {
-      return (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
-          <CircularProgress />
-        </Box>
-      );
-    }
+  if (isLoading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 5 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   const handleAddProcess = () => {
     setOpenConfirmDialog(true);
   };
 
   const confirmCreateProcess = () => {
-  if (creatingProcess) return;
-  if (!landId) return;
-  setOpenConfirmDialog(false);
+    if (creatingProcess) return;
+    if (!landId) return;
+    setOpenConfirmDialog(false);
 
-  const payload = {
-    land: landId,
-    startedDate: new Date().toISOString(),
-    endDate: null,
-  };
+    const payload = {
+      land: landId,
+      startedDate: new Date().toISOString(),
+      endDate: null,
+    };
 
-  // pass landId separately for query invalidation
-  createProcess({ ...payload, landId });
+    // pass landId separately for query invalidation
+    createProcess({ ...payload, landId });
   };
 
 
   // Only enable the Add button when all existing processes are "approved"
-  const allApproved = landProcesses.every( (p) => (p.status || "").toLowerCase() === "approved");
+  const allApproved = landProcesses.every((p) => (p.status || "").toLowerCase() === "approved");
 
   // show processes sorted newest -> oldest, filtering out optimistic-removed IDs
   const visibleProcesses = [...landProcesses]
@@ -130,7 +128,7 @@ const [errorDialogMessage, setErrorDialogMessage] = useState("");
             ADD NEW CYCLE
           </Button>
         </Box>
- 
+
         {visibleProcesses.map((proc, index) => {
 
           const id = proc._id ?? proc.id ?? index;

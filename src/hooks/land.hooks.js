@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getLandsByFieldOfficerId } from "../api/land.js";
+import { getLandsByDivId, getLandsByFieldOfficerId } from "../api/land.js";
 
 export const useGetFieldOfficerLands = (fieldOfficerId, options = {}) =>
   useQuery({
@@ -8,6 +8,14 @@ export const useGetFieldOfficerLands = (fieldOfficerId, options = {}) =>
     ...options,
   });
 
+export const useGetDivLands = (managerId, options = {}) =>
+  useQuery({
+    queryKey: ["fieldOfficerLands", managerId],
+    queryFn: () => getLandsByDivId(managerId),
+    ...options,
+  });
+
 export default {
   useGetFieldOfficerLands,
+  useGetDivLands,
 };

@@ -11,15 +11,15 @@ import AddIcon from "@mui/icons-material/Add";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
-import TaskTable from "./TaskTable";
+import TaskTable from "../TaskTable/TaskTable.jsx";
 import AddOperationDialog from "./AddOperationDialog.jsx";
-import ConfirmDialog from "./ConfirmDialog.jsx";
-import ErrorDialog from "./ErrorDialog.jsx";
+import ConfirmDialog from "../ConfirmDialog.jsx";
+import ErrorDialog from "../ErrorDialog.jsx";
 
-import { useCreateTask, useDeleteTask } from "../../../hooks/task.hooks.js";
-import { useUpdateProcessById, useDeleteProcess } from "../../../hooks/process.hook.js";
-import { useGetOperations } from "../../../hooks/operation.hook.js";
-import { useGetResources } from "../../../hooks/resource.hook.js";
+import { useCreateTask, useDeleteTask } from "../../../../hooks/task.hooks.js";
+import { useUpdateProcessById, useDeleteProcess } from "../../../../hooks/process.hook.js";
+import { useGetOperations } from "../../../../hooks/operation.hook.js";
+import { useGetResources } from "../../../../hooks/resource.hook.js";
 
 const defaultForm = {
   operation: "",
@@ -271,7 +271,7 @@ const normalizedStatus = useMemo( () => String(localStatus ?? "").toLowerCase(),
             variant="outlined"
             color="error"
             onClick={() => setDeleteProcessConfirmOpen(true)}
-            disabled={deletingProcess || updatingStatusLoading}
+            disabled={deletingProcess || updatingStatusLoading || process?.status !== "Not Started"}
             startIcon={<DeleteForeverIcon />}
           >
             DELETE

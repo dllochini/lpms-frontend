@@ -8,8 +8,7 @@ import {
   Link,
   CircularProgress,
 } from "@mui/material";
-import React, { useState, useEffect, useMemo } from "react";
-import AddIcon from "@mui/icons-material/Add";
+import React, { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
 import OperationGrid from "../../components/manager/OperationGrid";
@@ -23,7 +22,7 @@ export default function Operationapproval() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const { control, handleSubmit, reset } = useForm();
+  const { control } = useForm();
 
 const {data: tasksData = [], isLoading} = useGetTasksByDiv(localStorage.getItem("loggedUserId"), {
     onSuccess: (data) => {
@@ -42,8 +41,6 @@ const [selectedTask, setSelectedTask] = useState(null);
 
 // update handleViewDetails
 const handleViewDetails = (row) => {
-  // row comes from OperationGrid / DataGrid. 
-  // DataGrid rows id is mapped to row._id in your grid, ensure both checks for safety.
   const rowId = row._id ?? row.id;
 
   // find the matching task in tasks (tasks is from your hook)
@@ -133,12 +130,12 @@ const handleViewDetails = (row) => {
         )}
 
         <OperationDialog
-  open={openDialog}
-  onClose={handleCloseDialog}
-  control={control}
-  initialData={selectedRow}
-  initialTask={selectedTask}   // NEW
-/>
+          open={openDialog}
+          onClose={handleCloseDialog}
+          control={control}
+          initialData={selectedRow}
+          initialTask={selectedTask}
+        />
       </Paper>
     </Box>
   );

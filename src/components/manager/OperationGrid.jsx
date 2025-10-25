@@ -1,32 +1,24 @@
 import * as React from "react";
-import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
+import { DataGrid } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
-import Typography from "@mui/icons-material/Add";
 import { useState } from "react";
-import { useGetProcessByLandId } from "../../hooks/process.hook";
+import ConfirmDialog from "../../views/fieldOfficer/ProgressTrack/ConfirmDialog";
 
 const OperationGrid = ({ data, onDelete, onEdit, onView }) => {
+
+  console.log(data,"every task")
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  // Open confirmation dialog
+
   const handleDeleteClick = (id) => {
     setSelectedId(id);
     setOpenDialog(true);
   };
 
-  console.log(data,"in grid")
-  // Confirm delete
   const handleConfirmDelete = async () => {
     if (!selectedId) return;
-
     try {
-      if (onDelete) onDelete(selectedId);
+      onDelete?.(selectedId);
     } catch (error) {
       console.error("Delete failed:", error);
     } finally {
@@ -35,61 +27,46 @@ const OperationGrid = ({ data, onDelete, onEdit, onView }) => {
     }
   };
 
-  // Cancel delete
   const handleCancelDelete = () => {
     setOpenDialog(false);
     setSelectedId(null);
   };
 
-  // Edit resource
-  const handleEditClick = (id) => {
-    const resource = data.find((r) => r._id === id);
-    if (onEdit) onEdit(resource);
-  };
-
   const columns = [
-    { field: "landId", headerName: "LandID", flex: 2 },
+    { field: "landId", headerName: "Land ID", flex: 2 },
     { field: "fieldOfficer", headerName: "Field Officer", flex: 2 },
     { field: "operation", headerName: "Operation", flex: 1.5 },
     { field: "startDate", headerName: "Start Date", flex: 1.5 },
-    { field: "compeledDate", headerName: "Requested/Completed Date", flex: 2 },
+    { field: "completedDate", headerName: "Requested / Completed Date", flex: 2 },
     {
       field: "actions",
-      type: "actions",
-      headerName: "Action",
-      flex: 2,
-      getActions: (params) => [
+      headerName: "Actions",
+      flex: 1.5,
+      renderCell: (params) => (
         <Button
-          variant="contained"
+          variant="outlined"
+          size="small"
           color="primary"
-          // onClick={handleEditClick}
-          onClick={() => onView(params.row)} // ← call parent handleViewDetails
-          sx={{
-            mb: 2,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
+          onClick={() => onView?.(params.row)}
         >
-          view Details
-        </Button>,
-      ],
+          View Details
+        </Button>
+      ),
       sortable: false,
       filterable: false,
     },
   ];
 
   const rows = Array.isArray(data)
-  ? data.map((row) => ({
-      id: row._id,
-      landId: row.process?.land?._id || "-",
-      fieldOfficer: row.createdBy?.fullName || "N/A",
-      operation: row.operation?.name || "N/A",
-      startDate: row.startDate || "N/A",
-      compeledDate: row.endDate || "Pending",
-    }))
-  : [];
-
+    ? data.map((row) => ({
+        id: row._id ?? index,
+        landId: row.process?.land?._id ?? "-",
+        fieldOfficer: row.assignedTo?.fullName ?? "N/A",
+        operation: row.operation?.name ?? "N/A",
+        startDate: row.startDate ? new Date(row.startDate).toLocaleDateString() : "N/A",
+        completedDate: row.endDate ? new Date(row.endDate).toLocaleDateString() : "Pending",
+      }))
+    : [];
 
   return (
     <>
@@ -98,34 +75,33 @@ const OperationGrid = ({ data, onDelete, onEdit, onView }) => {
           autoHeight
           rows={rows}
           columns={columns}
-          rowHeight={100}
+          rowHeight={70}
           pageSizeOptions={[10, 20, 50]}
-          initialState={{ pagination: { paginationModel: { pageSize: 10 } } }}
+          initialState={{
+            pagination: { paginationModel: { pageSize: 10 } },
+          }}
           density="compact"
+          disableRowSelectionOnClick
           getRowClassName={(params) =>
             params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
           }
-          checkboxSelection={false}
-          disableRowSelectionOnClick
+          slots={{
+            noRowsOverlay: () => (
+              <div style={{ padding: 20 }}>No pending operations found.</div>
+            ),
+          }}
         />
       </div>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={openDialog} onClose={handleCancelDelete}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete resource <strong>{selectedId}</strong>
-          ?
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancelDelete} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleConfirmDelete} color="error">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmDialog
+        open={openDialog}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Confirm Delete"
+        message={`Are you sure you want to delete resource ${selectedId}?`}
+        confirmLabel="Delete"
+        confirmColor="error"
+      />
     </>
   );
 };
