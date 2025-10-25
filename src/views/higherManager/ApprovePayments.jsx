@@ -104,7 +104,7 @@ export default function PaymentApproval() {
 
       <Typography variant="h5" gutterBottom>Pending Payment Approval</Typography>
       <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", mb: 2 }}>
-        <Link component={RouterLink} to="/" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center" }}>
+        <Link component={RouterLink} to="/higherManager" underline="hover" color="inherit" sx={{ display: "flex", alignItems: "center" }}>
           <HomeIcon sx={{ mr: 0.5, fontSize: 18 }} /> Home
         </Link>
         <Typography color="text.primary">Payments Approval</Typography>

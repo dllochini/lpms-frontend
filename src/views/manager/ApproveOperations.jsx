@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 
 import OperationGrid from "../../components/manager/OperationGrid";
 import OperationDialog from "../../components/manager/OperationDialog";
-import { useGetLandsByDivision } from "../../hooks/land.hooks";
+import { useGetFieldOfficerLands } from "../../hooks/land.hooks";
 import { useGetTasksByDiv } from "../../hooks/task.hooks";
 
 export default function Operationapproval() {
