@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createTask, getAllTasks, getTasksByDiv, updateTaskById } from "../api/task.js";
+import { createTask, deleteTaskById, getAllTasks, getTasksByDiv, updateTaskById } from "../api/task.js";
 
 export const useGetAllTasks = (options = {}) => {
     return useQuery({
@@ -43,6 +43,27 @@ export const useUpdateTask = (options = {}) => {
     ...options,
   });
 };
+
+export const useDeleteTask = (options = {}) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    // expect variables like: { taskId }
+    mutationFn: ({ taskId }) => deleteTaskById(taskId),
+    onSuccess: (data, variables) => {
+      // invalidate queries so lists / related data refresh
+      queryClient.invalidateQueries(["task"]);
+      queryClient.invalidateQueries(["process"]); // if processes include tasks
+      // other keys you use, e.g. ["workdone"] or ["processes", variables?.processId]
+      if (options.onSuccess) options.onSuccess(data, variables);
+    },
+    onError: (err, variables) => {
+      if (options.onError) options.onError(err, variables);
+    },
+    ...options,
+  });
+};
+
 
 export default {
     useGetAllTasks,

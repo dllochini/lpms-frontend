@@ -25,14 +25,15 @@ export const updateTaskById = async (taskId, updatedData) => {
 
 // export const updateStatusByTask = (taskId, updatedData) => axiosBackend.put(`/tasks/status/${taskId}`, updatedData);
 
-// export const deleteTaskById = (taskId) => {
-//   return axiosBackend.delete(`/task/${taskId}`);
-// };
+export const deleteTaskById = (taskId) => {
+  console.log(taskId, "input");
+  return axiosBackend.delete(`/tasks/${taskId}`);
+};
 
 export default {
   // getTasks,
   createTask,
   getTasksByLandId,
   updateTaskById,
-  // deleteTaskById,
+  deleteTaskById,
 };

@@ -1,5 +1,5 @@
 // TaskTable.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   IconButton,
   Paper,
@@ -16,31 +17,63 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { DataGrid } from "@mui/x-data-grid";
 import CircularProgressWithLabel from "./circularProgressWithLabel";
 import { useUpdateTask } from "../../../hooks/task.hooks";
+import {
+  useCreateWorkDone,
+  useDeleteWorkDone,
+} from "../../../hooks/workdone.hooks";
+import ConfirmDialog from "./ConfirmDialog";
+import AddProcessDialog from "./AddTaskDialog";
+import AddTaskDialog from "./AddTaskDialog";
+import ErrorDialog from "./ErrorDialog";
 
-const TaskTable = ({ task = {}, onTaskStatusChange }) => {
+const TaskTable = ({ task = {}, onTaskStatusChange, onDeleteTask }) => {
   const taskKey = task._id ?? task.id ?? null;
+
+  // UI state
   const [expandedTaskId, setExpand] = useState(null);
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [localStatus, setLocalStatus] = useState(task?.status ?? "In Progress");
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
-  const { mutate: updateTaskStatus, isLoading: updatingStatusLoading } = useUpdateTask({
-    onSuccess: (updatedTask) => {
-      const newStatus = updatedTask?.status ?? "Sent for approval";
-      setLocalStatus(newStatus);
-      if (typeof onTaskStatusChange === "function") {
-        onTaskStatusChange(taskKey, newStatus);
-      }
-    },
-    onError: (err) => {
-      console.error("Failed to update task status:", err);
-      setLocalStatus(task?.status ?? "In Progress");
-    },
-  });
+  // after: const statusValue = String(localStatus ?? "Pending").toLowerCase();
+
+  const [workDones, setWorkDones] = useState(
+    Array.isArray(task?.workDones) ? task.workDones : []
+  );
+  const optimisticRef = useRef(null);
+
+  useEffect(() => {
+    if (task?.status && task.status !== localStatus) {
+      setLocalStatus(task.status);
+    }
+    setWorkDones(Array.isArray(task?.workDones) ? task.workDones : []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [task?.status, task?.workDones]);
+
+  const { mutate: updateTaskStatus, isLoading: updatingStatusLoading } =
+    useUpdateTask({
+      onSuccess: (updatedTask) => {
+        const newStatus = updatedTask?.status ?? "Sent for approval";
+        setLocalStatus(newStatus);
+        if (typeof onTaskStatusChange === "function") {
+          onTaskStatusChange(taskKey, newStatus);
+        }
+      },
+      onError: (err) => {
+        console.error("Failed to update task status:", err);
+        setLocalStatus(task?.status ?? "In Progress");
+      },
+    });
+
+  const { mutate: createWorkDone, isLoading: creatingWorkDone } = useCreateWorkDone();
+
+  // delete workDone hook (assumed react-query style)
+  const { mutate: deleteWorkDone, isLoading: deletingWorkDone } = useDeleteWorkDone();
 
   const [taskForm, setTaskForm] = useState({
     startDate: "",
@@ -50,28 +83,107 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
     note: "",
   });
 
-  // localStatus: keeps immediate UI state (optimistic) and prevents calling .toLowerCase on non-strings
-
-  useEffect(() => {
-    if (task?.status && task.status !== localStatus) {
-      setLocalStatus(task.status);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [task?.status]);
-
+  // confirm dialog for deleting the whole task (Task-level confirmation)
+  const [deleteTaskConfirmOpen, setDeleteTaskConfirmOpen] = useState(false);
   const statusValue = String(localStatus ?? "Pending").toLowerCase();
+  const isEditable =
+    task?.done ||
+    statusValue !== "in progress" ||
+    updatingStatus ||
+    updatingStatusLoading;
+
+  const handleRequestDeleteTask = () => {
+    setDeleteTaskConfirmOpen(true);
+  };
+
+  const handleConfirmDeleteTask = () => {
+    setDeleteTaskConfirmOpen(false);
+    if (typeof onDeleteTask === "function") {
+      onDeleteTask(taskKey);
+    }
+  };
+
+  // delete confirmation dialog state
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [pendingDeleteRow, setPendingDeleteRow] = useState(null);
+  // error dialog state
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false);
+  const [errorDialogMessage, setErrorDialogMessage] = useState("");
 
   const columns = [
-    { field: "id", headerName: "No", flex: 0.3, minWidth: 60, headerAlign: "center", align: "center" },
-    { field: "startDate", headerName: "Started Time", flex: 0.8, minWidth: 130, headerAlign: "center", align: "center" },
-    { field: "endDate", headerName: "End Time", flex: 0.8, minWidth: 130, headerAlign: "center", align: "center" },
-    { field: "newWork", headerName: `Work Done (${task?.resource?.unit?.name ?? ""})`, flex: 0.7, minWidth: 120, headerAlign: "center", align: "center" },
-    { field: "notes", headerName: "Notes", flex: 1.2, minWidth: 200, headerAlign: "center", align: "center" },
+    {
+      field: "id",
+      headerName: "No",
+      flex: 0.3,
+      minWidth: 60,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "startDate",
+      headerName: "Started Time",
+      flex: 0.8,
+      minWidth: 130,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "endDate",
+      headerName: "End Time",
+      flex: 0.8,
+      minWidth: 130,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "newWork",
+      headerName: `Work Done (${task?.resource?.unit?.name ?? ""})`,
+      flex: 0.7,
+      minWidth: 120,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "notes",
+      headerName: "Notes",
+      flex: 1.2,
+      minWidth: 200,
+      headerAlign: "center",
+      align: "center",
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      flex: 0.5,
+      minWidth: 100,
+      sortable: false,
+      filterable: false,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => {
+        return (
+          <IconButton
+            size="small"
+            onClick={() => handleRequestDelete(params.row)}
+            disabled={creatingWorkDone || deletingWorkDone || isEditable}
+            aria-label="delete-workdone"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        );
+      },
+    },
   ];
 
   const handleTaskDialogOpen = (taskObj) => {
     setSelectedTask(taskObj);
-    setTaskForm({ startDate: "", endDate: "", unit: "Acre", workDone: 0, note: "" });
+    setTaskForm({
+      startDate: "",
+      endDate: "",
+      unit: taskObj?.resource?.unit?.name ?? "Acre",
+      workDone: 0,
+      note: "",
+    });
     setTaskDialogOpen(true);
   };
 
@@ -82,6 +194,7 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
 
   const handleAddTaskRow = () => {
     if (!selectedTask || selectedTask.done) return;
+    if (creatingWorkDone) return;
 
     const payload = {
       task: selectedTask?._id || selectedTask?.id,
@@ -91,8 +204,77 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
       notes: taskForm.note || "",
     };
 
-    // TODO: call your createWorkDone mutation here. This file demonstrates status handling.
-    console.log("Would create WorkDone payload:", payload);
+    const tempId = `temp-${Date.now()}`;
+    const optimisticEntry = {
+      id: tempId,
+      startDate: payload.startDate,
+      endDate: payload.endDate,
+      newWork: payload.newWork,
+      notes: payload.notes,
+      optimistic: true,
+    };
+
+    optimisticRef.current = optimisticEntry.id;
+    setWorkDones((prev) => [...prev, optimisticEntry]);
+
+    setTaskDialogOpen(false);
+    setSelectedTask(null);
+    setTaskForm({
+      startDate: "",
+      endDate: "",
+      unit: task?.resource?.unit?.name ?? "Acre",
+      workDone: 0,
+      note: "",
+    });
+
+    createWorkDone(payload, {
+      onSuccess: (res) => {
+        const created = res?.data ?? res;
+
+        setWorkDones((prev) => {
+          if (optimisticRef.current != null) {
+            return prev.map((w) =>
+              w.id === optimisticRef.current
+                ? {
+                  id: created.id ?? created._id ?? w.id,
+                  startDate:
+                    created.startDate ?? payload.startDate ?? w.startDate,
+                  endDate: created.endDate ?? payload.endDate ?? w.endDate,
+                  newWork:
+                    created.newWork ??
+                    created.workDone ??
+                    payload.newWork ??
+                    w.newWork,
+                  notes:
+                    created.notes ?? created.note ?? payload.notes ?? w.notes,
+                  __raw: created,
+                } : w);
+          }
+          return [
+            ...prev,
+            {
+              id: created.id ?? created._id ?? `srv-${Date.now()}`,
+              startDate: created.startDate ?? payload.startDate,
+              endDate: created.endDate ?? payload.endDate,
+              newWork: created.newWork ?? created.workDone ?? payload.newWork,
+              notes: created.notes ?? created.note ?? payload.notes,
+              __raw: created,
+            },
+          ];
+        });
+
+        optimisticRef.current = null;
+      },
+      onError: (err) => {
+        setWorkDones((prev) =>
+          prev.filter((w) => w.id !== optimisticRef.current)
+        );
+        optimisticRef.current = null;
+        console.error("Failed to create workDone:", err);
+        setErrorDialogMessage("Failed to add progress. Please try again.");
+        setErrorDialogOpen(true);
+      },
+    });
   };
 
   const handleTaskDialogClose = () => {
@@ -100,35 +282,86 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
     setSelectedTask(null);
   };
 
-  // Safe getRowsForTask: never call map on undefined
-  const getRowsForTask = (taskObj = {}) => {
-    const rows = Array.isArray(taskObj.workDones) ? taskObj.workDones : [];
-    return rows.map((work, index) => ({
-      id: work._id ?? work.id ?? `${taskKey ?? "t"}-row-${index + 1}`,
-      startDate: work?.startDate ?? "-",
-      endDate: work?.endDate ?? "-",
-      newWork: work?.newWork ?? 0,
-      notes: work?.notes ?? "-",
-    }));
+  const handleRequestDelete = (row) => {
+    setPendingDeleteRow(row);
+    setDeleteConfirmOpen(true);
   };
+
+  const handleConfirmDelete = () => {
+    if (!pendingDeleteRow) {
+      setDeleteConfirmOpen(false);
+      return;
+    }
+
+    const row = pendingDeleteRow;
+    const prev = workDones;
+
+    if (String(row.id).startsWith("temp-") || row.optimistic) {
+      setWorkDones((p) => p.filter((w) => w.id !== row.id));
+      setPendingDeleteRow(null);
+      setDeleteConfirmOpen(false);
+      return;
+    }
+
+    const serverId = row.__raw?.id ?? row.__raw?._id ?? row.id;
+
+    setWorkDones((p) => p.filter((w) => w.id !== row.id));
+    setDeleteConfirmOpen(false);
+
+    deleteWorkDone(
+      { workId: serverId },
+      {
+        onSuccess: () => {
+          setPendingDeleteRow(null);
+        },
+        onError: (err) => {
+          setWorkDones(prev);
+          setPendingDeleteRow(null);
+          console.error("Failed to delete workDone:", err);
+          setErrorDialogMessage("Failed to delete progress. Please try again.");
+          setErrorDialogOpen(true);
+        },
+      }
+    );
+  };
+
+  // map workDones to rows for DataGrid; display readable date (YYYY-MM-DD) if ISO provided
+  const getRowsForWorkDones = (list = []) =>
+    (Array.isArray(list) ? list : []).map((work, index) => {
+      const format = (d) => {
+        if (!d) return "-";
+        try {
+          return String(d).includes("T") ? String(d).slice(0, 10) : String(d);
+        } catch (e) {
+          return String(d);
+        }
+      };
+      return {
+        id: work.id ?? work._id ?? `r-${index + 1}`,
+        startDate: work.startDate ? format(work.startDate) : "-",
+        endDate: work.endDate ? format(work.endDate) : "-",
+        newWork: work.newWork ?? 0,
+        notes: work.notes ?? work.note ?? "-",
+        __raw: work,
+      };
+    });
 
   const handleMarkSentForApproval = () => {
     if (!taskKey) return;
-    // prevent double clicks while request in flight
     if (updatingStatusLoading || updatingStatus) return;
 
-    // optimistic UI
     setUpdatingStatus(true);
     setLocalStatus("Sent for approval");
 
-    // call mutation; mutate accepts (variables, options)
     updateTaskStatus(
-      { taskId: taskKey, updatedData: { status: "Sent for approval", endDate: new Date().toISOString(), } },
       {
-        onSettled: () => {
-          setUpdatingStatus(false);
+        taskId: taskKey,
+        updatedData: {
+          status: "Sent for approval",
+          endDate: new Date().toISOString(),
         },
-      }
+      },
+      { onSettled: () => { setUpdatingStatus(false); } }
     );
   };
 
@@ -198,7 +431,7 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
           <Box sx={{ mt: 2 }}>
             <DataGrid
               autoHeight
-              rows={getRowsForTask(task)}
+              rows={getRowsForWorkDones(workDones)}
               columns={columns}
               pageSizeOptions={[5, 10]}
               initialState={{
@@ -226,12 +459,9 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
                 display: "flex",
                 justifyContent: "space-between",
                 mt: 2,
-                gap: 2,
                 alignItems: "center",
-                flexWrap: "wrap",
               }}
             >
-              {/* disable add progress and done if status is "sent for approval" */}
               <Box
                 sx={{
                   display: "flex",
@@ -240,185 +470,84 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
                   width: "100%",
                 }}
               >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleTaskDialogOpen(task)}
-                  disabled={task?.done || statusValue === "sent for approval"}
-                >
-                  Add New Progress
-                </Button>
+                <Box
+                  sx={{ display: "flex", flex:1, justifyContent: "flex-start" }}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={handleRequestDeleteTask}
+                    disabled={isEditable}
+                  >
+                    Delete Operation
+                  </Button>
+                </Box>
+                <Box sx={{ gap: 1, flex:1, display: "flex", justifyContent: "flex-end  " }}>
 
-                <Button
-                  variant="contained"
-                  color="success"
-                  onClick={handleMarkSentForApproval}
-                  disabled={
-                    task?.done ||
-                    statusValue === "sent for approval" ||
-                    updatingStatus
-                  }
-                >
-                  {updatingStatus ? "Sending..." : "Done"}
-                </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => handleTaskDialogOpen(task)}
+                    disabled={isEditable || creatingWorkDone}
+                  >
+
+                    Add New Progress
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={handleMarkSentForApproval}
+                    disabled={task?.done || statusValue !== "in progress" || updatingStatus}
+                  >
+                    {updatingStatus ? "Sending..." : "Done"}
+                  </Button>
+                </Box>
               </Box>
+
             </Box>
           </Box>
         </Collapse>
       </Paper>
 
-      <Dialog
+      <AddTaskDialog
         open={taskDialogOpen}
         onClose={handleTaskDialogClose}
-        fullWidth
-        maxWidth="sm"
-        PaperProps={{ sx: { borderRadius: 3, p: 1.5 } }}
-      >
-        <DialogTitle
-          sx={{
-            fontWeight: 700,
-            textAlign: "center",
-            fontSize: "1.3rem",
-            color: "primary.main",
-          }}
-        >
-          Add New Progress
-        </DialogTitle>
+        onSubmit={handleAddTaskRow}
+        taskForm={taskForm}
+        onFormChange={handleTaskFormChange}
+        selectedTask={selectedTask}
+        creatingWorkDone={creatingWorkDone}
+      />
 
-        <DialogContent dividers sx={{ py: 3 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5 }}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 1,
-                width: "100%",
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <Typography variant="subtitle2" color="text.secondary">
-                  Operation:
-                </Typography>
-                <Typography variant="body1" fontWeight={600}>
-                  {selectedTask?.operation?.name || "-"}
-                </Typography>
-              </Box>
+      {/* Confirm delete progress entry */}
+      <ConfirmDialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Confirm Delete"
+        message="Are you sure you want to delete this progress entry? This action cannot be undone."
+        confirmLabel="Delete"
+        loading={deletingWorkDone} // ✅ correct loading flag
+        confirmColor="error"
+      />
 
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 2,
-                  alignItems: "center",
-                  flexWrap: "wrap",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    flex: "1 1 45%",
-                    minWidth: 140,
-                  }}
-                >
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Machine:
-                  </Typography>
-                  <Typography variant="body1" fontWeight={500}>
-                    {selectedTask?.resource?.name || "-"}
-                  </Typography>
-                </Box>
+      {/* Confirm delete entire operation/task */}
+      <ConfirmDialog
+        open={deleteTaskConfirmOpen}
+        onClose={() => setDeleteTaskConfirmOpen(false)}
+        onConfirm={handleConfirmDeleteTask}
+        title="Confirm Delete Task"
+        message="Are you sure you want to delete this entire operation? This action cannot be undone."
+        confirmLabel="Delete"
+        confirmColor="error"
+      />
 
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    flex: "1 1 45%",
-                    minWidth: 120,
-                  }}
-                >
-                  <Typography variant="subtitle2" color="text.secondary">
-                    Unit:
-                  </Typography>
-                  <Typography variant="body1" fontWeight={500}>
-                    {selectedTask?.resource?.unit?.name || "-"}(
-                    {selectedTask?.resource?.unit?.symbol || "-"})
-                  </Typography>
-                </Box>
-              </Box>
-            </Box>
 
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
-                label="Start Date"
-                type="date"
-                name="startDate"
-                value={taskForm.startDate}
-                onChange={handleTaskFormChange}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-              />
-              <TextField
-                label="End Date"
-                type="date"
-                name="endDate"
-                value={taskForm.endDate}
-                onChange={handleTaskFormChange}
-                fullWidth
-                InputLabelProps={{ shrink: true }}
-              />
-            </Box>
-
-            <TextField
-              label={`Work Done (${task?.resource?.unit?.name ?? ""})`}
-              type="number"
-              name="workDone"
-              value={taskForm.workDone}
-              onChange={handleTaskFormChange}
-              fullWidth
-            />
-
-            <TextField
-              label="Note"
-              name="note"
-              value={taskForm.note}
-              onChange={handleTaskFormChange}
-              fullWidth
-              multiline
-              rows={3}
-              variant="outlined"
-            />
-          </Box>
-        </DialogContent>
-
-        <DialogActions
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            px: 3,
-            pb: 2,
-          }}
-        >
-          <Button
-            onClick={handleTaskDialogClose}
-            color="inherit"
-            variant="outlined"
-            sx={{ borderRadius: 2, textTransform: "none" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleAddTaskRow}
-            variant="contained"
-            color="primary"
-            sx={{ borderRadius: 2, textTransform: "none", px: 3 }}
-          >
-            Add Progress
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ErrorDialog
+        open={errorDialogOpen}
+        onClose={() => setErrorDialogOpen(false)}
+        message={errorDialogMessage}
+      />
     </>
   );
 };
@@ -426,6 +555,7 @@ const TaskTable = ({ task = {}, onTaskStatusChange }) => {
 TaskTable.propTypes = {
   task: PropTypes.object,
   onTaskStatusChange: PropTypes.func,
+  onDeleteTask: PropTypes.func, // delete whole task
 };
 
 export default TaskTable;
