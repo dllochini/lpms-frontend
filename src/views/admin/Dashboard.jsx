@@ -4,7 +4,7 @@ import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
 import { getUsers } from "../../api/user";
 import { useState, useEffect } from "react";
-import BasicDataGrid from "../../components/admin/UsersDataGrid";
+import UsersDataGrid from "./UsersDataGrid";
 import { useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
@@ -14,7 +14,7 @@ export default function Dashboard() {
 
   const fetchData = async function () {
     const response = await getUsers();
-    // console.log("API users:", response.data);
+    console.log("API users:", response.data);
     setResponseData(response?.data ?? []);
   };
 
@@ -82,7 +82,7 @@ export default function Dashboard() {
             CREATE NEW USER
           </Button>
         </Box>
-        <BasicDataGrid data={responseData} onDelete={handleDelete} />
+        <UsersDataGrid data={responseData} onDelete={handleDelete} />
       </Paper>
     </Box>
   );

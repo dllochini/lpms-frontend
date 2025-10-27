@@ -9,7 +9,6 @@ import ProgressDisplay from "./ProgressDisplay";
 import NotesPreview from "./NotesPreview";
 
 const TaskTable = ({ task = {} }) => {
-  const taskKey = task._id ?? task.id ?? null;
   const [expanded, setExpanded] = useState(false);
   const [workDones, setWorkDones] = useState(Array.isArray(task?.workDones) ? task.workDones : []);
 
