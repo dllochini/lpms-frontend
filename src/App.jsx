@@ -31,7 +31,7 @@ import FieldOperations from "./views/fieldOfficer/FieldOperations";
 import FarmResources from "./views/fieldOfficer/FarmResources";
 import LandRegistry from "./views/fieldOfficer/LandRegistry";
 import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress";
-import LandProgressTracking from "./views/fieldOfficer/ProgressTrack/ProgressTrack";
+import LandProgressTracking from "./views/fieldOfficer/ProgressTrack/main/ProgressTrack";
 
 import LandRegistrationPage1 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration1";
 import LandRegistrationPage2 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration2";
@@ -54,6 +54,7 @@ import Dashboard from "./views/manager/Dashboard";
 import ManagerApprovePayments from "./views/manager/ApprovePayments";
 import ApproveOperations from "./views/manager/ApproveOperations";
 import DivisionProgress from "./views/manager/DivisionProgress";
+import ViewLandProgress from "./views/manager/ProgressTrackView/ViewProgressTrack"
 
 //Layout
 import ManagerLayout from "./views/layout/Manager";
@@ -127,6 +128,7 @@ const AppWrapper = () => {
         <Route path="approveOperations" element={<ApproveOperations/>} />
         <Route path="approvePayments" element={<ManagerApprovePayments />} />
         <Route path="divisionProgress" element={<DivisionProgress />} />
+        <Route path="viewProgress/:landId" element={<ViewLandProgress/>} />
       </Route>
 
       <Route path="/higherManager/" element={<HigherManagerLayout />}>
