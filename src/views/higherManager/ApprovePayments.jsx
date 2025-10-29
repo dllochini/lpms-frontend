@@ -27,69 +27,113 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { Link as RouterLink } from "react-router-dom";
 import PendingPaymentDataGrid from "../../components/higherManager/PaymentApprovalGrid";
+import { set, useForm } from "react-hook-form";
+import { useGetTasksByDiv } from "../../hooks/task.hooks";
 
-export default function PaymentApproval() {
+export default function PaymentApproval({initialData,initialTask}) {
   const [rows, setRows] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [expandedOps, setExpandedOps] = useState({}); // { opIndex: true }
-
+  const [selectedTask, setSelectedTask] = useState(null);
   useEffect(() => {
-    // sample rows - replace with API fetch as needed
-    setRows([
-      {
-        id: "B1234",
-        billId: "B1234",
-        landId: "L1234",
-        fieldOfficer: "Alex Jones",
-        accountant: "Alex Jones",
-        requestedDate: "2025-08-12",
-        operations: [
-          {
-            date: "04/17/2022",
-            operation: "Bush Clearing",
-            subtotal: 10000,
-            details: []
-          },
-          {
-            date: "04/17/2022",
-            operation: "Ploughing",
-            subtotal: 10000,
-            details: [
-              { date: "04/17/2022", method: "Tractor 4WD", unitPrice: 200, subtotal: 4000 },
-              { date: "04/17/2022", method: "Tractor 4WD", unitPrice: 100, subtotal: 3000 }
-            ]
-          },
-          {
-            date: "04/18/2022",
-            operation: "Fertilizing",
-            subtotal: 15000,
-            details: [
-              { date: "04/18/2022", method: "Manual Spray", unitPrice: 500, subtotal: 15000 }
-            ]
-          }
-        ],
-        discount: 4000,
-        total: 100000
+    const wds = initialTask?.workDones ?? [];
+    const rows = Array.isArray(wds)
+      ? wds.map((wd, index) => ({
+          id: wd._id ?? `${initialTask?._id ?? "t"}-${index}`,
+          date: wd.startDate ? new Date(wd.startDate).toLocaleDateString() : "N/A",
+          progress: wd.newWork ?? "N/A",
+          note: wd.notes ?? wd.note ?? "—",
+        }))
+      : [];
+    setTaskRows(rows);
+  }, [initialTask]);
+
+  if(!initialData) return null;
+
+  // useEffect(() => {
+  //   // sample rows - replace with API fetch as needed
+  //   setRows([
+  //     {
+  //       id: "B1234",
+  //       billId: "B1234",
+  //       landId: "L1234",
+  //       fieldOfficer: "Alex Jones",
+  //       accountant: "Alex Jones",
+  //       requestedDate: "2025-08-12",
+  //       operations: [
+  //         {
+  //           date: "04/17/2022",
+  //           operation: "Bush Clearing",
+  //           subtotal: 10000,
+  //           details: []
+  //         },
+  //         {
+  //           date: "04/17/2022",
+  //           operation: "Ploughing",
+  //           subtotal: 10000,
+  //           details: [
+  //             { date: "04/17/2022", method: "Tractor 4WD", unitPrice: 200, subtotal: 4000 },
+  //             { date: "04/17/2022", method: "Tractor 4WD", unitPrice: 100, subtotal: 3000 }
+  //           ]
+  //         },
+  //         {
+  //           date: "04/18/2022",
+  //           operation: "Fertilizing",
+  //           subtotal: 15000,
+  //           details: [
+  //             { date: "04/18/2022", method: "Manual Spray", unitPrice: 500, subtotal: 15000 }
+  //           ]
+  //         }
+  //       ],
+  //       discount: 4000,
+  //       total: 100000
+  //     },
+  //     {
+  //       id: "B1235",
+  //       billId: "B1235",
+  //       landId: "L1235",
+  //       fieldOfficer: "Chris Smith",
+  //       accountant: "John Doe",
+  //       requestedDate: "2025-08-13",
+  //       operations: [],
+  //       discount: 0,
+  //       total: 0
+  //     }
+  //   ]);
+  //  }, []);
+  const{control}=useForm();
+
+  const {data: tasksData = [], isLoading} = useGetTasksByDiv(localStorage.getItem("loggedUserId"), {
+      onSuccess: (data) => {
+        console.log("Lands for field officer:", data);
       },
-      {
-        id: "B1235",
-        billId: "B1235",
-        landId: "L1235",
-        fieldOfficer: "Chris Smith",
-        accountant: "John Doe",
-        requestedDate: "2025-08-13",
-        operations: [],
-        discount: 0,
-        total: 0
-      }
-    ]);
-  }, []);
+      onError: (error) => {
+        console.error("Failed to fetch lands for field officer", error);
+      },
+    });
+
+    const tasks = useMemo(() => Array.isArray(tasksData) ? tasksData : [], [tasksData]);
+      // console.log(tasks,"response")
+
 
   // called when grid "VIEW DETAILS" clicked
   const handleViewDetails = (row) => {
-    console.log("Parent received onViewDetails row:", row);
-    setSelectedPayment(row);
+    const rowId = row._id ?? row.id;
+
+    // find the matching task in tasks (tasks is from your hook)
+    const matchedtask = tasks.find(
+      (t) => String(t._id) === String(row.id) || String(t.id) === String(row.id)
+    ) ?? null;  
+
+    console.log("Cliked row:", row, "matchedtask", matchedtask);
+    // console.log("Parent received onViewDetails row:", row);
+    // setSelectedPayment(row);
+    // setExpandedOps({}); // reset expansions for new dialog
+
+    setRows(row); 
     setExpandedOps({}); // reset expansions for new dialog
+    setSelectedTask(matchedtask); // NEW (matching task or null)
+
   };
 
   const toggleOp = (index) => {
@@ -124,9 +168,9 @@ export default function PaymentApproval() {
             <DialogContent dividers>
               {/* Header info */}
               <Box sx={{ mb: 2 }}>
-                <Typography variant="body2"><strong>Bill ID :</strong> {selectedPayment.billId}</Typography>
-                <Typography variant="body2"><strong>Land ID :</strong> {selectedPayment.landId}</Typography>
-                <Typography variant="body2"><strong>Field Officer :</strong> {selectedPayment.fieldOfficer}</Typography>
+                <Typography variant="body2"><strong>Bill ID :</strong> {initialTask?.operation?.bill ?? "N/A"}</Typography>
+                <Typography variant="body2"><strong>Land ID :</strong> {initialTask?.process?.land?.address ?? "N/A"}</Typography>
+                <Typography variant="body2"><strong>Field Officer :</strong> {initialTask?.assignedTo?.fullName ?? "N/A"}</Typography>
                 <Typography variant="body2"><strong>Accountant :</strong> {selectedPayment.accountant}</Typography>
                 <Typography variant="body2"><strong>Requested Date :</strong> {selectedPayment.requestedDate}</Typography>
               </Box>
