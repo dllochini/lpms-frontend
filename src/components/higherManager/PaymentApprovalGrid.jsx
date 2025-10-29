@@ -7,7 +7,7 @@ const PendingPaymentDataGrid = ({ rows = [], onViewDetails = () => {} }) => {
     { field: "billId", headerName: "Bill ID", flex: 1 },
     { field: "landId", headerName: "Land ID", flex: 1 },
     { field: "fieldOfficer", headerName: "Field Officer", flex: 2 },
-    { field: "accountant", headerName: "Accountant", flex: 2 },
+    // { field: "accountant", headerName: "Accountant", flex: 2 },
     { field: "requestedDate", headerName: "Requested Date", flex: 1.5 },
     {
       field: "action",
