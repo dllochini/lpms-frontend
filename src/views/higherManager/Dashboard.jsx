@@ -1,3 +1,5 @@
+// src/pages/higherManager/Dashboard.jsx
+import React, { useEffect, useState } from "react";
 import {
   Typography,
   Box,
@@ -6,127 +8,135 @@ import {
   Grid,
   Card,
   CardContent,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-import { useEffect, useState } from "react";
 
 import Graph from "../../components/higherManager/Graph";
 import Coverage from "../../components/higherManager/Coverage";
+import { getHigherManagerDashboardCardInfo } from "../../api/higherManager";
+import { getUserById } from "../../api/user";
 
-function Dashboard() {
-
+export default function Dashboard() {
   const [userName, setUserName] = useState("");
-  
-    useEffect(() => {
-      setUserName(localStorage.getItem("name") || "");
-    }, []);
-
-  
-  const [overview] = useState({
+  const [role, setRole] = useState("");
+  const [division, setDivision] = useState("");
+  const [overview, setOverview] = useState({
     totalLands: 0,
-    fieldOfficers: 0,
-    pendingOps: 0,
-    pendingPayments: 0,
+    totalArea: 0,
+    divisions: 0,
+    landsInProgress: 0,
   });
-
-  const [requests] = useState([]);
-  const [payments] = useState([]);
+  const [graphData, setGraphData] = useState([]);
+  const [coverageData, setCoverageData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // fetch real data if needed
-  }, []);
+    const fetchDashboard = async () => {
+      setLoading(true);
+      setError(null);
 
-  // control the horizontal offset of the whole table-group (positive -> push right)
-  const tableGroupOffset = 20; // pixels; change this to increase/decrease right-nudge
-  // control width of each table card (min)
-  const tableCardMinWidth = 420;
+      try {
+        const loggedUserId = localStorage.getItem("loggedUserId") || "";
+        if (!loggedUserId) {
+          setError("No logged user id found");
+          return;
+        }
+
+        const userRes = await getUserById(loggedUserId);
+        if (!userRes?.data) {
+          setError("Failed to load user data");
+          return;
+        }
+
+        const user = userRes.data;
+        setUserName(user.fullName || "");
+        setRole(user.role?.name || "");
+
+        
+        const divisionId = user.division?._id ?? user.division ?? "";
+        setDivision(divisionId);
+        if (!divisionId) return;
+
+        const dashboardRes = await getHigherManagerDashboardCardInfo(divisionId);
+        const data = dashboardRes?.data;
+        if (!data) {
+          setError("No dashboard data returned");
+          return;
+        }
+
+        setOverview({
+          totalLands: data.totalLands ?? 0,
+          totalArea: data.totalArea ?? 0,
+          divisions: data.divisions ?? 0,
+          landsInProgress: data.landsInProgress ?? 0,
+        });
+
+        setGraphData(data.graph ?? []);
+        setCoverageData(data.coverage ?? []);
+      } catch (err) {
+        console.error("Error fetching dashboard:", err);
+        const msg = err?.response?.data?.message ?? err?.message ?? "Unexpected error";
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
 
   return (
     <Box sx={{ maxWidth: 1150, mx: "auto", p: 3 }}>
-      {/* Breadcrumbs */}
+      {/* Greeting */}
       <Paper
-        sx={{
-          mx: "auto",
-          p: 3,
-          mb: 3,
-          borderRadius: 4,
-          background: "linear-gradient(135deg, #e8f5e9, #f1f8e9)",
-        }}
+        sx={{ mx: "auto", p: 3, mb: 3, borderRadius: 4, background: "linear-gradient(135deg, #e8f5e9, #f1f8e9)" }}
         elevation={0}
       >
         <Typography variant="h5" gutterBottom>
-          Hello {userName} 👋
+          Hello {userName || (loading ? <CircularProgress size={20} /> : "User")} 👋
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Welcome back to the Agricultural Land Preparation System Dashboard.
         </Typography>
       </Paper>
+
+      {/* Breadcrumb */}
       <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2 }}>
         <Typography color="text.primary">
-          <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
-          Home
+          <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} /> Home
         </Typography>
       </Breadcrumbs>
 
-      {/* MAIN CARD: Division Overview (only small stat cards) */}
+      {/* Error */}
+      {error && (
+        <Box sx={{ maxWidth: 925, mx: "auto", mt: 2 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      )}
+
+      {/* Overview Cards */}
       <Paper
         elevation={5}
-        sx={{
-          maxWidth: 925,
-          mx: "auto",
-          p: 3,
-          borderRadius: 5,
-          mb: 3,
-          backgroundColor: "#fdfdfd",
-        }}
+        sx={{ maxWidth: 925, mx: "auto", p: 3, borderRadius: 5, mb: 3, backgroundColor: "#fdfdfd" }}
       >
-        <Typography variant="h6" gutterBottom>
-          Overall Overview
-        </Typography>
-
-        {/* Center the small stat cards as a group */}
-        <Grid
-          container
-          spacing={2}
-          justifyContent="center"
-          alignItems="center"
-          sx={{ mb: 1 }}
-        >
+        <Typography variant="h6" gutterBottom>Division Overview</Typography>
+        <Grid container spacing={2} justifyContent="center" alignItems="center">
           {[
             { label: "Total lands", value: overview.totalLands },
-            { label: "Total Area(Acres)", value: overview.fieldOfficers },
-            { label: "Number of Division", value: overview.pendingOps },
-            { label: "Lands in Progress", value: overview.pendingPayments },
+            { label: "Total Area (Acre)", value: overview.totalArea },
+            { label: "Number of Divisions", value: overview.divisions },
+            { label: "Lands in Progress", value: overview.landsInProgress },
           ].map((item, idx) => (
-            <Grid
-              item
-              key={idx}
-              xs="auto"
-              sx={{ display: "flex", justifyContent: "center" }}
-            >
-              <Card
-                elevation={2}
-                sx={{
-                  borderRadius: 4,
-                  bgcolor: "#fff",
-                  boxShadow: "0 3px 6px rgba(0,0,0,0.08)",
-                  textAlign: "center",
-                  minWidth: 140,
-                  px: 2,
-                }}
-              >
+            <Grid item key={idx} xs="auto" sx={{ display: "flex", justifyContent: "center" }}>
+              <Card elevation={2} sx={{ borderRadius: 4, bgcolor: "#fff", textAlign: "center", minWidth: 140, px: 2 }}>
                 <CardContent sx={{ py: 2 }}>
-                  <Typography
-                    variant="h4"
-                    sx={{ fontWeight: "700", lineHeight: 1 }}
-                  >
-                    {item.value}
+                  <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                    {loading ? <CircularProgress size={22} /> : item.value}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                     {item.label}
                   </Typography>
                 </CardContent>
@@ -136,74 +146,18 @@ function Dashboard() {
         </Grid>
       </Paper>
 
-      {/* ---------------------------
-          TABLES: OUTSIDE the MAIN CARD,
-          centered under it but nudged slightly to the right
-          --------------------------- */}
-      <Box
-        sx={{
-          maxWidth: 1000,
-          mx: "auto",
-          // transform nudges the whole group to the right by tableGroupOffset px.
-          // On small screens this transform still applies but cards will stack.
-          transform: `translateX(${tableGroupOffset}px)`,
-        }}
-      >
-        <Grid
-          container
-          spacing={3}
-          justifyContent="center" // center the group under the main card
-          alignItems="flex-start"
-        >
-          {/* Requests card (auto-sized) */}
-          {/* centered, auto-sized card */}
-          <Grid
-            item
-            xs="auto"
-            md="auto"
-            sx={{ display: "flex", justifyContent: "center" }}
-          >
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                borderRadius: 3,
-                border: "1px solid #eee",
-                minWidth: tableCardMinWidth, // number is treated as px by MUI
-                width: { xs: "100%", md: "auto" }, // full width on small screens, auto on md+
-                display: "flex",
-                flexDirection: "column",
-                mx: "auto", // centers the Paper inside the grid cell
-              }}
-            >
-              <div style={{ width: "100%" }}>
-                <Graph />
-              </div>
+      {/* Graph & Coverage */}
+      <Box sx={{ maxWidth: 1000, mx: "auto" }}>
+        <Grid container spacing={3} justifyContent="center" alignItems="flex-start">
+          <Grid item xs="12" md="6" sx={{ display: "flex", justifyContent: "center" }}>
+            <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: "1px solid #eee", minWidth: 420, display: "flex", flexDirection: "column", mx: "auto" }}>
+              <Graph data={graphData} loading={loading} />
             </Paper>
           </Grid>
 
-          {/* Payments card (auto-sized) */}
-          <Grid
-            item
-            xs={12}
-            md="auto"
-            sx={{ display: "flex", justifyContent: "center" }}
-          >
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                borderRadius: 3,
-                border: "1px solid #eee",
-                minWidth: `${tableCardMinWidth}px`,
-                width: { xs: "100%", md: "auto" },
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div style={{ width: "100%" }}>
-                <Coverage />
-              </div>
+          <Grid item xs="12" md="6" sx={{ display: "flex", justifyContent: "center" }}>
+            <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: "1px solid #eee", minWidth: 420, display: "flex", flexDirection: "column" }}>
+              <Coverage data={coverageData} loading={loading} />
             </Paper>
           </Grid>
         </Grid>
@@ -211,5 +165,3 @@ function Dashboard() {
     </Box>
   );
 }
-
-export default Dashboard;

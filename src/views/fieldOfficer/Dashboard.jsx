@@ -1,4 +1,5 @@
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import {
   Typography,
   Box,
@@ -8,51 +9,74 @@ import {
   Card,
   CardContent,
   Button,
-  Stack,
   LinearProgress,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+// API functions
+import { getFieldOfficerDashboardCardInfo } from "../../api/fieldOfficer";
+import { getUserById } from "../../api/user";
 
 export default function FieldOfficerDashboard() {
   const [userName, setUserName] = useState("");
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    setUserName(localStorage.getItem("name") || "");
-  }, []);
-
-  const [overview] = useState({
+  const [overview, setOverview] = useState({
     totalLands: 0,
     farmers: 0,
     assignedLands: 0,
     progressLand: 0,
   });
-
-  // sample progress values (0-100)
-  const [progress] = useState({
+  const [progress, setProgress] = useState({
     pending: 0,
     inProgress: 0,
     completed: 0,
   });
+  const [updates, setUpdates] = useState([]);
 
-  // sample recent updates (replace with real data / fetch)
-  const [updates] = useState([
-    { id: 1, title: "New land created - L1234", time: "2 hours ago" },
-  ]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // fetch real data if needed
+    const fetchDashboard = async () => {
+      try {
+        const loggedUserId = localStorage.getItem("loggedUserId") || "";
+        if (!loggedUserId) return;
+
+        // Fetch user info
+        const userRes = await getUserById(loggedUserId);
+        const user = userRes.data;
+        setUserName(user.fullName || "");
+
+        // Get division ID
+        const divisionId = user.division?._id || "";
+        if (!divisionId) {
+          console.warn("No division assigned");
+          return;
+        }
+
+        // Fetch Field Officer dashboard info by divisionId
+        const res = await getFieldOfficerDashboardCardInfo(divisionId);
+        const data = res.data;
+
+        setOverview(data.overview || {});
+        setProgress(data.progress || { pending: 0, inProgress: 0, completed: 0 });
+        setUpdates(data.updates || []);
+      } catch (err) {
+        console.error(
+          "Error fetching Field Officer Dashboard:",
+          err.response?.data || err.message
+        );
+      }
+    };
+
+    fetchDashboard();
   }, []);
 
   const mainCardWidth = 925;
 
   return (
     <Box sx={{ mb: 4 }}>
-      {/* Breadcrumbs/title */}
+      {/* Greeting Card */}
       <Box sx={{ maxWidth: 1150, mx: "auto", p: 3 }}>
-        {/* Greeting Card */}
         <Paper
           sx={{
             mx: "auto",
@@ -70,6 +94,7 @@ export default function FieldOfficerDashboard() {
             Welcome back to the Agricultural Land Preparation System Dashboard.
           </Typography>
         </Paper>
+
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2 }}>
           <Typography color="text.primary">
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
@@ -78,6 +103,7 @@ export default function FieldOfficerDashboard() {
         </Breadcrumbs>
       </Box>
 
+      {/* Add New Land Button */}
       <Box
         sx={{
           maxWidth: mainCardWidth,
@@ -98,7 +124,7 @@ export default function FieldOfficerDashboard() {
         </Button>
       </Box>
 
-      {/* MAIN CARD: ONLY the 4 small stat cards */}
+      {/* Stat Cards */}
       <Paper
         elevation={5}
         sx={{
@@ -108,50 +134,29 @@ export default function FieldOfficerDashboard() {
           borderRadius: 5,
           mb: 3,
           backgroundColor: "#fdfdfd",
-          overflow: "visible",
         }}
       >
         <Typography variant="h6" gutterBottom>
           Division Overview
         </Typography>
 
-        {/* Small stat cards (centered group) */}
         <Grid container spacing={2} justifyContent="center" alignItems="center">
           {[
             { label: "Total registered lands", value: overview.totalLands },
-            { label: "Total registerd farmers", value: overview.farmers },
+            { label: "Total registered farmers", value: overview.farmers },
             { label: "Your assigned lands", value: overview.assignedLands },
             { label: "Your lands in progress", value: overview.progressLand },
           ].map((item, idx) => (
-            <Grid
-              item
-              key={idx}
-              xs="auto"
-              sx={{ display: "flex", justifyContent: "center" }}
-            >
+            <Grid item key={idx} xs="auto" sx={{ display: "flex", justifyContent: "center" }}>
               <Card
                 elevation={2}
-                sx={{
-                  borderRadius: 4,
-                  bgcolor: "#fff",
-                  boxShadow: "0 3px 6px rgba(0,0,0,0.08)",
-                  textAlign: "center",
-                  minWidth: 140,
-                  px: 2,
-                }}
+                sx={{ borderRadius: 4, textAlign: "center", minWidth: 140, px: 2 }}
               >
                 <CardContent sx={{ py: 2 }}>
-                  <Typography
-                    variant="h4"
-                    sx={{ fontWeight: "700", lineHeight: 1 }}
-                  >
+                  <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1 }}>
                     {item.value}
                   </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                     {item.label}
                   </Typography>
                 </CardContent>
@@ -161,10 +166,10 @@ export default function FieldOfficerDashboard() {
         </Grid>
       </Paper>
 
-      {/* OUTSIDE CARDS: Progress and Recent Updates (aligned to mainCardWidth) */}
+      {/* Progress + Updates */}
       <Box sx={{ maxWidth: mainCardWidth, mx: "auto", px: 1, mt: 2 }}>
         <Grid container spacing={3}>
-          {/* Overall Progress Assigned Lands (outside main card) */}
+          {/* Progress */}
           <Grid item xs={12} md={15} sx={{ display: "flex" }}>
             <Paper
               elevation={0}
@@ -175,87 +180,41 @@ export default function FieldOfficerDashboard() {
                 display: "flex",
                 flexDirection: "column",
                 width: "100%",
-                boxSizing: "border-box",
               }}
             >
-              <Typography
-                variant="subtitle1"
-                gutterBottom
-                sx={{ fontSize: "1rem" }}
-              >
+              <Typography variant="subtitle1" gutterBottom sx={{ fontSize: "1rem" }}>
                 Overall Progress — Assigned Lands
               </Typography>
 
-              <Box sx={{ mt: 1 }}>
-                <Typography variant="body2" color="text.secondary">
-                  Pending
-                </Typography>
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}
-                >
-                  <LinearProgress
-                    variant="determinate"
-                    value={progress.pending}
-                    sx={{ flex: 1, height: 8, borderRadius: 4 }}
-                  />
-                  <Typography
-                    variant="body2"
-                    sx={{ minWidth: 36, textAlign: "right" }}
-                  >
-                    {progress.pending}%
+              {["pending", "inProgress", "completed"].map((key) => (
+                <Box key={key} sx={{ mt: key === "pending" ? 1 : 0 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1")}
                   </Typography>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+                    <LinearProgress
+                      variant="determinate"
+                      value={progress[key]}
+                      sx={{ flex: 1, height: 8, borderRadius: 4 }}
+                    />
+                    <Typography variant="body2" sx={{ minWidth: 36, textAlign: "right" }}>
+                      {progress[key]}%
+                    </Typography>
+                  </Box>
                 </Box>
-
-                <Typography variant="body2" color="text.secondary">
-                  In progress
-                </Typography>
-                <Box
-                  sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}
-                >
-                  <LinearProgress
-                    variant="determinate"
-                    value={progress.inProgress}
-                    sx={{ flex: 1, height: 8, borderRadius: 4 }}
-                  />
-                  <Typography
-                    variant="body2"
-                    sx={{ minWidth: 36, textAlign: "right" }}
-                  >
-                    {progress.inProgress}%
-                  </Typography>
-                </Box>
-
-                <Typography variant="body2" color="text.secondary">
-                  Completed
-                </Typography>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                  <LinearProgress
-                    variant="determinate"
-                    value={progress.completed}
-                    sx={{ flex: 1, height: 8, borderRadius: 4 }}
-                  />
-                  <Typography
-                    variant="body2"
-                    sx={{ minWidth: 36, textAlign: "right" }}
-                  >
-                    {progress.completed}%
-                  </Typography>
-                </Box>
-              </Box>
+              ))}
             </Paper>
           </Grid>
 
-          {/* Recent Updates (outside main card) */}
-          {/* Recent Updates — compact, screenshot-style list */}
+          {/* Updates */}
           <Grid item xs={12} md={30} sx={{ display: "flex" }}>
             <Paper
               elevation={0}
               sx={{
-                p: 1.25, // tighter padding like screenshot
+                p: 1.25,
                 borderRadius: 3,
                 border: "1px solid #eee",
                 width: "100%",
-                boxSizing: "border-box",
               }}
             >
               <Typography
@@ -266,25 +225,13 @@ export default function FieldOfficerDashboard() {
                 Recent Updates
               </Typography>
 
-              {/* Scrollable list area with fixed max height */}
-              <Box
-                sx={{
-                  mt: 0.5,
-                  maxHeight: 200, // adjust to match screenshot height
-                  overflowY: "auto",
-                }}
-              >
-                {/* Data rows */}
+              <Box sx={{ mt: 0.5, maxHeight: 200, overflowY: "auto" }}>
                 {updates.length === 0 ? (
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ py: 1 }}
-                  >
+                  <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
                     No updates yet.
                   </Typography>
                 ) : (
-                  updates.map((u, i) => (
+                  updates.map((u) => (
                     <Box
                       key={u.id}
                       sx={{
@@ -293,11 +240,10 @@ export default function FieldOfficerDashboard() {
                         display: "flex",
                         alignItems: "center",
                         gap: 1,
-                        borderTop: i === 0 ? "none" : "1px solid #f2f2f2",
+                        borderTop: "1px solid #f2f2f2",
                       }}
                     >
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        {/* truncated update text */}
                         <Typography
                           variant="body2"
                           sx={{
@@ -313,13 +259,8 @@ export default function FieldOfficerDashboard() {
                           {u.title}
                         </Typography>
                       </Box>
-
                       <Box sx={{ flexShrink: 0, ml: 1 }}>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ fontSize: 11 }}
-                        >
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: 11 }}>
                           {u.time}
                         </Typography>
                       </Box>
