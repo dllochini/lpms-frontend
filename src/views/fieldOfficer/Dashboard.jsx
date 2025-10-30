@@ -95,7 +95,7 @@ export default function FieldOfficerDashboard() {
           </Typography>
         </Paper>
 
-        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2 }}>
+        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2}}>
           <Typography color="text.primary">
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
             Home
@@ -144,8 +144,8 @@ export default function FieldOfficerDashboard() {
           {[
             { label: "Total registered lands", value: overview.totalLands },
             { label: "Total registered farmers", value: overview.farmers },
-            { label: "Your assigned lands", value: overview.assignedLands },
-            { label: "Your lands in progress", value: overview.progressLand },
+            { label: "Assigned lands", value: overview.assignedLands },
+            { label: "Assigned lands in progress", value: overview.progressLand },
           ].map((item, idx) => (
             <Grid item key={idx} xs="auto" sx={{ display: "flex", justifyContent: "center" }}>
               <Card

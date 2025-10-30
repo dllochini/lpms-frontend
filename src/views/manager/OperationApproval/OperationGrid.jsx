@@ -2,7 +2,7 @@ import * as React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import Button from "@mui/material/Button";
 import { useState } from "react";
-import ConfirmDialog from "../../views/fieldOfficer/ProgressTrack/ConfirmDialog";
+import ConfirmDialog from "../../fieldOfficer/ProgressTrack/ConfirmDialog";
 
 const OperationGrid = ({ data, onDelete, onEdit, onView }) => {
 

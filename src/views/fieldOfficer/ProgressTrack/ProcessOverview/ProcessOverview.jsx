@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useRef } from "react";
+// src/components/Process/ProcessOverview.jsx
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
   Box,
@@ -6,10 +7,12 @@ import {
   Paper,
   Stack,
   Typography,
+  Divider,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import TaskTable from "../TaskTable/TaskTable.jsx";
 import AddOperationDialog from "./AddOperationDialog.jsx";
@@ -20,6 +23,8 @@ import { useCreateTask, useDeleteTask } from "../../../../hooks/task.hooks.js";
 import { useUpdateProcessById, useDeleteProcess } from "../../../../hooks/process.hook.js";
 import { useGetOperations } from "../../../../hooks/operation.hook.js";
 import { useGetResources } from "../../../../hooks/resource.hook.js";
+import { useCreateBill, useGetBillByProcess } from "../../../../hooks/bill.hook.js";
+import BillDetailDialog from "./BillDetailDialog.jsx";
 
 const defaultForm = {
   operation: "",
@@ -51,6 +56,11 @@ const ProcessOverview = ({ process, onDeleted }) => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorDialogMessage, setErrorDialogMessage] = useState("");
 
+  // Bill UI state
+  const [currentBill, setCurrentBill] = useState(null);
+  const [openBillPreview, setOpenBillPreview] = useState(false);
+  const prevShowApprovedRef = useRef(false); // used to auto-open dialog on transition
+
   // Operations & Resources
   const { data: operations = [], isLoading: loadingOperations } = useGetOperations();
   const { data: resources = [], isLoading: loadingResources } = useGetResources();
@@ -68,7 +78,7 @@ const ProcessOverview = ({ process, onDeleted }) => {
     onSuccess: createdTask => {
       if (optimisticRef.current) {
         setOptimisticAddedTasks(prev =>
-          prev.map(t => t._id === optimisticRef.current ? createdTask : t)
+          prev.map(t => (t._id === optimisticRef.current ? createdTask : t))
         );
         optimisticRef.current = null;
       } else if (createdTask) {
@@ -103,19 +113,79 @@ const ProcessOverview = ({ process, onDeleted }) => {
   }, [process, optimisticAddedTasks, optimisticDeletedIds]);
 
   const anySentForApproval = useMemo(() => {
-  return displayedTasks.some(task => {
-    const statusStr = String(task?.status ?? "").toLowerCase().trim();
-    return statusStr === "sent for approval";
-  });
-}, [displayedTasks]);
+    return displayedTasks.some(task => {
+      const statusStr = String(task?.status ?? "").toLowerCase().trim();
+      return statusStr === "sent for approval";
+    });
+  }, [displayedTasks]);
 
-
-const normalizedStatus = useMemo( () => String(localStatus ?? "").toLowerCase(), [localStatus]);
-
+  const normalizedStatus = useMemo(() => String(localStatus ?? "").toLowerCase(), [localStatus]);
 
   if (deletedLocally) return null;
 
-  // Handlers
+  // ------------------ Bill fetching / creation logic ------------------
+  // NOTE: ensure useGetBillByProcess supports (processId, options) or adapt accordingly.
+  const {
+    data: billFromServer,
+    isLoading: loadingBill,
+    refetch: refetchBill,
+  } = useGetBillByProcess(process?._id, { enabled: !!process?._id });
+
+  // Normalize incoming bill(s) and pick the "approved" bill if present
+  useEffect(() => {
+    if (!billFromServer) {
+      setCurrentBill(null);
+      return;
+    }
+
+    const billsArray = Array.isArray(billFromServer) ? billFromServer : [billFromServer];
+    const approved = billsArray.find(b => String(b?.status ?? "").toLowerCase() === "approved");
+
+    const pick =
+      approved ||
+      billsArray.slice().sort((a, b) => {
+        const aTime = new Date(a?.createdAt ?? 0).getTime();
+        const bTime = new Date(b?.createdAt ?? 0).getTime();
+        return bTime - aTime;
+      })[0] ||
+      null;
+
+    setCurrentBill(pick);
+  }, [billFromServer]);
+
+  // createBill should set the bill on success so the UI is immediate.
+  const { mutate: createBill } = useCreateBill({
+    onSuccess: (data) => {
+      if (data) setCurrentBill(data);
+    },
+    onError: (err) => {
+      console.error("createBill failed", err);
+    },
+  });
+
+  // When process -> approved, re-fetch bill (in case it was updated remotely)
+  useEffect(() => {
+    const isProcessApproved = normalizedStatus === "approved" || (process?.status ?? "").toLowerCase() === "approved";
+    if (isProcessApproved && process?._id) {
+      if (typeof refetchBill === "function") refetchBill();
+    }
+  }, [normalizedStatus, process?._id, refetchBill, process?.status]);
+
+  // Auto-open preview dialog when preview becomes available (transition detection)
+  const showApprovedBill =
+    currentBill &&
+    String(currentBill?.status ?? "").toLowerCase() === "approved" &&
+    (normalizedStatus === "approved" || (process?.status ?? "").toLowerCase() === "approved");
+
+  useEffect(() => {
+    const prev = prevShowApprovedRef.current;
+    if (showApprovedBill && !prev) {
+      setOpenBillPreview(true);
+    }
+    prevShowApprovedRef.current = showApprovedBill;
+  }, [showApprovedBill]);
+
+  // ------------------ Handlers ------------------
   const requestDeleteTask = taskId => {
     setPendingDeleteId(taskId);
     setDeleteConfirmOpen(true);
@@ -124,7 +194,11 @@ const normalizedStatus = useMemo( () => String(localStatus ?? "").toLowerCase(),
   const handleConfirmDelete = () => {
     if (!pendingDeleteId) return setDeleteConfirmOpen(false);
 
-    setOptimisticDeletedIds(prev => new Set(prev).add(pendingDeleteId));
+    setOptimisticDeletedIds(prev => {
+      const s = new Set(prev);
+      s.add(pendingDeleteId);
+      return s;
+    });
     setDeleteConfirmOpen(false);
 
     deleteTask(
@@ -174,6 +248,7 @@ const normalizedStatus = useMemo( () => String(localStatus ?? "").toLowerCase(),
       processId: process._id,
       updatedData: { status: "Sent for Payment Approval", endDate: new Date().toISOString() },
     });
+    createBill({ processId: process._id, notes: "Auto-generated on completion" });
   };
 
   const handleDialogOpen = () => setOpenDialog(true);
@@ -241,7 +316,6 @@ const normalizedStatus = useMemo( () => String(localStatus ?? "").toLowerCase(),
   };
 
   const allowed = ["in progress", "not started"];
-
   return (
     <>
       <Paper elevation={3} sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 3, mt: 2 }}>
@@ -259,19 +333,32 @@ const normalizedStatus = useMemo( () => String(localStatus ?? "").toLowerCase(),
               <TaskTable
                 key={task._id ?? task.id ?? idx}
                 task={task}
-                onTaskStatusChange={() => {}}
+                onTaskStatusChange={() => { }}
                 onDeleteTask={requestDeleteTask}
               />
             ))
           )}
         </Stack>
 
+        {/* If bill exists and both process & bill are approved, show a Bill preview */}
+        {showApprovedBill && (
+          <Box sx={{ mt: 2 }}><Button
+            variant="outlined"
+            color="primary"
+            onClick={() => setOpenBillPreview(true)}
+            startIcon={<VisibilityIcon />}
+          >
+            View Approved Bill
+          </Button></Box>
+        )}
+
+
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
           <Button
             variant="outlined"
             color="error"
             onClick={() => setDeleteProcessConfirmOpen(true)}
-            disabled={deletingProcess || updatingStatusLoading || process?.status !== "Not Started"}
+            disabled={deletingProcess || updatingStatusLoading || normalizedStatus !== "not started"}
             startIcon={<DeleteForeverIcon />}
           >
             DELETE
@@ -341,6 +428,13 @@ const normalizedStatus = useMemo( () => String(localStatus ?? "").toLowerCase(),
         open={errorDialogOpen}
         onClose={() => setErrorDialogOpen(false)}
         message={errorDialogMessage}
+      />
+
+      {/* Bill Detail Dialog: use the preview state & currentBill */}
+      <BillDetailDialog
+        open={openBillPreview}
+        onClose={() => setOpenBillPreview(false)}
+        bill={currentBill}
       />
     </>
   );

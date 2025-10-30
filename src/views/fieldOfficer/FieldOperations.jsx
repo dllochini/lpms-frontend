@@ -27,7 +27,7 @@ export default function FieldOperation() {
   const fetchData = async () => {
     const response = await getOperations();
     // console.log("operations :", response);
-    setResponseData(response?.data ?? []);
+    setResponseData(response ?? []);
   };
 
   useEffect(() => {

@@ -1,6 +1,3 @@
-
-
-// src/pages/manager/Dashboard.jsx
 import {
   Typography,
   Box,
@@ -12,10 +9,10 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import { useEffect, useState } from "react";
-import { getManagerDashboardCardInfo } from "../../api/manager";
-import RequestsDataGrid from "../../components/manager/RequestDataGrid";
-import PaymentDataGrid from "../../components/manager/PaymentDataGrid";
-import { getUserById } from "../../api/user";
+import { getManagerDashboardCardInfo } from "../../../api/manager";
+import RequestsDataGrid from "./RequestDataGrid";
+import PaymentDataGrid from "./PaymentDataGrid";
+import { getUserById } from "../../../api/user";
 
 export default function Dashboard() {
   const [overview, setOverview] = useState({
@@ -38,6 +35,7 @@ export default function Dashboard() {
 
       try {
         const userRes = await getUserById(loggedUserId);
+        console.log(userRes, "elllo")
         if (!userRes || !userRes.data) {
           console.warn("No user data returned");
           return;
@@ -67,6 +65,8 @@ export default function Dashboard() {
 
         const data = overviewRes.data;
 
+        // console.log("data resoponse", data);
+
         setOverview({
           totalLands: data.totalLands || 0,
           fieldOfficers: data.totalFieldOfficers || 0,
@@ -88,28 +88,34 @@ export default function Dashboard() {
   }, []);
 
   const mappedRequests = (requests || []).map((req, idx) => {
-    const landObj = req.processID?.landID ?? req.processID?.landId ?? null;
+
+    console.log(requests, "requests fetched")
+
+    const landObj = req.process?.land ?? null;
     const landId = (landObj && (landObj._id ?? landObj)) ?? "";
 
     const assigned = req.assignedTo ?? {};
-    const officer =
-      assigned.name ?? assigned.fullName ?? (typeof assigned === "string" ? assigned : "-");
+    const officer = assigned.fullName ?? (typeof assigned === "string" ? assigned : "-");
+
+    const operation = req.operation?.name ?? "-";
 
     return {
       id: req._id ?? idx,
       landId,
       officer,
-      operation: req.name ?? "-",
+      operation,
       date: req.startDate ? new Date(req.startDate).toLocaleDateString() : "-",
       raw: req,
     };
   });
 
+  console.log(payments, "oh yeah")
+
   const mappedPayments = (payments || []).map((p, idx) => ({
     id: p._id ?? idx,
-    amount: p.total_amount ?? p.amount ?? "-",
+    amount: p.totalAmount ?? p.amount ?? "-",
     status: p.status ?? "-",
-    payer: p.payer?.fullName ?? p.payer?.name ?? (typeof p.payer === "string" ? p.payer : "-"),
+    fieldOfficer: p.process?.land?.createdBy?.fullName ?? "-",
     date: p.createdAt ? new Date(p.createdAt).toLocaleDateString() : "-",
     raw: p,
   }));

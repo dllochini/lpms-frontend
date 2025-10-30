@@ -20,6 +20,8 @@ export default function RequestDataGrid({ requests = [] }) {
 
   const rows = requests.map((req, idx) => ({ id: idx, ...req }));
 
+  console.log(rows,"data grid yesy")
+
   return (
     <>
       <div style={{ width: "100%" }}>
