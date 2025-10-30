@@ -10,7 +10,7 @@ import Alert from "@mui/material/Alert";
 import TextField from "@mui/material/TextField";
 import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 import { DataGrid } from "@mui/x-data-grid";
-import { useUpdateTask } from "../../hooks/task.hooks";
+import { useUpdateTask } from "../../../hooks/task.hooks";
 
 export default function OperationDialog({
   open,

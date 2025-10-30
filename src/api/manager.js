@@ -1,11 +1,7 @@
 import axiosBackend from "../configs/axios-config";
 
-export const getManagerDashboardCardInfo = (divisionId) => {
-  // console.log("Hi api!");
-  // RETURN the axios promise
-  return axiosBackend.get(`/managers/division/${divisionId}/cards`);
-};
+// Fetch Manager dashboard data by divisionId
+export const getManagerDashboardCardInfo = (divisionId) =>
+  axiosBackend.get(`/manager/division/${divisionId}/cards`);
 
-export default {
-  getManagerDashboardCardInfo,
-};
+export default { getManagerDashboardCardInfo };

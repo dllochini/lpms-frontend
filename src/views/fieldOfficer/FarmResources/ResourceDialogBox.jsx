@@ -12,12 +12,10 @@ import {
   TextField,
   Snackbar,
   Alert,
+  InputAdornment,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
-import {
-  createResource,
-  updateResourceById,
-} from "../../api/resources";
+import { createResource, updateResourceById } from "../../../api/resources";
 
 export default function ResourceDialog({
   open,
@@ -25,14 +23,15 @@ export default function ResourceDialog({
   defaultValues,
   categories = [],
   units = [],
-  onSuccess, // ✅ new prop
+  onSuccess, // callback to refresh parent
 }) {
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      resource: "",
+      name: "",
       category: "",
       unit: "",
-      description: "",
+      unitPrice: "", // new
+      notes: "",
     },
   });
 
@@ -46,13 +45,17 @@ export default function ResourceDialog({
   useEffect(() => {
     if (open) {
       reset({
-        resource: defaultValues?.resource || "",
+        name: defaultValues?.name || "",
         category: defaultValues?.category || "",
         unit:
           (defaultValues?.unit && defaultValues.unit._id) ||
           defaultValues?.unit ||
           "",
-        description: defaultValues?.description || "",
+        unitPrice:
+          typeof defaultValues?.unitPrice === "number"
+            ? String(defaultValues.unitPrice)
+            : defaultValues?.unitPrice ?? "",
+        notes: defaultValues?.notes || "",
       });
     }
   }, [open, defaultValues, reset]);
@@ -67,13 +70,22 @@ export default function ResourceDialog({
     setOpenConfirm(false);
     setSubmitError("");
     try {
+      // Ensure unitPrice is number
+      const payload = {
+        ...formData,
+        unitPrice:
+          formData.unitPrice === "" || formData.unitPrice === null
+            ? 0
+            : Number(formData.unitPrice),
+      };
+
       let response;
       if (defaultValues?._id) {
         // Editing
-        response = await updateResourceById(defaultValues._id, formData);
+        response = await updateResourceById(defaultValues._id, payload);
       } else {
         // Creating
-        response = await createResource(formData);
+        response = await createResource(payload);
       }
 
       // success UI
@@ -124,7 +136,7 @@ export default function ResourceDialog({
           <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {/* Resource Name */}
             <Controller
-              name="resource"
+              name="name"
               control={control}
               rules={{ required: "Resource name is required" }}
               render={({ field, fieldState }) => (
@@ -177,14 +189,44 @@ export default function ResourceDialog({
               )}
             />
 
-            {/* Description */}
+            {/* Unit Price */}
             <Controller
-              name="description"
+              name="unitPrice"
+              control={control}
+              rules={{
+                validate: (val) => {
+                  if (val === "" || val === null) return true; // allow empty (interpreted as 0)
+                  const n = Number(val);
+                  if (Number.isNaN(n)) return "Unit price must be a number";
+                  if (n < 0) return "Unit price cannot be negative";
+                  return true;
+                },
+              }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  label="Unit Price"
+                  fullWidth
+                  size="small"
+                  type="number"
+                  inputProps={{ step: "0.01", min: "0" }}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message || "Enter price per unit (optional)"}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">LKR</InputAdornment>,
+                  }}
+                />
+              )}
+            />
+
+            {/* notes */}
+            <Controller
+              name="notes"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Description"
+                  label="Notes"
                   fullWidth
                   size="small"
                   multiline
@@ -200,10 +242,11 @@ export default function ResourceDialog({
               variant="contained"
               color="secondary"
               onClick={onClose}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit" variant="contained" color="primary">
+            <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>
               Submit
             </Button>
           </DialogActions>
@@ -219,7 +262,9 @@ export default function ResourceDialog({
             : "Are you sure you want to create this resource?"}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenConfirm(false)}>Cancel</Button>
+          <Button onClick={() => setOpenConfirm(false)} disabled={isSubmitting}>
+            Cancel
+          </Button>
           <Button
             onClick={handleConfirmSubmit}
             color="primary"

@@ -11,7 +11,7 @@ import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useState } from "react";
-import { deleteResourceById } from "../../api/resources";
+import { deleteResourceById } from "../../../api/resources";
 
 const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -69,10 +69,10 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
 
   const columns = [
     { field: "_id", headerName: "Resource ID", flex: 2 },
-    { field: "resource", headerName: "Resource_Name", flex: 3 },
+    { field: "name", headerName: "Resource_Name", flex: 3 },
     { field: "category", headerName: "Category", flex: 1.5 },
     { field: "unit", headerName: "Unit of Measure", flex: 1.5 },
-    { field: "description", headerName: "Description", flex: 3 },
+    { field: "notes ", headerName: "Notes", flex: 3 },
     {
       field: "actions",
       type: "actions",

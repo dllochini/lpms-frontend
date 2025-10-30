@@ -8,6 +8,7 @@ export const getProcessByLandId = async (landId) => {
 };
 
 export const updateProcessById = async (processId, updatedData) => {
+  
   if (!processId) throw new Error("processId required");
   const res = await axiosBackend.put(`/process/${processId}`, updatedData);
   return res.data; // return server payload

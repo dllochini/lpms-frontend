@@ -2,7 +2,7 @@ import React from "react";
 import { Typography, Box, Breadcrumbs, Link, CircularProgress } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import { Link as RouterLink, useParams } from "react-router-dom";
-import ProcessOverview from "./ViewProcessOverview";
+import ViewProcessOverview from "./ViewProcessOverview";
 import { useGetProcessByLandId } from "../../../hooks/process.hook";
 
 export default function ProgressTrack() {
@@ -40,10 +40,10 @@ export default function ProgressTrack() {
       </Box>
 
       {[...landProcesses]
-  .sort((a, b) => new Date(b.startedDate) - new Date(a.startedDate)) // newest first
-  .map((proc, idx) => (
-    <ProcessOverview key={proc._id ?? idx} process={proc} />
-))}
+        .sort((a, b) => new Date(b.startedDate) - new Date(a.startedDate)) // newest first
+        .map((proc, idx) => (
+          <ViewProcessOverview key={proc._id ?? idx} process={proc} />
+        ))}
 
     </Box>
   );
