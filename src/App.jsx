@@ -28,10 +28,10 @@ import UserEdit from "./views/admin/UserEdit";
 // FieldOfficer
 import FieldOfficerDashboard from "./views/fieldOfficer/Dashboard";
 import FieldOperations from "./views/fieldOfficer/FieldOperations";
-import FarmResources from "./views/fieldOfficer/FarmResources";
+import FarmResources from "./views/fieldOfficer/FarmResources/FarmResources";
 import LandRegistry from "./views/fieldOfficer/LandRegistry";
 import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress";
-import LandProgressTracking from "./views/fieldOfficer/ProgressTrack/ProgressTrack";
+import LandProgressTracking from "./views/fieldOfficer/ProgressTrack/main/ProgressTrack";
 
 import LandRegistrationPage1 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration1";
 import LandRegistrationPage2 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration2";
@@ -47,13 +47,14 @@ import LandEditPage4 from "./views/fieldOfficer/FarmerLandEdit/LandEdit4";
 import HigherManagerDashboard from "./views/higherManager/Dashboard";
 import HigherManagerLandProgress from "./views/higherManager/LandProgress";
 import HigherManagerLandProgressTracking from "./views/higherManager/LandProgressTracking";
-import HigherManagerApprovePayments from "./views/higherManager/ApprovePayments";
+// import HigherManagerApprovePayments from "./views/higherManager/ApprovePayments";
 
 //Manager
-import Dashboard from "./views/manager/Dashboard";
-import ManagerApprovePayments from "./views/manager/ApprovePayments";
-import ApproveOperations from "./views/manager/ApproveOperations";
+import Dashboard from "./views/manager/Dashboard/Dashboard";
+import ApprovePayments from "./views/manager/PaymentApproval/ApprovePayments";
+import ApproveOperations from "./views/manager/OperationApproval/ApproveOperations";
 import DivisionProgress from "./views/manager/DivisionProgress";
+import ViewLandProgress from "./views/manager/ProgressTrackView/ViewProgressTrack"
 
 //Layout
 import ManagerLayout from "./views/layout/Manager";
@@ -124,9 +125,10 @@ const AppWrapper = () => {
         <Route path="*" element={<NoPage />} />
         <Route path="profile" element={<Profile />} />
         <Route path="" element={<Dashboard />} />
-        <Route path="approveOperations" element={<ApproveOperations/>} />
-        <Route path="approvePayments" element={<ManagerApprovePayments />} />
+        <Route path="approveOperations" element={<ApproveOperations />} />
+        <Route path="approvePayments" element={<ApprovePayments />} />
         <Route path="divisionProgress" element={<DivisionProgress />} />
+        <Route path="viewProgress/:landId" element={<ViewLandProgress />} />
       </Route>
 
       <Route path="/higherManager/" element={<HigherManagerLayout />}>
@@ -134,10 +136,6 @@ const AppWrapper = () => {
         <Route path="profile" element={<Profile />} />
         <Route path="" element={<HigherManagerDashboard />} />
         <Route path="landProgress" element={<HigherManagerLandProgress />} />
-        <Route
-          path="approvePayments"
-          element={<HigherManagerApprovePayments />}
-        />
       </Route>
     </Routes>
   );

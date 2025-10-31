@@ -6,3 +6,17 @@ export const getProcessByLandId = async (landId) => {
   // console.log(result.data,"in api");
   return result.data;
 };
+
+export const updateProcessById = async (processId, updatedData) => {
+  
+  if (!processId) throw new Error("processId required");
+  const res = await axiosBackend.put(`/process/${processId}`, updatedData);
+  return res.data; // return server payload
+};
+
+export const deleteProcessById = (processId) => {
+  console.log(processId, "input");
+  return axiosBackend.delete(`/process/${processId}`);
+};
+
+export const createProcess = (processData) => {return axiosBackend.post("/process", processData)};

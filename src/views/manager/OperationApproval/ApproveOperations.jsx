@@ -8,14 +8,13 @@ import {
   Link,
   CircularProgress,
 } from "@mui/material";
-import React, { useState, useEffect, useMemo } from "react";
-import AddIcon from "@mui/icons-material/Add";
+import React, { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
-import OperationGrid from "../../components/manager/OperationGrid";
-import OperationDialog from "../../components/manager/OperationDialog";
-import { useGetLandsByDivision } from "../../hooks/land.hooks";
-import { useGetTasksByDiv } from "../../hooks/task.hooks";
+import OperationGrid from "./OperationGrid";
+import OperationDialog from "./OperationDialog";
+// import { useGetLandsByDivision } from "../../hooks/land.hooks";
+import { useGetTasksByDiv } from "../../../hooks/task.hooks";
 
 export default function Operationapproval() {
 
@@ -23,9 +22,9 @@ export default function Operationapproval() {
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  const { control, handleSubmit, reset } = useForm();
+  const { control } = useForm();
 
-const {data: tasksData = [], isLoading} = useGetTasksByDiv(localStorage.getItem("loggedUserId"), {
+  const { data: tasksData = [], isLoading } = useGetTasksByDiv(localStorage.getItem("loggedUserId"), {
     onSuccess: (data) => {
       console.log("Lands for field officer:", data);
     },
@@ -33,30 +32,28 @@ const {data: tasksData = [], isLoading} = useGetTasksByDiv(localStorage.getItem(
       console.error("Failed to fetch lands for field officer", error);
     },
   });
-  
+
   const tasks = useMemo(() => Array.isArray(tasksData) ? tasksData : [], [tasksData]);
   // console.log(tasks,"response")
 
   // at top of component add new state
-const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
-// update handleViewDetails
-const handleViewDetails = (row) => {
-  // row comes from OperationGrid / DataGrid. 
-  // DataGrid rows id is mapped to row._id in your grid, ensure both checks for safety.
-  const rowId = row._id ?? row.id;
+  // update handleViewDetails
+  const handleViewDetails = (row) => {
+    const rowId = row._id ?? row.id;
 
-  // find the matching task in tasks (tasks is from your hook)
-  const matchedTask = tasks.find(
-    (t) => String(t._id) === String(rowId) || String(t.id) === String(rowId)
-  ) ?? null;
+    // find the matching task in tasks (tasks is from your hook)
+    const matchedTask = tasks.find(
+      (t) => String(t._id) === String(rowId) || String(t.id) === String(rowId)
+    ) ?? null;
 
-  console.log("Clicked row:", row, "matchedTask:", matchedTask);
+    console.log("Clicked row:", row, "matchedTask:", matchedTask);
 
-  setSelectedRow(row);       // existing (grid row)
-  setSelectedTask(matchedTask); // NEW (matching task or null)
-  setOpenDialog(true);
-};
+    setSelectedRow(row);       // existing (grid row)
+    setSelectedTask(matchedTask); // NEW (matching task or null)
+    setOpenDialog(true);
+  };
 
 
   const handleOpenDialog = () => {
@@ -133,12 +130,12 @@ const handleViewDetails = (row) => {
         )}
 
         <OperationDialog
-  open={openDialog}
-  onClose={handleCloseDialog}
-  control={control}
-  initialData={selectedRow}
-  initialTask={selectedTask}   // NEW
-/>
+          open={openDialog}
+          onClose={handleCloseDialog}
+          control={control}
+          initialData={selectedRow}
+          initialTask={selectedTask}
+        />
       </Paper>
     </Box>
   );

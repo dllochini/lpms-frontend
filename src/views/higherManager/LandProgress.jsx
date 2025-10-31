@@ -142,7 +142,7 @@ export default function LandProgress() {
       <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", mb: 2 }}>
         <Link
           component={RouterLink}
-          to="/"
+          to="/higherManager"
           underline="hover"
           color="inherit"
           sx={{ display: "flex", alignItems: "center" }}

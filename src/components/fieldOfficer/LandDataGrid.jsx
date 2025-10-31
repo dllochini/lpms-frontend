@@ -14,6 +14,11 @@ const LandDataGrid = ({ data }) => {
 
   const columns = [
     { field: "_id", headerName: "Land ID", flex: 1, minWidth: 130 },
+    {
+      field: "address",
+      headerName: "Address",
+      flex: 1.5,
+    },
     { field: "size", headerName: "Area (acre)", flex: 1, minWidth: 110 },
     {
       field: "taskName",
@@ -25,26 +30,26 @@ const LandDataGrid = ({ data }) => {
       headerName: "Current Status",
       flex: 1.5,
     },
-    {
-      field: "taskProgressPercent",
-      headerName: "Current Task Progress",
-      flex: 1.8,
-      sortable: false,
-      filterable: false,
-      renderCell: (params) => {
-        const value = Math.max(0, Math.min(100, params?.row.taskProgressPercent ?? 0));
-        return (
-          <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
-            <Box sx={{ flex: 1 }}>
-              <LinearProgress variant="determinate" value={value} />
-            </Box>
-            <Box sx={{ minWidth: 40 }}>
-              <Typography variant="body2">{`${Math.round(value)}%`}</Typography>
-            </Box>
-          </Box>
-        );
-      },
-    },
+    // {
+    //   field: "taskProgressPercent",
+    //   headerName: "Current Task Progress",
+    //   flex: 1.8,
+    //   sortable: false,
+    //   filterable: false,
+    //   renderCell: (params) => {
+    //     const value = Math.max(0, Math.min(100, params?.row.taskProgressPercent ?? 0));
+    //     return (
+    //       <Box sx={{ width: "100%", display: "flex", alignItems: "center", gap: 1 }}>
+    //         <Box sx={{ flex: 1 }}>
+    //           <LinearProgress variant="determinate" value={value} />
+    //         </Box>
+    //         <Box sx={{ minWidth: 40 }}>
+    //           <Typography variant="body2">{`${Math.round(value)}%`}</Typography>
+    //         </Box>
+    //       </Box>
+    //     );
+    //   },
+    // },
     {
       field: "actions",
       type: "actions",

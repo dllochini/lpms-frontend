@@ -13,7 +13,7 @@ export default function AssignedLandProgress() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
-  const {data: foLandData = [], isLoading} = useGetFieldOfficerLands(localStorage.getItem("loggedUserId"), {
+  const { data: foLandData = [], isLoading } = useGetFieldOfficerLands(localStorage.getItem("loggedUserId"), {
     onSuccess: (data) => {
       console.log("Lands for field officer:", data);
     },
@@ -41,7 +41,7 @@ export default function AssignedLandProgress() {
   });
 
   const lands = useMemo(() => {
-    if(!Array.isArray(foLandData) || !Array.isArray(taskData)) return [];
+    if (!Array.isArray(foLandData) || !Array.isArray(taskData)) return [];
     return foLandData.map((land) => {
       // Find tasks for this land
       const tasksForLand = taskData.filter((task) => task?.process?.land === land._id).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
@@ -52,10 +52,11 @@ export default function AssignedLandProgress() {
       return {
         _id: land._id,
         size: land.size,
+        address: land?.address,
         status: currentTask?.status ?? "No Task",
         taskName: currentTask?.operation?.name,
       }
-    });      
+    });
   }, [foLandData, taskData, workDoneData]);
 
   return (

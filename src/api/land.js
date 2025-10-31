@@ -11,6 +11,11 @@ export const getLandsByFieldOfficerId = async (fieldOfficerId) => {
   return result.data;
 }
 
+export const getLandsByDivId = async (managerId) => { 
+  const result = await axiosBackend.get(`/lands/manager/${managerId }`);
+  return result.data;
+}
+
 export const getLandById = (landId) => {
   return axiosBackend.get(`/lands/${landId}`)
 };
