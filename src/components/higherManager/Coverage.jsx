@@ -1,5 +1,3 @@
-
-// src/components/higherManager/Coverage.jsx
 import React from "react";
 import {
   PieChart,
@@ -14,6 +12,15 @@ import { Box, Typography, CircularProgress } from "@mui/material";
 const COLORS = ["#FF00FF", "#00BFFF", "#20B2AA", "#8A2BE2", "#FFA500", "#8B0000"];
 
 const Coverage = ({ data = [], loading = false }) => {
+ 
+  // Transform the data from the API format (_id, count)
+  // to the format Recharts expects (name, value)
+  const chartData = data.map((item) => ({
+    name: item._id || "Unknown", // Use _id as the name
+    value: item.count,          // Use count as the value
+  }));
+ 
+
   // data expected: [{ name, value }]
   return (
     <Box sx={{ width: "100%" }}>
@@ -25,21 +32,21 @@ const Coverage = ({ data = [], loading = false }) => {
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
           <CircularProgress />
         </Box>
-      ) : data.length === 0 ? (
+      ) : chartData.length === 0 ? ( // <-- Use chartData here
         <Box sx={{ textAlign: "center", py: 6 }}>No coverage data available</Box>
       ) : (
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
-              data={data}
+              data={chartData} // <-- Use chartData here
               dataKey="value"
               nameKey="name"
               cx="50%"
               cy="50%"
               outerRadius={100}
-              label
+              label // You can customize this: label={(entry) => entry.value}
             >
-              {data.map((entry, index) => (
+              {chartData.map((entry, index) => ( // <-- And use chartData here
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>

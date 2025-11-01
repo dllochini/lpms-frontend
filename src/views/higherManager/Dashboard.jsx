@@ -56,9 +56,8 @@ export default function Dashboard() {
         setRole(user.role?.name || "");
 
         
-        const divisionId = user.division?._id ?? user.division ?? "";
+        const divisionId = user.division?._id ?? user.division ?? null;
         setDivision(divisionId);
-        if (!divisionId) return;
 
         const dashboardRes = await getHigherManagerDashboardCardInfo(divisionId);
         const data = dashboardRes?.data;
@@ -67,11 +66,11 @@ export default function Dashboard() {
           return;
         }
 
-        setOverview({
-          totalLands: data.totalLands ?? 0,
-          totalArea: data.totalArea ?? 0,
-          divisions: data.divisions ?? 0,
-          landsInProgress: data.landsInProgress ?? 0,
+        setOverview(data.overview || {
+          totalLands: 0,
+          totalArea: 0,
+          divisions: 0,
+          landsInProgress: 0,
         });
 
         setGraphData(data.graph ?? []);
