@@ -14,7 +14,7 @@ import {
 import HomeIcon from "@mui/icons-material/Home";
 
 import Graph from "../../components/higherManager/Graph";
-import Coverage from "../../components/higherManager/Coverage";
+import TaskSummary from "../../components/higherManager/TaskSummary";
 import { getHigherManagerDashboardCardInfo } from "../../api/higherManager";
 import { getUserById } from "../../api/user";
 
@@ -29,7 +29,7 @@ export default function Dashboard() {
     landsInProgress: 0,
   });
   const [graphData, setGraphData] = useState([]);
-  const [coverageData, setCoverageData] = useState([]);
+  const [TaskSummaryData, setTaskSummaryData] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -74,7 +74,7 @@ export default function Dashboard() {
         });
 
         setGraphData(data.graph ?? []);
-        setCoverageData(data.coverage ?? []);
+        setTaskSummaryData(data.progress ?? {});
       } catch (err) {
         console.error("Error fetching dashboard:", err);
         const msg = err?.response?.data?.message ?? err?.message ?? "Unexpected error";
@@ -156,7 +156,7 @@ export default function Dashboard() {
 
           <Grid item xs="12" md="6" sx={{ display: "flex", justifyContent: "center" }}>
             <Paper elevation={0} sx={{ p: 2, borderRadius: 3, border: "1px solid #eee", minWidth: 420, display: "flex", flexDirection: "column" }}>
-              <Coverage data={coverageData} loading={loading} />
+              <TaskSummary data={TaskSummaryData} loading={loading} />
             </Paper>
           </Grid>
         </Grid>
