@@ -55,7 +55,7 @@ const LandRegistration4 = () => {
 
   // landRegForm1 and landForm2 may be stored as wrapper { data, fileKey }
   const form1Wrapper = getWithExpiry("landRegForm1") || null; // Farmer info wrapper
-  const form2Wrapper = getWithExpiry("landForm2") || null; // Land info wrapper
+  const form2Wrapper = getWithExpiry("landRegForm2") || null; // Land info wrapper
 
   const form1 = form1Wrapper?.data || form1Wrapper || {};
   const form2 = form2Wrapper?.data || form2Wrapper || {};
