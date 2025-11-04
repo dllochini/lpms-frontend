@@ -1,0 +1,18 @@
+{
+    "files.readonlyInclude": {
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\views\\admin\\Dashboard.jsx": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\views\\validations\\userSchemas.js": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\views\\admin\\UserEdit.jsx": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\views\\admin\\UserRegistration.jsx": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\views\\validations\\resetPasswordSchema.js": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\views\\ResetPw.jsx": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\index.html": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\theme.jsx": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\index.css": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\App.css": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\views\\Login.jsx": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\views\\Profile.jsx": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\views\\NoPage.jsx": true,
+        "c:\\Users\\MY DELL\\Documents\\sample lpms\\lpms-frontend\\src\\main.jsx": true
+    }
+}
