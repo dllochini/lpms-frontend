@@ -29,6 +29,7 @@ const AddOperationDialog = ({
   anySentForApproval,
 }) => {
 
+  console.log(resources)
       
   return (
     <Dialog
@@ -96,7 +97,7 @@ const AddOperationDialog = ({
               ) : resources.length === 0 ? (
                 <MenuItem disabled>No machines found</MenuItem>
               ) : (
-                resources.map((res) => (
+                resources.data.map((res) => (
                   <MenuItem key={res._id} value={res._id}>
                     {res.name} ({res.unit?.symbol || "-"})
                   </MenuItem>
