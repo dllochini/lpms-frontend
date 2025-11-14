@@ -1,4 +1,4 @@
-// src/pages/higherManager/Dashboard.jsx
+
 import React, { useEffect, useState } from "react";
 import {
   Typography,
@@ -10,7 +10,14 @@ import {
   CardContent,
   CircularProgress,
   Alert,
-} from "@mui/material";
+  // --- ADDED Table Imports ---
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from "@mui/material"; // <-- MODIFIED
 import HomeIcon from "@mui/icons-material/Home";
 
 import Graph from "../../components/higherManager/Graph";
@@ -21,7 +28,7 @@ import { getUserById } from "../../api/user";
 export default function Dashboard() {
   const [userName, setUserName] = useState("");
   const [role, setRole] = useState("");
-  const [division, setDivision] = useState("");
+  // const [division, setDivision] = useState(""); // <-- REMOVED (No longer needed for API call)
   const [overview, setOverview] = useState({
     totalLands: 0,
     totalArea: 0,
@@ -30,6 +37,7 @@ export default function Dashboard() {
   });
   const [graphData, setGraphData] = useState([]);
   const [TaskSummaryData, setTaskSummaryData] = useState({});
+  const [divisionData, setDivisionData] = useState([]); // <-- ADDED: State for the new table
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -55,11 +63,11 @@ export default function Dashboard() {
         setUserName(user.fullName || "");
         setRole(user.role?.name || "");
 
-        
-        const divisionId = user.division?._id ?? user.division ?? null;
-        setDivision(divisionId);
-
-        const dashboardRes = await getHigherManagerDashboardCardInfo(divisionId);
+        // --- MODIFIED API Call ---
+        // We no longer pass a specific divisionId. We want data for *all* divisions
+        // this manager oversees.
+        // We assume the API backend is updated to handle this.
+        const dashboardRes = await getHigherManagerDashboardCardInfo(); // <-- MODIFIED
         const data = dashboardRes?.data;
         if (!data) {
           setError("No dashboard data returned");
@@ -75,6 +83,11 @@ export default function Dashboard() {
 
         setGraphData(data.graph ?? []);
         setTaskSummaryData(data.progress ?? {});
+
+        // --- ADDED: Set data for the new table ---
+        // We assume the API response now includes a 'divisionPerformance' array
+        setDivisionData(data.divisionPerformance || []); // <-- ADDED
+        
       } catch (err) {
         console.error("Error fetching dashboard:", err);
         const msg = err?.response?.data?.message ?? err?.message ?? "Unexpected error";
@@ -144,6 +157,63 @@ export default function Dashboard() {
           ))}
         </Grid>
       </Paper>
+
+      {/* --- ADDED: Division Performance Table --- */}
+      <Paper 
+        elevation={5}
+        sx={{ maxWidth: 925, mx: "auto", p: 3, borderRadius: 5, mb: 3, backgroundColor: "#fdfdfd" }}
+      >
+        <Typography variant="h6" gutterBottom>Division Performance</Typography>
+        <TableContainer>
+          <Table sx={{ minWidth: 650 }} aria-label="division performance table">
+            <TableHead>
+              <TableRow>
+                <TableCell sx={{ fontWeight: 'bold' }}>Division Name</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Lands in Progress</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>% Complete</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 'bold' }}>Overdue Tasks</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    <CircularProgress size={30} />
+                  </TableCell>
+                </TableRow>
+              ) : error ? (
+                <TableRow>
+                   <TableCell colSpan={4} align="center">
+                     <Typography color="error">Could not load division data.</Typography>
+                   </TableCell>
+                 </TableRow>
+              ) : divisionData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} align="center">
+                    No division performance data found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                divisionData.map((row) => (
+                  <TableRow
+                    key={row.divisionName}
+                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                  >
+                    <TableCell component="th" scope="row">
+                      {row.divisionName}
+                    </TableCell>
+                    <TableCell align="right">{row.landsInProgress}</TableCell>
+                    <TableCell align="right">{row.percentComplete}%</TableCell>
+                    <TableCell align="right">{row.overdueTasks}</TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Paper>
+      {/* --- END of new table --- */}
+
 
       {/* Graph & Coverage */}
       <Box sx={{ maxWidth: 1000, mx: "auto" }}>
