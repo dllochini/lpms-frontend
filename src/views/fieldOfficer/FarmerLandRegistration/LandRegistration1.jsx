@@ -246,7 +246,7 @@ const LandRegistration1 = () => {
         </Typography>
 
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-          <Link underline="hover" color="inherit" href="/">
+          <Link underline="hover" color="inherit" href="/fieldOfficer">
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />{" "}
             Home
           </Link>

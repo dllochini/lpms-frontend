@@ -100,8 +100,8 @@ export default function Operationapproval() {
         </Typography>
 
         <div role="presentation">
-          <Breadcrumbs aria-label="breadcrumb">
-            <Link underline="hover" color="inherit" href="/">
+          <Breadcrumbs aria-label="breadcrumb"  sx={{ fontSize: "0.9rem", mb: 2 }}>
+            <Link underline="hover" color="inherit" href="/manager">
               Home
             </Link>
             <Typography sx={{ color: "text.primary" }}>
