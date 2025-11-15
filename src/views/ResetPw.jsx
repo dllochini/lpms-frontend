@@ -14,10 +14,10 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSearchParams } from "react-router-dom";
-import bgImage from "/images/sugar-cane.jpg";
-import companyLogo from "/images/ceylon-sugar-industries.png";
+import bgImage from "/images/Wallpaper.jpg";
+import companyLogo from "/images/CeylonSugarLogo.png";
 import { resetPassword } from "../api/auth";
-import resetPasswordSchema from "./validations/resetPasswordSchema.js"; // ✅ import schema
+import resetPasswordSchema from "../validations/resetPasswordSchema.js"; 
 
 // Local error mapper
 function getFriendlyErrorMessage(

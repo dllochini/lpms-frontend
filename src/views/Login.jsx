@@ -14,8 +14,8 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import bgImage from "/images/sugar-cane.jpg";
-import companyLogo from "/images/ceylon-sugar-industries.png";
+import bgImage from "/images/Wallpaper.jpg";
+import companyLogo from "/images/CeylonSugarLogo.png";
 import { loginUser, forgotPassword } from "../api/auth";
 import { redirectByRole } from "../utils/redirectByRole";
 import { useNavigate } from "react-router-dom";

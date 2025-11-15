@@ -1,6 +1,5 @@
-// theme.js
 import { createTheme } from '@mui/material/styles';
-import '@fontsource/lato';  
+import '@fontsource/lato';
 
 const theme = createTheme({
   palette: {

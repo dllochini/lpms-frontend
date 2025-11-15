@@ -26,7 +26,7 @@ import {
   AccountCircle,
   ExpandMore,
 } from "@mui/icons-material";
-import companyLogo from "/images/ceylon-sugar-industries.png";
+import companyLogo from "/images/CeylonSugarLogo.png";
 import { clearAuth } from "../../utils/auth";
 import {redirectProfileByRole} from "../../utils/redirectProfileByRole"
 

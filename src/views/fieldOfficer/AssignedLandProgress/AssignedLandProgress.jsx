@@ -2,10 +2,10 @@
 import React, { useState, useMemo } from "react";
 import { Typography, Box, Paper, Breadcrumbs, CircularProgress, Snackbar, Alert } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-import LandDataGrid from "../../components/fieldOfficer/LandDataGrid";
-import { useGetFieldOfficerLands } from "../../hooks/land.hooks";
-import { useGetAllTasks } from "../../hooks/task.hooks";
-import { useGetAllWorkDone } from "../../hooks/workdone.hooks";
+import LandDataGrid from "./LandDataGrid";
+import { useGetFieldOfficerLands } from "../../../hooks/land.hooks";
+import { useGetAllTasks } from "../../../hooks/task.hooks";
+import { useGetAllWorkDone } from "../../../hooks/workdone.hooks";
 
 export default function AssignedLandProgress() {
 

@@ -11,7 +11,7 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
 import { useState } from "react";
-import { deleteLandById } from "../../api/land";
+import { deleteLandById } from "../../../api/land";
 import { useNavigate } from "react-router-dom";
 
 const LandRegistryDataGrid = ({ data, onDelete }) => {

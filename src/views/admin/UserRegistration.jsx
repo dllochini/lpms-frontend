@@ -24,7 +24,7 @@ import { createUser } from "../../api/user";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { getRoles } from "../../api/role";
 import { getDivisions } from "../../api/division";
-import getUserSchema from "../validations/userSchemas.js";
+import getUserSchema from "../../validations/userSchemas.js";
 
 const UserRegistration = () => {
   const [openConfirm, setOpenConfirm] = useState(false);

@@ -1,4 +1,3 @@
-// src/pages/higherManager/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import {
   Typography,
@@ -13,8 +12,8 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 
-import Graph from "../../components/higherManager/Graph";
-import TaskSummary from "../../components/higherManager/TaskSummary";
+import Graph from "./Graph";
+import TaskSummary from "./TaskSummary";
 import { getHigherManagerDashboardCardInfo } from "../../api/higherManager";
 import { getUserById } from "../../api/user";
 

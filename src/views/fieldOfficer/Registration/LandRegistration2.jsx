@@ -1,4 +1,4 @@
-// File: LandEdit2.jsx
+// File: LandRegistration2.jsx
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -15,40 +15,55 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FormStepper from "../../../components/fieldOfficer/CreateLandFormStepper.jsx";
-import { useNavigate, useParams } from "react-router-dom";
+import FormStepper from "./CreateLandFormStepper.jsx";
+import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { getDivisions } from "../../../../api/division.js";
+import { getUnits } from "../../../../api/unit.js";
 import * as yup from "yup";
-import { getDivisions } from "../../../api/division.js";
-import { getUnits } from "../../../api/unit.js";
-import { getLandById, updateLandById } from "../../../api/land.js";
 import {
-  getWithExpiry,
   setWithExpiry,
-} from "../../../utils/localStorageHelpers.js";
-import { saveFile, getAllFiles } from "../../../utils/db.js";
+  getWithExpiry,
+} from "../../../../utils/localStorageHelpers.js";
+import { saveFile, getAllFiles } from "../../../../utils/db.js";
 
-const FILE_KEY = "landEdit2_file";
+const FILE_KEY = "landRegForm2_file";
 
-const LandEdit2 = () => {
+const LandRegistration2 = () => {
   const navigate = useNavigate();
-  const { landId } = useParams();
-
   const [file, setFile] = useState(null);
   const [divisions, setDivisions] = useState([]);
-  const [units, setUnits] = useState([]);
-  const [farmerName, setFarmerName] = useState("");
+  const [landUnits, setLandUnits] = useState([]);
 
+  // const divisions = [
+  //   { value: "North", label: "North" },
+  //   { value: "South", label: "South" },
+  //   { value: "East", label: "East" },
+  //   { value: "West", label: "West" },
+  // ];
+
+  // const landUnits = [
+  //   { value: "Acre", label: "Acre" },
+  //   { value: "Hectare", label: "Hectare" },
+  //   { value: "Perch", label: "Perch" },
+  // ];
+
+  // --- Validation schema ---
   const schema = yup.object({
     division: yup.string().required("Select a division"),
     address: yup.string().required("Address is required"),
-    size: yup
+    // language: yup.string().required("Language is required"),
+    landSize: yup
       .number()
       .typeError("Enter a valid number")
       .required("Extent of land is required"),
-    unit: yup.string().required("Unit is required"),
+    landUnit: yup.string().required("Unit is required"),
+    date: yup.string().required("Date of registration is required"),
   });
+
+  // Read saved wrapper object { data: {...}, fileKey: 'land_image' }
+  const savedWrapper = getWithExpiry("landRegForm2") || null;
 
   const fetchData = async () => {
     try {
@@ -65,14 +80,14 @@ const LandEdit2 = () => {
 
     try {
       const resUnits = await getUnits();
-      setUnits(
+      setLandUnits(
         Array.isArray(resUnits.data)
           ? resUnits.data
-          : resUnits.data?.units || []
+          : resUnits.data?.landUnits || []
       );
     } catch (err) {
       console.error("Error fetching units:", err);
-      setUnits([]);
+      setLandUnits([]);
     }
   };
 
@@ -80,123 +95,111 @@ const LandEdit2 = () => {
     fetchData();
   }, []);
 
-  const {
-    control,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({
-    defaultValues: {
-      division: "",
-      address: "",
-      size: "",
-      unit: "",
-    },
-    resolver: yupResolver(schema),
-  });
-
-  useEffect(() => {
-    if (!landId) return;
-    let mounted = true;
-    const loadLand = async () => {
-      try {
-        const res = await getLandById(landId);
-        const landData = res?.data || {};
-        if (mounted) {
-          reset({
-            division: landData.division?._id || "",
-            address: landData.address || "",
-            size: landData.size || "",
-            unit: landData.unit?._id || "",
-          });
-          setFarmerName(landData.farmer?.fullName || "");
-        }
-
-        if (typeof getAllFiles === "function") {
-          const files = await getAllFiles();
-          if (files && files[FILE_KEY]) setFile(files[FILE_KEY]);
-        }
-      } catch (err) {
-        console.error("Failed to load land data:", err);
-      }
-    };
-    loadLand();
-    return () => (mounted = false);
-  }, [landId, reset]);
-
   const handleFileChange = async (fileObj) => {
     if (!fileObj) return;
     setFile(fileObj);
 
     try {
-      await saveFile(FILE_KEY, fileObj);
+      if (typeof saveFile === "function") {
+        await saveFile(FILE_KEY, fileObj);
+      }
+
+      // Update the stored form reference (preserve existing data if any)
+      const existing = getWithExpiry("landRegForm2") || {};
       setWithExpiry(
-        "landEdit2",
-        { data: {}, fileKey: FILE_KEY },
-        30 * 60 * 1000
+        "landRegForm2",
+        { ...(existing || {}), data: existing.data || {}, fileKey: FILE_KEY },
+        30 * 60 * 1000 // 30 min expiry
       );
     } catch (err) {
-      console.error("Failed to save file:", err);
+      console.error("Failed to save file to IndexedDB:", err);
     }
   };
+
+  // --- Use react-hook-form ---
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: savedWrapper?.data || {
+      division: "",
+      address: "",
+      // language: "",
+      landSize: "",
+      landUnit: "",
+      date: "",
+    },
+    resolver: yupResolver(schema),
+  });
+
+  // --- Prefill file if stored (load from IndexedDB using getAllFiles) ---
+  useEffect(() => {
+    const loadFile = async () => {
+      try {
+        const stored = getWithExpiry("landRegForm2");
+        const key = stored?.fileKey || null;
+        if (!key) return;
+        if (typeof getAllFiles === "function") {
+          const files = await getAllFiles();
+          if (files && files[key]) setFile(files[key]);
+        }
+      } catch (err) {
+        console.error("Failed to load file from indexedDB:", err);
+      }
+    };
+    loadFile();
+  }, []);
 
   const onSubmit = async (data) => {
     try {
-      const selectedUnit = units.find((u) => u._id === data.unit);
-      if (!selectedUnit) return;
+      // Get the selected unit object
+      const selectedUnit = landUnits.find((u) => u._id === data.landUnit);
 
+      if (!selectedUnit) {
+        console.error("No unit selected or invalid unit");
+        return;
+      }
+
+      // Build the payload with unit _id and size
       const payload = {
         ...data,
-        unit: selectedUnit._id,
+        landUnit: selectedUnit._id, // send ID
+        size: selectedUnit.size, // send size for backend
       };
 
-      console.log("Submitting data:", payload);
+      const fileKey = file ? "land_image" : null;
+      if (file) {
+        await saveFile(fileKey, file);
+      }
 
-      if (file) await saveFile(FILE_KEY, file);
+      setWithExpiry("landRegForm2", { data, fileKey }, 60 * 60 * 1000);
 
-      await updateLandById(landId, payload);
-      setWithExpiry(
-        "landEdit2",
-        { data, fileKey: file ? FILE_KEY : null },
-        30 * 60 * 1000
-      );
+      // Send payload to backend (example API call)
+      // await api.saveLand(payload);
 
-      navigate(`/fieldOfficer/landEdit3/${landId}`);
+      navigate("/fieldOfficer/landRegistration3");
     } catch (err) {
-      console.error("Failed to update land:", err);
+      console.error("Failed to save land details:", err);
     }
-  };
-
-  const handleReset = () => {
-    if (!landId) return;
-    getLandById(landId).then((res) => {
-      const landData = res?.data || {};
-      reset({
-        division: landData.division?._id || "",
-        address: landData.address || "",
-        size: landData.size || "",
-        unit: landData.unit?._id || "",
-      });
-    });
   };
 
   return (
     <Box sx={{ minHeight: "100vh" }}>
       <Box sx={{ maxWidth: 1100, mx: "auto", p: 3 }}>
         <Typography variant="h5" gutterBottom>
-          Edit Details – {farmerName} (Land ID: {landId})
+          Farmer and Land Registration
         </Typography>
 
+        <FormStepper activeStep={1} />
+
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-          <Link underline="hover" color="inherit" href="/fieldOfficer">
+          <Link underline="hover" color="inherit" href="/">
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />{" "}
             Home
           </Link>
-          <Typography color="text.primary">Edit Farmer & Land</Typography>
+          <Typography color="text.primary">Add New Farmer & Land</Typography>
         </Breadcrumbs>
-        <Box sx={{ mt: 4 }}>
-          <FormStepper activeStep={1} />
-        </Box>
       </Box>
 
       <Box
@@ -259,11 +262,29 @@ const LandEdit2 = () => {
               />
             </Grid>
 
+            {/* Language */}
+            {/* <Grid size={{ xs: 12, md: 7 }} sx={{ display: "flex", gap: 1 }}>
+              <InputLabel sx={{ minWidth: 130 }}>Language :</InputLabel>
+              <Controller
+                name="language"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    size="small"
+                    sx={{ flex: 1 }}
+                    error={!!errors.language}
+                    helperText={errors.language?.message || " "}
+                  />
+                )}
+              />
+            </Grid> */}
+
             {/* Land Size + Unit */}
             <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
               <InputLabel sx={{ minWidth: 130 }}>Extent of Land :</InputLabel>
               <Controller
-                name="size"
+                name="landSize"
                 control={control}
                 render={({ field }) => (
                   <TextField
@@ -271,13 +292,13 @@ const LandEdit2 = () => {
                     size="small"
                     type="number"
                     sx={{ flex: 1 }}
-                    error={!!errors.size}
-                    helperText={errors.size?.message || " "}
+                    error={!!errors.landSize}
+                    helperText={errors.landSize?.message || " "}
                   />
                 )}
               />
               <Controller
-                name="unit"
+                name="landUnit"
                 control={control}
                 render={({ field }) => (
                   <TextField
@@ -285,17 +306,39 @@ const LandEdit2 = () => {
                     select
                     size="small"
                     sx={{ width: 120 }}
-                    error={!!errors.unit}
-                    helperText={errors.unit?.message || " "}
+                    error={!!errors.landUnit}
+                    helperText={errors.landUnit?.message || " "}
                   >
-                    {units
-                      .filter((u) => u.category === "area")
-                      .map((u) => (
-                        <MenuItem key={u._id} value={u._id}>
-                          {u.name}
+                    {landUnits
+                      .filter((unit) => unit.category === "area")
+                      .map((unit) => (
+                        <MenuItem key={unit._id} value={unit._id}>
+                          {unit.name}
                         </MenuItem>
                       ))}
                   </TextField>
+                )}
+              />
+            </Grid>
+
+            {/* Date */}
+            <Grid size={{ xs: 12, md: 7 }} sx={{ display: "flex", gap: 1 }}>
+              <InputLabel sx={{ minWidth: 130 }}>
+                Date of Registration :
+              </InputLabel>
+              <Controller
+                name="date"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    type="date"
+                    size="small"
+                    sx={{ flex: 1 }}
+                    InputLabelProps={{ shrink: true }}
+                    error={!!errors.date}
+                    helperText={errors.date?.message || " "}
+                  />
                 )}
               />
             </Grid>
@@ -322,27 +365,24 @@ const LandEdit2 = () => {
               {file && <Typography>{file.name}</Typography>}
             </Grid>
 
-            {/* Buttons */}
+            {/* Back and Next buttons */}
             <Box
               sx={{
                 display: "flex",
                 gap: 2,
                 justifyContent: "right",
                 width: "100%",
-                mt: 2,
               }}
             >
               <Button
                 variant="outlined"
-                onClick={() => navigate(`/fieldOfficer/landEdit1/${landId}`)}
+                onClick={() => navigate("/fieldOfficer/landRegistration1")}
               >
                 Back
               </Button>
-              <Button variant="outlined" onClick={handleReset}>
-                Reset
-              </Button>
+
               <Button variant="contained" type="submit">
-                Save & Next
+                Next
               </Button>
             </Box>
           </Grid>
@@ -352,4 +392,4 @@ const LandEdit2 = () => {
   );
 };
 
-export default LandEdit2;
+export default LandRegistration2;

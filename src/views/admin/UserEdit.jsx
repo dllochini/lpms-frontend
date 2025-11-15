@@ -24,7 +24,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { getUserById, updateUserById } from "../../api/user";
 import { getRoles } from "../../api/role";
 import { getDivisions } from "../../api/division";
-import getUserSchema from "../validations/userSchemas.js";
+import getUserSchema from "../../validations/userSchemas.js";
 
 const UserEdit = () => {
   const { userId } = useParams();

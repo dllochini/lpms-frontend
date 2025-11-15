@@ -1,12 +1,12 @@
 import { Typography, Box, Paper, Button, Breadcrumbs } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
-import { getUsers } from "../../api/user";
+import { getUsers } from "../../../api/user.js";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
-import LandRegistryDataGrid from "../../components/fieldOfficer/LandRegistryDataGrid";
-import { getLandsByFieldOfficerId } from "../../api/land.js";
+import LandRegistryDataGrid from "./LandRegistryDataGrid.jsx";
+import { getLandsByFieldOfficerId } from "../../../api/land.js";
 
 const LandRegistry = () => {
   const navigate = useNavigate();
