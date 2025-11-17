@@ -336,10 +336,12 @@ const TaskTable = ({ task = {}, onTaskStatusChange, onDeleteTask }) => {
         <Collapse in={expandedTaskId === taskKey} timeout="auto" unmountOnExit>
           <Box sx={{ mt: 2 }}>
             <WorkDoneGrid
-              workDones={workDones}
-              onDeleteRow={handleRequestDelete}
-              loading={creatingWorkDone || deletingWorkDone}
-            />
+  workDones={workDones}
+  onDeleteRow={handleRequestDelete}
+  loading={creatingWorkDone || deletingWorkDone}
+  disableDelete={statusValue === "sent for approval"} // <-- disable delete
+/>
+
 
             <Box
               sx={{
