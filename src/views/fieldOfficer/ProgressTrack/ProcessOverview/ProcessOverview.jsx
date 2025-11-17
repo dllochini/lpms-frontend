@@ -177,14 +177,6 @@ const ProcessOverview = ({ process, onDeleted }) => {
     String(currentBill?.status ?? "").toLowerCase() === "approved" &&
     (normalizedStatus === "approved" || (process?.status ?? "").toLowerCase() === "approved");
 
-  useEffect(() => {
-    const prev = prevShowApprovedRef.current;
-    if (showApprovedBill && !prev) {
-      setOpenBillPreview(true);
-    }
-    prevShowApprovedRef.current = showApprovedBill;
-  }, [showApprovedBill]);
-
   // ------------------ Handlers ------------------
   const requestDeleteTask = taskId => {
     setPendingDeleteId(taskId);
