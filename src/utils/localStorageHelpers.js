@@ -1,5 +1,3 @@
-// localStorageHelpers.js
-
 export const setWithExpiry = (key, value, ttl) => {
   const now = new Date();
   const item = { value, expiry: now.getTime() + ttl };

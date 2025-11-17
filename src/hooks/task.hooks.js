@@ -7,9 +7,6 @@ import {
   updateTaskById,
 } from "../api/task.js";
 
-// -------------------------------------------------------------
-// GET ALL TASKS
-// -------------------------------------------------------------
 export const useGetAllTasks = (options = {}) => {
   return useQuery({
     queryKey: ["task"],
@@ -18,9 +15,6 @@ export const useGetAllTasks = (options = {}) => {
   });
 };
 
-// -------------------------------------------------------------
-// GET TASKS BY FIELD OFFICER DIVISION
-// -------------------------------------------------------------
 export const useGetTasksByDiv = (userId, options = {}) =>
   useQuery({
     queryKey: ["fieldOfficerLands", userId],
@@ -29,23 +23,16 @@ export const useGetTasksByDiv = (userId, options = {}) =>
     ...options,
   });
 
-// -------------------------------------------------------------
-// CREATE TASK
-// -------------------------------------------------------------
-// in hooks/task.hooks.js
 export const useCreateTask = (options = {}) => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: createTask,
     onSuccess: (res, variables) => {
-      // Normalize axios-like responses
       const created = res && res.data ? res.data : res;
 
       queryClient.invalidateQueries(["task"]);
       queryClient.invalidateQueries(["fieldOfficerLands", variables?.userId]);
-
-      // call caller's onSuccess with normalized created object
       options.onSuccess && options.onSuccess(created, variables);
     },
     onError: (err) => {
@@ -53,11 +40,8 @@ export const useCreateTask = (options = {}) => {
     },
     ...options,
   });
-};  
+};
 
-// -------------------------------------------------------------
-// UPDATE TASK
-// -------------------------------------------------------------
 export const useUpdateTask = (options = {}) => {
   const queryClient = useQueryClient();
 
@@ -80,9 +64,6 @@ export const useUpdateTask = (options = {}) => {
   });
 };
 
-// -------------------------------------------------------------
-// DELETE TASK
-// -------------------------------------------------------------
 export const useDeleteTask = (options = {}) => {
   const queryClient = useQueryClient();
 
