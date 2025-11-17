@@ -20,7 +20,7 @@ import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { getUserById, getUsers } from "../../../../api/user.js";
+import { getFarmers, getUserById, getUsers } from "../../../../api/user.js";
 
 // Use your helpers
 import {
@@ -139,7 +139,8 @@ const LandRegistration1 = () => {
     const fetchFarmers = async () => {
       setFarmersLoading(true);
       try {
-        const res = await getUsers();
+        const res = await getFarmers();
+        console.log("Fetched farmers:", res.data);
         if (!canceled) setFarmers(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Failed to load farmers:", err);
