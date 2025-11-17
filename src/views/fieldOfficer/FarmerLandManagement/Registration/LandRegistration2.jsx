@@ -19,7 +19,6 @@ import FormStepper from "../CreateLandFormStepper.jsx";
 import { useNavigate } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { getDivisions } from "../../../../api/division.js";
 import { getUnits } from "../../../../api/unit.js";
 import * as yup from "yup";
 import {
@@ -27,33 +26,18 @@ import {
   getWithExpiry,
 } from "../../../../utils/localStorageHelpers.js";
 import { saveFile, getAllFiles } from "../../../../utils/db.js";
+import { getUserById } from "../../../../api/user.js";
 
 const FILE_KEY = "landRegForm2_file";
 
 const LandRegistration2 = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
-  const [divisions, setDivisions] = useState([]);
   const [landUnits, setLandUnits] = useState([]);
-
-  // const divisions = [
-  //   { value: "North", label: "North" },
-  //   { value: "South", label: "South" },
-  //   { value: "East", label: "East" },
-  //   { value: "West", label: "West" },
-  // ];
-
-  // const landUnits = [
-  //   { value: "Acre", label: "Acre" },
-  //   { value: "Hectare", label: "Hectare" },
-  //   { value: "Perch", label: "Perch" },
-  // ];
 
   // --- Validation schema ---
   const schema = yup.object({
-    division: yup.string().required("Select a division"),
     address: yup.string().required("Address is required"),
-    // language: yup.string().required("Language is required"),
     landSize: yup
       .number()
       .typeError("Enter a valid number")
@@ -66,18 +50,6 @@ const LandRegistration2 = () => {
   const savedWrapper = getWithExpiry("landRegForm2") || null;
 
   const fetchData = async () => {
-    try {
-      const resDivisions = await getDivisions();
-      setDivisions(
-        Array.isArray(resDivisions.data)
-          ? resDivisions.data
-          : resDivisions.data?.divisions || []
-      );
-    } catch (err) {
-      console.error("Error fetching divisions:", err);
-      setDivisions([]);
-    }
-
     try {
       const resUnits = await getUnits();
       setLandUnits(
@@ -123,9 +95,7 @@ const LandRegistration2 = () => {
     formState: { errors },
   } = useForm({
     defaultValues: savedWrapper?.data || {
-      division: "",
       address: "",
-      // language: "",
       landSize: "",
       landUnit: "",
       date: "",
@@ -153,30 +123,38 @@ const LandRegistration2 = () => {
 
   const onSubmit = async (data) => {
     try {
-      // Get the selected unit object
+      // Get selected unit object
       const selectedUnit = landUnits.find((u) => u._id === data.landUnit);
 
       if (!selectedUnit) {
-        console.error("No unit selected or invalid unit");
+        console.error("Invalid unit");
         return;
       }
 
-      // Build the payload with unit _id and size
+      // Get logged user
+      const loggedUserId = localStorage.getItem("loggedUserId") || "";
+      if (!loggedUserId) {
+        console.error("No logged user ID found");
+        return;
+      }
+
+      const user = await getUserById(loggedUserId);
+      const divisionId = user?.data?.division?._id;
+
+
+      // Build payload
       const payload = {
         ...data,
-        landUnit: selectedUnit._id, // send ID
-        size: selectedUnit.size, // send size for backend
+        landUnit: selectedUnit._id,
+        size: selectedUnit.size,
+        division: divisionId,
       };
-
       const fileKey = file ? "land_image" : null;
       if (file) {
         await saveFile(fileKey, file);
       }
 
-      setWithExpiry("landRegForm2", { data, fileKey }, 60 * 60 * 1000);
-
-      // Send payload to backend (example API call)
-      // await api.saveLand(payload);
+      setWithExpiry("landRegForm2", { payload, fileKey }, 60 * 60 * 1000);
 
       navigate("/fieldOfficer/landRegistration3");
     } catch (err) {
@@ -219,30 +197,6 @@ const LandRegistration2 = () => {
           <Divider sx={{ mb: 2 }} />
 
           <Grid container spacing={2}>
-            {/* Division */}
-            <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
-              <InputLabel sx={{ minWidth: 130 }}>Division :</InputLabel>
-              <Controller
-                name="division"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    size="small"
-                    sx={{ flex: 1 }}
-                    error={!!errors.division}
-                    helperText={errors.division?.message || " "}
-                  >
-                    {divisions.map((d) => (
-                      <MenuItem key={d._id} value={d._id}>
-                        {d.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
 
             {/* Address */}
             <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 }}>
@@ -261,24 +215,6 @@ const LandRegistration2 = () => {
                 )}
               />
             </Grid>
-
-            {/* Language */}
-            {/* <Grid size={{ xs: 12, md: 7 }} sx={{ display: "flex", gap: 1 }}>
-              <InputLabel sx={{ minWidth: 130 }}>Language :</InputLabel>
-              <Controller
-                name="language"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    size="small"
-                    sx={{ flex: 1 }}
-                    error={!!errors.language}
-                    helperText={errors.language?.message || " "}
-                  />
-                )}
-              />
-            </Grid> */}
 
             {/* Land Size + Unit */}
             <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
@@ -391,5 +327,6 @@ const LandRegistration2 = () => {
     </Box>
   );
 };
+
 
 export default LandRegistration2;

@@ -20,7 +20,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { getDivisions } from "../../../../api/division.js";
 import { getUnits } from "../../../../api/unit.js";
 import { getLandById, updateLandById } from "../../../../api/land.js";
 import {
@@ -36,12 +35,10 @@ const LandEdit2 = () => {
   const { landId } = useParams();
 
   const [file, setFile] = useState(null);
-  const [divisions, setDivisions] = useState([]);
   const [units, setUnits] = useState([]);
   const [farmerName, setFarmerName] = useState("");
 
   const schema = yup.object({
-    division: yup.string().required("Select a division"),
     address: yup.string().required("Address is required"),
     size: yup
       .number()
@@ -51,17 +48,6 @@ const LandEdit2 = () => {
   });
 
   const fetchData = async () => {
-    try {
-      const resDivisions = await getDivisions();
-      setDivisions(
-        Array.isArray(resDivisions.data)
-          ? resDivisions.data
-          : resDivisions.data?.divisions || []
-      );
-    } catch (err) {
-      console.error("Error fetching divisions:", err);
-      setDivisions([]);
-    }
 
     try {
       const resUnits = await getUnits();
@@ -87,7 +73,6 @@ const LandEdit2 = () => {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      division: "",
       address: "",
       size: "",
       unit: "",
@@ -104,7 +89,6 @@ const LandEdit2 = () => {
         const landData = res?.data || {};
         if (mounted) {
           reset({
-            division: landData.division?._id || "",
             address: landData.address || "",
             size: landData.size || "",
             unit: landData.unit?._id || "",
@@ -172,7 +156,6 @@ const LandEdit2 = () => {
     getLandById(landId).then((res) => {
       const landData = res?.data || {};
       reset({
-        division: landData.division?._id || "",
         address: landData.address || "",
         size: landData.size || "",
         unit: landData.unit?._id || "",
@@ -216,30 +199,6 @@ const LandEdit2 = () => {
           <Divider sx={{ mb: 2 }} />
 
           <Grid container spacing={2}>
-            {/* Division */}
-            <Grid size={{ xs: 12, md: 6 }} sx={{ display: "flex", gap: 1 }}>
-              <InputLabel sx={{ minWidth: 130 }}>Division :</InputLabel>
-              <Controller
-                name="division"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    size="small"
-                    sx={{ flex: 1 }}
-                    error={!!errors.division}
-                    helperText={errors.division?.message || " "}
-                  >
-                    {divisions.map((d) => (
-                      <MenuItem key={d._id} value={d._id}>
-                        {d.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
 
             {/* Address */}
             <Grid size={{ xs: 12 }} sx={{ display: "flex", gap: 1 }}>

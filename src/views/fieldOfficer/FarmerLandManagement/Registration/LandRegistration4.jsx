@@ -58,7 +58,9 @@ const LandRegistration4 = () => {
   const form2Wrapper = getWithExpiry("landRegForm2") || null; // Land info wrapper
 
   const form1 = form1Wrapper?.data || form1Wrapper || {};
-  const form2 = form2Wrapper?.data || form2Wrapper || {};
+  const form2 = form2Wrapper?.payload || {};
+
+  // console.log("Form2 data:", form2);
 
   const handleFinalSubmission = async () => {
     try {
@@ -115,18 +117,17 @@ const LandRegistration4 = () => {
         formData.append("signedAgreement", agreementFile, agreementFile.name);
       }
 
-      // Debug log
-      for (let [k, v] of formData.entries()) {
-        console.log("formData entry:", k, v);
+      for (let pair of formData.entries()) {
+        console.log(pair[0] + ": ", pair[1]);
       }
+      console.log("FORMDATA CONTENTS:");
+      for (let p of formData.entries()) console.log(p[0], p[1]);
 
       const res = await createUserLand(formData);
       console.log("Submission response:", res.data);
 
       setOpenSnackbar(true);
 
-      // cleanup local storage and optionally delete saved files from IndexedDB
-      // cleanup local storage and delete files referenced in filesMap
       localStorage.removeItem("landRegForm1");
       localStorage.removeItem("landRegForm2");
       localStorage.removeItem("landRegForm3");
