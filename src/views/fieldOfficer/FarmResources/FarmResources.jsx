@@ -15,7 +15,7 @@ import DataGrid from "./ResourceDataGrid";
 import ResourceDialog from "./ResourceDialogBox";
 import { getUnits } from "../../../api/unit";
 import { useGetResources } from "../../../hooks/resource.hook";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 /**
  * Optional helper hook — if you already have a useGetUnits hook,
@@ -28,7 +28,9 @@ const useGetUnits = () =>
     // keep previous data etc. as desired
   });
 
+
 export default function FarmResources() {
+  const queryClient = useQueryClient();
   const [formData, setFormData] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -50,10 +52,10 @@ export default function FarmResources() {
       Array.isArray(rawResources)
         ? rawResources
         : Array.isArray(rawResources?.data)
-        ? rawResources.data
-        : Array.isArray(rawResources?.resources)
-        ? rawResources.resources
-        : [];
+          ? rawResources.data
+          : Array.isArray(rawResources?.resources)
+            ? rawResources.resources
+            : [];
 
     // map/flatten to the shape your DataGrid expects (example fields — adapt to your grid)
     return arr.map((r) => ({
@@ -79,10 +81,10 @@ export default function FarmResources() {
       Array.isArray(rawUnits)
         ? rawUnits
         : Array.isArray(rawUnits?.data)
-        ? rawUnits.data
-        : Array.isArray(rawUnits?.units)
-        ? rawUnits.units
-        : [];
+          ? rawUnits.data
+          : Array.isArray(rawUnits?.units)
+            ? rawUnits.units
+            : [];
     return arr;
   }, [rawUnits]);
 
@@ -158,12 +160,9 @@ export default function FarmResources() {
           defaultValues={formData}
           categories={categories}
           units={units}
-          // onSuccess: you should refetch queries using react-query in real flow,
-          // but you asked to avoid effects — the dialog can call queryClient.invalidateQueries on success
-          // Here we simply close dialog; best practice: call queryClient.invalidateQueries(["resources"])
           onSuccess={() => {
+            queryClient.invalidateQueries(["resources"]);
             handleCloseDialog();
-            // ideally call queryClient.invalidateQueries(["resources"]) here
           }}
         />
       </Paper>
