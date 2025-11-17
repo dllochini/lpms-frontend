@@ -25,6 +25,7 @@ import { useGetOperations } from "../../../../hooks/operation.hook.js";
 import { useGetResources } from "../../../../hooks/resource.hook.js";
 import { useCreateBill, useGetBillByProcess } from "../../../../hooks/bill.hook.js";
 import BillDetailDialog from "./BillDetailDialog.jsx";
+import { useQueryClient } from "@tanstack/react-query";
 
 const defaultForm = {
   operation: "",
@@ -37,6 +38,8 @@ const defaultForm = {
 };
 
 const ProcessOverview = ({ process, onDeleted }) => {
+  const queryClient = useQueryClient();
+
   const { startedDate, endDate } = process || {};
 
   // Optimistic state
@@ -75,19 +78,21 @@ const ProcessOverview = ({ process, onDeleted }) => {
   });
 
   const { mutate: createTask, isLoading: creatingTask } = useCreateTask({
-    onSuccess: createdTask => {
+    onSuccess: (createdTask) => {
       if (optimisticRef.current) {
         setOptimisticAddedTasks(prev =>
-          prev.map(t => (t._id === optimisticRef.current ? createdTask : t))
+          prev.filter(t => t._id !== optimisticRef.current)
         );
         optimisticRef.current = null;
-      } else if (createdTask) {
-        setOptimisticAddedTasks(prev => [...prev, createdTask]);
       }
+
       setForm(defaultForm);
       setOpenDialog(false);
+
+      // ✅ AUTO-RELOAD process data
+      queryClient.invalidateQueries(["process", process._id]);
     },
-    onError: err => {
+    onError: (err) => {
       if (optimisticRef.current) {
         setOptimisticAddedTasks(prev =>
           prev.filter(t => t._id !== optimisticRef.current)
@@ -99,6 +104,7 @@ const ProcessOverview = ({ process, onDeleted }) => {
       console.error("Create task failed:", err);
     },
   });
+
 
   const { mutate: deleteTask, isLoading: deletingTask } = useDeleteTask();
   const { mutate: deleteProcess, isLoading: deletingProcess } = useDeleteProcess();

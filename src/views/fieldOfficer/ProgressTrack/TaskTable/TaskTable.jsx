@@ -144,19 +144,19 @@ const TaskTable = ({ task = {}, onTaskStatusChange, onDeleteTask }) => {
             return prev.map((w) =>
               w.id === optimisticRef.current
                 ? {
-                    id: created.id ?? created._id ?? w.id,
-                    startDate:
-                      created.startDate ?? payload.startDate ?? w.startDate,
-                    endDate: created.endDate ?? payload.endDate ?? w.endDate,
-                    newWork:
-                      created.newWork ??
-                      created.workDone ??
-                      payload.newWork ??
-                      w.newWork,
-                    notes:
-                      created.notes ?? created.note ?? payload.notes ?? w.notes,
-                    __raw: created,
-                  }
+                  id: created.id ?? created._id ?? w.id,
+                  startDate:
+                    created.startDate ?? payload.startDate ?? w.startDate,
+                  endDate: created.endDate ?? payload.endDate ?? w.endDate,
+                  newWork:
+                    created.newWork ??
+                    created.workDone ??
+                    payload.newWork ??
+                    w.newWork,
+                  notes:
+                    created.notes ?? created.note ?? payload.notes ?? w.notes,
+                  __raw: created,
+                }
                 : w
             );
           }
@@ -336,11 +336,11 @@ const TaskTable = ({ task = {}, onTaskStatusChange, onDeleteTask }) => {
         <Collapse in={expandedTaskId === taskKey} timeout="auto" unmountOnExit>
           <Box sx={{ mt: 2 }}>
             <WorkDoneGrid
-  workDones={workDones}
-  onDeleteRow={handleRequestDelete}
-  loading={creatingWorkDone || deletingWorkDone}
-  disableDelete={statusValue === "sent for approval"} // <-- disable delete
-/>
+              workDones={workDones}
+              onDeleteRow={handleRequestDelete}
+              loading={creatingWorkDone || deletingWorkDone}
+              disableDelete={statusValue === "sent for approval"} // <-- disable delete
+            />
 
 
             <Box
@@ -359,7 +359,7 @@ const TaskTable = ({ task = {}, onTaskStatusChange, onDeleteTask }) => {
                   width: "100%",
                 }}
               >
-                <Box sx={{ display: "flex", flex:1, justifyContent: "flex-start" }}>
+                <Box sx={{ display: "flex", flex: 1, justifyContent: "flex-start" }}>
                   <Button
                     variant="outlined"
                     color="error"
@@ -369,7 +369,7 @@ const TaskTable = ({ task = {}, onTaskStatusChange, onDeleteTask }) => {
                     Delete Operation
                   </Button>
                 </Box>
-                <Box sx={{ gap: 1, flex:1, display: "flex", justifyContent: "flex-end  " }}>
+                <Box sx={{ gap: 1, flex: 1, display: "flex", justifyContent: "flex-end  " }}>
                   <Button
                     variant="contained"
                     color="primary"
