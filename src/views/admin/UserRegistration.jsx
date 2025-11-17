@@ -46,7 +46,6 @@ const UserRegistration = () => {
     { value: "Rev.", label: "Rev." },
   ];
 
-  // Fetch roles
   const fetchRoles = async () => {
     try {
       const response = await getRoles();
@@ -61,7 +60,6 @@ const UserRegistration = () => {
     }
   };
 
-  // Fetch divisions
   const fetchDivisions = async () => {
     try {
       const response = await getDivisions();
@@ -81,7 +79,6 @@ const UserRegistration = () => {
     fetchDivisions();
   }, []);
 
-  // Dynamic validation schema based on roles
   const schema = useMemo(() => {
     if (!roles || roles.length === 0) return null;
     return getUserSchema(roles, { isEdit: true });

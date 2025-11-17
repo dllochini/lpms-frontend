@@ -51,7 +51,6 @@ const UserEdit = () => {
     { value: "Rev.", label: "Rev." },
   ];
 
-  // Fetch roles
   const fetchRoles = async () => {
     try {
       const response = await getRoles();
@@ -66,7 +65,6 @@ const UserEdit = () => {
     }
   };
 
-  // Fetch divisions
   const fetchDivisions = async () => {
     try {
       const response = await getDivisions();
@@ -86,7 +84,6 @@ const UserEdit = () => {
     fetchDivisions();
   }, []);
 
-  // Build validation schema after roles are loaded
   const schema = useMemo(() => {
     if (!roles || roles.length === 0) return null;
     return getUserSchema(roles, { isEdit: true });
@@ -102,7 +99,6 @@ const UserEdit = () => {
     resolver: schema ? yupResolver(schema) : undefined,
   });
 
-  // Fetch user data
   useEffect(() => {
     const fetchUserData = async () => {
       try {
