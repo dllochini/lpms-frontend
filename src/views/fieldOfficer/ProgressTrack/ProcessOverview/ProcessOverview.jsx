@@ -221,23 +221,24 @@ const ProcessOverview = ({ process, onDeleted }) => {
   const handleConfirmDeleteProcess = () => {
     if (!process?._id) return setDeleteProcessConfirmOpen(false);
 
-    setDeletedLocally(true);
     setDeleteProcessConfirmOpen(false);
 
     deleteProcess(
       { processId: process._id },
       {
         onSuccess: () => {
+          // mark it deleted only after server confirms
+          setDeletedLocally(true);
           if (onDeleted) onDeleted(process._id);
         },
         onError: () => {
-          setDeletedLocally(false);
           setErrorDialogMessage("Failed to delete process. Please try again.");
           setErrorDialogOpen(true);
         },
       }
     );
   };
+
 
   const handleProcessCompletion = () => {
     if (!process?._id) return;
