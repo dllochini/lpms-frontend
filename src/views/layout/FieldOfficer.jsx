@@ -1,4 +1,3 @@
-// views/Layout.jsx
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -55,7 +54,6 @@ const Layout = () => {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 
-  // Replace with real user from auth/context
   const [userName, setUserName] = useState("");
   const [role, setRole] = useState("");
 
@@ -64,17 +62,13 @@ const Layout = () => {
     setRole(localStorage.getItem("role") || "");
   }, []);
 
-  // tabs state (index) — derived from current route
   const [tabValue, setTabValue] = useState(0);
 
-  // user menu
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = Boolean(anchorEl);
 
-  // responsive drawer for small screens
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Map route -> tab index
   useEffect(() => {
     const idx = navItems.findIndex((n) => n.path === location.pathname);
     setTabValue(idx === -1 ? false : idx);
@@ -171,7 +165,7 @@ const Layout = () => {
         position="fixed"
         color="default"
         elevation={1}
-        sx={{ zIndex: (t) => t.zIndex.drawer + 1, borderRadius:0, }}
+        sx={{ zIndex: (t) => t.zIndex.drawer + 1, borderRadius: 0, }}
       >
         <Toolbar
           sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}

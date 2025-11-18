@@ -1,6 +1,5 @@
-// views/Layout.jsx
 import React, { useState, useEffect } from "react";
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -33,7 +32,6 @@ const drawerWidth = 260;
 
 const Layout = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 
@@ -133,7 +131,7 @@ const Layout = () => {
             />
           </Box>
 
-          <Box sx={{ flex: 1 }} /> {/* spacer instead of tabs */}
+          <Box sx={{ flex: 1 }} />
 
           <Box
             onClick={handleMenuOpen}
@@ -209,7 +207,7 @@ const Layout = () => {
       </Drawer>
 
       <Box component="main" sx={{ flex: 1, p: 3, bgcolor: "grey.50" }}>
-        <Toolbar /> {/* spacer for fixed AppBar */}
+        <Toolbar />
         <Outlet />
       </Box>
 

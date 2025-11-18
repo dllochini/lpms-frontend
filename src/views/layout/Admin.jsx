@@ -1,4 +1,3 @@
-// views/Layout.jsx
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -27,7 +26,7 @@ import {
 } from "@mui/icons-material";
 import companyLogo from "/images/CeylonSugarLogo.png";
 import { clearAuth } from "../../utils/auth";
-import {redirectProfileByRole} from "../../utils/redirectProfileByRole"
+import { redirectProfileByRole } from "../../utils/redirectProfileByRole"
 
 const drawerWidth = 260;
 
@@ -36,7 +35,6 @@ const Layout = () => {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 
-  // User info from localStorage
   const [userName, setUserName] = useState("");
   const [role, setRole] = useState("");
 
@@ -45,11 +43,9 @@ const Layout = () => {
     setRole(localStorage.getItem("role") || "");
   }, []);
 
-  // User menu
   const [anchorEl, setAnchorEl] = useState(null);
   const menuOpen = Boolean(anchorEl);
 
-  // Drawer state
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
@@ -92,7 +88,7 @@ const Layout = () => {
   return (
     <Box sx={{ display: "flex", minHeight: "100vh", flexDirection: "column" }}>
       {/* AppBar */}
-      <AppBar position="fixed" color="default" elevation={1} sx={{ zIndex: (t) => t.zIndex.drawer + 1, borderRadius:0, }}>
+      <AppBar position="fixed" color="default" elevation={1} sx={{ zIndex: (t) => t.zIndex.drawer + 1, borderRadius: 0, }}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between", gap: 2 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {!isMdUp && (
