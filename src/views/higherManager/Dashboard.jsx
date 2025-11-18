@@ -11,7 +11,6 @@ import {
   Alert,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-
 import Graph from "./Graph";
 import TaskSummary from "./TaskSummary";
 import { getHigherManagerDashboardCardInfo } from "../../api/higherManager";
@@ -54,7 +53,7 @@ export default function Dashboard() {
         setUserName(user.fullName || "");
         setRole(user.role?.name || "");
 
-        
+
         const divisionId = user.division?._id ?? user.division ?? null;
         setDivision(divisionId);
 
