@@ -1,4 +1,3 @@
-// App.jsx
 import "./App.css";
 import {
   BrowserRouter,
@@ -46,8 +45,6 @@ import LandEditPage4 from "./views/fieldOfficer/FarmerLandManagement/Edit/LandEd
 // Higher Manager
 import HigherManagerDashboard from "./views/higherManager/Dashboard";
 import HigherManagerLandProgress from "./views/higherManager/LandProgress";
-import HigherManagerLandProgressTracking from "./views/higherManager/LandProgressTracking";
-// import HigherManagerApprovePayments from "./views/higherManager/ApprovePayments";
 
 //Manager
 import Dashboard from "./views/manager/Dashboard/Dashboard";
