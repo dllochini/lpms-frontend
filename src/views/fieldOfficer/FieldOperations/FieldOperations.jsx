@@ -14,16 +14,14 @@ import {
   deleteOperationById,
 } from "../../../api/operation"; 
 
-import OperationDialog from "./OperationDialogBox"; // <-- import dialog
+import OperationDialog from "./OperationDialogBox";
 
 export default function FieldOperation() {
   const [responseData, setResponseData] = useState([]);
 
-  // Dialog state
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedRow, setSelectedRow] = useState(null);
 
-  // Fetch operations (already includes implements)
   const fetchData = async () => {
     const response = await getOperations();
     // console.log("operations :", response);
@@ -34,10 +32,9 @@ export default function FieldOperation() {
     fetchData();
   }, []);
 
-  // Delete handler
   const handleDelete = async (deletedOperationId) => {
     try {
-      await deleteOperationById(deletedOperationId); // only call once (parent)
+      await deleteOperationById(deletedOperationId);
       // console.log("Deleted operation ID:", deletedOperationId);
       setResponseData((prev) =>
         prev.filter((op) => op._id !== deletedOperationId)
@@ -83,7 +80,7 @@ export default function FieldOperation() {
       if (selectedRow) {
         const res = await updateOperationById(selectedRow._id, data);
         // console.log("Update response:", res);
-        updatedOrCreated = res.data; // adjust if your API wraps the object
+        updatedOrCreated = res.data;
         setResponseData((prev) =>
           prev.map((item) =>
             item._id === selectedRow._id ? updatedOrCreated : item
@@ -91,7 +88,7 @@ export default function FieldOperation() {
         );
       } else {
         const res = await createOperation(data);
-        updatedOrCreated = res.data; // adjust if needed
+        updatedOrCreated = res.data;
         setResponseData((prev) => [...prev, updatedOrCreated]);
       }
       handleCloseDialog();

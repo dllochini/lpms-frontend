@@ -13,19 +13,16 @@ import Alert from "@mui/material/Alert";
 import { useState } from "react";
 
 const BasicDataGrid = ({ data, onDelete, onEdit }) => {
-  // Delete dialog state
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedOperationName, setSelectedOperationName] = useState("");
 
-  // Snackbar state
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
 
-  // Delete handlers
   const handleDeleteClick = (id) => {
     const operation = data.find((u) => u._id === id);
     setSelectedOperationName(operation ? operation.name : "");
@@ -37,7 +34,7 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     if (selectedId) {
       try {
         if (onDelete) {
-          await onDelete(selectedId); // Call parent handler
+          await onDelete(selectedId);
         }
         setSnackbar({
           open: true,
@@ -66,7 +63,6 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Edit handler
   const handleEditClick = (id) => {
     const row = data.find((u) => u._id === id);
     if (onEdit && row) {
@@ -74,7 +70,6 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     }
   };
 
-  // Columns config
   const columns = [
     { field: "_id", headerName: "Operation ID", flex: 4 },
     {
@@ -82,16 +77,6 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
       headerName: "Operation Name",
       flex: 3,
     },
-    // {
-    //   field: "relatedMachines",
-    //   headerName: "Related Machines",
-    //   flex: 3,
-    // },
-    // {
-    //   field: "relatedImplements",
-    //   headerName: "Related Implements",
-    //   flex: 3,
-    // },
     {
       field: "note",
       headerName: "Note",
@@ -123,9 +108,9 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
 
   const rows = Array.isArray(data)
     ? data.map((row) => ({
-        id: row._id,
-        ...row,
-      }))
+      id: row._id,
+      ...row,
+    }))
     : [];
 
   return (

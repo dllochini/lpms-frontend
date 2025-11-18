@@ -1,4 +1,3 @@
-// src/components/Process/ProcessOverview.jsx
 import React, { useState, useMemo, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import {
@@ -7,7 +6,6 @@ import {
   Paper,
   Stack,
   Typography,
-  Divider,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -42,7 +40,6 @@ const ProcessOverview = ({ process, onDeleted }) => {
 
   const { startedDate, endDate } = process || {};
 
-  // Optimistic state
   const [optimisticAddedTasks, setOptimisticAddedTasks] = useState([]);
   const [optimisticDeletedIds, setOptimisticDeletedIds] = useState(new Set());
   const optimisticRef = useRef(null);
@@ -51,7 +48,6 @@ const ProcessOverview = ({ process, onDeleted }) => {
   const [form, setForm] = useState(defaultForm);
   const [localStatus, setLocalStatus] = useState(process?.status ?? "In Progress");
 
-  // Dialog states
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [deleteProcessConfirmOpen, setDeleteProcessConfirmOpen] = useState(false);
@@ -59,16 +55,13 @@ const ProcessOverview = ({ process, onDeleted }) => {
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   const [errorDialogMessage, setErrorDialogMessage] = useState("");
 
-  // Bill UI state
   const [currentBill, setCurrentBill] = useState(null);
   const [openBillPreview, setOpenBillPreview] = useState(false);
-  const prevShowApprovedRef = useRef(false); // used to auto-open dialog on transition
+  const prevShowApprovedRef = useRef(false);
 
-  // Operations & Resources
   const { data: operations = [], isLoading: loadingOperations } = useGetOperations();
   const { data: resources = [], isLoading: loadingResources } = useGetResources();
 
-  // Mutations
   const { mutate: updateProcessStatus, isLoading: updatingStatusLoading } = useUpdateProcessById({
     onSuccess: updatedProcess => {
       const newStatus = updatedProcess?.status ?? "Sent for Payment Approval";
@@ -89,7 +82,6 @@ const ProcessOverview = ({ process, onDeleted }) => {
       setForm(defaultForm);
       setOpenDialog(false);
 
-      // ✅ AUTO-RELOAD process data
       queryClient.invalidateQueries(["process", process._id]);
     },
     onError: (err) => {
@@ -109,7 +101,6 @@ const ProcessOverview = ({ process, onDeleted }) => {
   const { mutate: deleteTask, isLoading: deletingTask } = useDeleteTask();
   const { mutate: deleteProcess, isLoading: deletingProcess } = useDeleteProcess();
 
-  // Derived displayed tasks
   const displayedTasks = useMemo(() => {
     const serverTasks = process?.tasks ?? [];
     return [
@@ -129,15 +120,12 @@ const ProcessOverview = ({ process, onDeleted }) => {
 
   if (deletedLocally) return null;
 
-  // ------------------ Bill fetching / creation logic ------------------
-  // NOTE: ensure useGetBillByProcess supports (processId, options) or adapt accordingly.
   const {
     data: billFromServer,
     isLoading: loadingBill,
     refetch: refetchBill,
   } = useGetBillByProcess(process?._id, { enabled: !!process?._id });
 
-  // Normalize incoming bill(s) and pick the "approved" bill if present
   useEffect(() => {
     if (!billFromServer) {
       setCurrentBill(null);
@@ -159,7 +147,6 @@ const ProcessOverview = ({ process, onDeleted }) => {
     setCurrentBill(pick);
   }, [billFromServer]);
 
-  // createBill should set the bill on success so the UI is immediate.
   const { mutate: createBill } = useCreateBill({
     onSuccess: (data) => {
       if (data) setCurrentBill(data);
@@ -169,7 +156,6 @@ const ProcessOverview = ({ process, onDeleted }) => {
     },
   });
 
-  // When process -> approved, re-fetch bill (in case it was updated remotely)
   useEffect(() => {
     const isProcessApproved = normalizedStatus === "approved" || (process?.status ?? "").toLowerCase() === "approved";
     if (isProcessApproved && process?._id) {
@@ -177,13 +163,11 @@ const ProcessOverview = ({ process, onDeleted }) => {
     }
   }, [normalizedStatus, process?._id, refetchBill, process?.status]);
 
-  // Auto-open preview dialog when preview becomes available (transition detection)
   const showApprovedBill =
     currentBill &&
     String(currentBill?.status ?? "").toLowerCase() === "approved" &&
     (normalizedStatus === "approved" || (process?.status ?? "").toLowerCase() === "approved");
 
-  // ------------------ Handlers ------------------
   const requestDeleteTask = taskId => {
     setPendingDeleteId(taskId);
     setDeleteConfirmOpen(true);
@@ -225,7 +209,7 @@ const ProcessOverview = ({ process, onDeleted }) => {
       { processId: process._id },
       {
         onSuccess: () => {
-          // mark it deleted only after server confirms
+
           setDeletedLocally(true);
           if (onDeleted) onDeleted(process._id);
         },

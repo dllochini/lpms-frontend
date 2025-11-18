@@ -15,7 +15,7 @@ export default function AssignedLandProgress() {
 
   const { data: foLandData = [], isLoading } = useGetFieldOfficerLands(localStorage.getItem("loggedUserId"), {
     onSuccess: (data) => {
-      console.log("Lands for field officer:", data);
+      // console.log("Lands for field officer:", data);
     },
     onError: (error) => {
       console.error("Failed to fetch lands for field officer", error);
@@ -24,7 +24,7 @@ export default function AssignedLandProgress() {
 
   const { data: taskData = [], isLoading: isLoadingTasks } = useGetAllTasks(localStorage.getItem("loggedUserId"), {
     onSuccess: (data) => {
-      console.log("All tasks data:", data);
+      // console.log("All tasks data:", data);
     },
     onError: (error) => {
       console.error("Failed to fetch all tasks", error);
@@ -33,7 +33,7 @@ export default function AssignedLandProgress() {
 
   const { data: workDoneData = [], isLoading: isLoadingWorkDone } = useGetAllWorkDone({
     onSuccess: (data) => {
-      console.log("All work done data:", data);
+      // console.log("All work done data:", data);
     },
     onError: (error) => {
       console.error("Failed to fetch all work done data", error);
@@ -43,11 +43,9 @@ export default function AssignedLandProgress() {
   const lands = useMemo(() => {
     if (!Array.isArray(foLandData) || !Array.isArray(taskData)) return [];
     return foLandData.map((land) => {
-      // Find tasks for this land
       const tasksForLand = taskData.filter((task) => task?.process?.land === land._id).sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
       const currentTask = tasksForLand?.[0] ?? null;
-      // current task workdone
-      console.log("all workdone data:", workDoneData);
+      // console.log("all workdone data:", workDoneData);
 
       return {
         _id: land._id,

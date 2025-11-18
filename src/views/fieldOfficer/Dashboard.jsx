@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 
-// API functions
 import { getFieldOfficerDashboardCardInfo } from "../../api/fieldOfficer";
 import { getUserById } from "../../api/user";
 
@@ -37,19 +36,16 @@ export default function FieldOfficerDashboard() {
         const loggedUserId = localStorage.getItem("loggedUserId") || "";
         if (!loggedUserId) return;
 
-        // Fetch user info
         const userRes = await getUserById(loggedUserId);
         const user = userRes.data;
         setUserName(user.fullName || "");
 
-        // Get division ID
         const divisionId = user.division?._id || "";
         if (!divisionId) {
           console.warn("No division assigned");
           return;
         }
 
-        // Fetch Field Officer dashboard info by divisionId
         const res = await getFieldOfficerDashboardCardInfo(divisionId);
         const data = res.data;
 

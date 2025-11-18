@@ -36,7 +36,6 @@ const LandEdit4 = () => {
         const res = await getLandById(landId);
         setLand(res.data);
 
-        // Load existing agreement
         if (res.data.signedAgreement) {
           setExistingAgreement(res.data.signedAgreement);
         } else if (res.data.documents && res.data.documents.length) {
@@ -60,13 +59,12 @@ const LandEdit4 = () => {
       setLoading(true);
       const formData = new FormData();
 
-      // Append agreement if a new file is uploaded
       if (agreementFile) {
         formData.append("signedAgreement", agreementFile, agreementFile.name);
       }
 
       const res = await updateLandById(landId, formData);
-      console.log("Update response:", res.data);
+      // console.log("Update response:", res.data);
       setOpenSnackbar(true);
       setTimeout(() => navigate("/fieldOfficer/landRegistry"), 1500);
     } catch (err) {

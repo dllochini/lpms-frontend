@@ -1,4 +1,3 @@
-// File: LandRegistration3.jsx
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -13,12 +12,10 @@ import {
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import FormStepper from "../CreateLandFormStepper.jsx";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { saveFile, getAllFiles, deleteFile } from "../../../../utils/db.js";
-import {
-  getWithExpiry,
-  setWithExpiry,
-} from "../../../../utils/localStorageHelpers.js";
+import { getWithExpiry, setWithExpiry } from "../../../../utils/localStorageHelpers.js";
+import { getLandById } from "../../../../api/land.js"; // Optional: fetch existing data
 
 const FILE_KEYS = {
   titleDeed: "titleDeed_file",
@@ -48,33 +45,45 @@ const documentFields = [
 
 const LandRegistration3 = () => {
   const navigate = useNavigate();
+  const { landId } = useParams();
   const [files, setFiles] = useState({});
 
-  // Load files from IndexedDB on mount
   useEffect(() => {
     const loadFiles = async () => {
       try {
+        // IndexedDB stored files
         const storedFiles = await getAllFiles();
         setFiles(storedFiles || {});
+
+        // Optional: fetch existing land docs from backend (for edit scenario)
+        if (landId) {
+          const res = await getLandById(landId);
+          const landData = res?.data;
+          if (landData?.documents) {
+            const existingFiles = {};
+            landData.documents.forEach(doc => {
+              const key = FILE_KEYS[doc.name];
+              existingFiles[key] = doc.url; // store URL for display
+            });
+            setFiles(prev => ({ ...prev, ...existingFiles }));
+          }
+        }
       } catch (err) {
-        console.error("Failed to load files from IndexedDB:", err);
+        console.error("Failed to load files:", err);
       }
     };
     loadFiles();
-  }, []);
+  }, [landId]);
 
-  // Save file and store reference with expiry
   const handleFileChange = async (name, file) => {
     if (!file) return;
     const key = FILE_KEYS[name];
 
-    // update UI state
-    setFiles((prev) => ({ ...prev, [key]: file }));
+    setFiles(prev => ({ ...prev, [key]: file }));
 
     try {
       await saveFile(key, file);
 
-      // keep track of multiple files
       const existing = getWithExpiry("landRegForm3") || {};
       const newFiles = { ...(existing.files || {}), [name]: key };
 
@@ -88,25 +97,13 @@ const LandRegistration3 = () => {
     }
   };
 
-  // Optional: cleanup expired files
-  useEffect(() => {
-    const cleanupExpiredFiles = async () => {
-      const expired = !getWithExpiry("landRegForm3");
-      if (expired) {
-        for (const key of Object.values(FILE_KEYS)) {
-          await deleteFile(key);
-        }
-        setFiles({});
-      }
-    };
-    cleanupExpiredFiles();
-  }, []);
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Ensure all required documents are uploaded (use FILE_KEYS)
-    const missing = documentFields.filter((doc) => !files[FILE_KEYS[doc.name]]);
+    const missing = documentFields.filter(
+      (doc) => !files[FILE_KEYS[doc.name]]
+    );
+
     if (missing.length) {
       alert(
         `Please upload all required documents: ${missing
@@ -116,7 +113,6 @@ const LandRegistration3 = () => {
       return;
     }
 
-    // Navigate to next step
     navigate("/fieldOfficer/landRegistration4");
   };
 
@@ -126,9 +122,7 @@ const LandRegistration3 = () => {
         <Typography variant="h5" gutterBottom>
           Farmer and Land Registration
         </Typography>
-
         <FormStepper activeStep={2} />
-
         <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
           <Link underline="hover" color="inherit" href="/">
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
@@ -138,57 +132,40 @@ const LandRegistration3 = () => {
         </Breadcrumbs>
       </Box>
 
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ display: "flex", justifyContent: "center", mb: 3 }}
-      >
-        <Paper
-          elevation={5}
-          sx={{ maxWidth: "70%", mx: "auto", px: 10, py: 5, borderRadius: 5 }}
-        >
+      <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+        <Paper elevation={5} sx={{ maxWidth: "70%", mx: "auto", px: 10, py: 5, borderRadius: 5 }}>
           <Typography variant="h6" gutterBottom>
             Document Upload
           </Typography>
           <Divider sx={{ mb: 2 }} />
 
           <Grid container spacing={2} direction="column">
-            {documentFields.map((doc) => (
-              <Grid
-                key={doc.name}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 2,
-                  width: "100%",
-                }}
-              >
-                <Typography sx={{ minWidth: 280 }}>{doc.label}</Typography>
-                <Button
-                  component="label"
-                  variant="outlined"
-                  startIcon={<UploadFileIcon />}
-                  sx={{ flex: 1, textAlign: "left" }}
-                >
-                  {files[FILE_KEYS[doc.name]]?.name || "Link or drag and drop"}
-                  <input
-                    type="file"
-                    hidden
-                    accept=".jpg,.jpeg,.png,.pdf"
-                    onChange={(e) =>
-                      handleFileChange(doc.name, e.target.files[0])
-                    }
-                  />
-                </Button>
-              </Grid>
-            ))}
+            {documentFields.map((doc) => {
+              const key = FILE_KEYS[doc.name];
+              const file = files[key];
+              const fileName = file?.name || (typeof file === "string" ? file.split("/").pop() : "Upload / Replace");
+
+              return (
+                <Grid key={doc.name} sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
+                  <Typography sx={{ minWidth: 280 }}>{doc.label}</Typography>
+
+                  <Button component="label" variant="outlined" startIcon={<UploadFileIcon />} sx={{ flex: 1, textAlign: "left" }}>
+                    {fileName}
+                    <input type="file" hidden accept=".jpg,.jpeg,.png,.pdf" onChange={(e) => handleFileChange(doc.name, e.target.files[0])} />
+                  </Button>
+
+                  {file && typeof file === "string" && (
+                    <a href={file} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 10, fontSize: "0.8rem" }}>
+                      View
+                    </a>
+                  )}
+                </Grid>
+              );
+            })}
           </Grid>
 
           <Box sx={{ display: "flex", gap: 2, mt: 4 }}>
-            <Button
-              variant="outlined"
-              onClick={() => navigate("/fieldOfficer/landRegistration2")}
-            >
+            <Button variant="outlined" onClick={() => navigate("/fieldOfficer/landRegistration2")}>
               Back
             </Button>
 

@@ -15,13 +15,12 @@ import { deleteLandById } from "../../../api/land";
 import { useNavigate } from "react-router-dom";
 
 const LandRegistryDataGrid = ({ data, onDelete }) => {
-  console.log("Data in LandRegistryDataGrid:", data);
+  // console.log("Data in LandRegistryDataGrid:", data);
   const navigate = useNavigate();
-  // Dialog state
+
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -121,16 +120,16 @@ const LandRegistryDataGrid = ({ data, onDelete }) => {
 
   const rows = Array.isArray(data)
     ? data.map((land) => ({
-        id: land._id, // ✅ From backend
-        farmer: land.farmer?.fullName || land.user?.fullName || "N/A",
-        contactNo:
-          land.farmer?.contactNo ||
-          land.farmer?.contact_no ||
-          land.user?.contact_no ||
-          "N/A",
-        address: land.address || land.location || "N/A",
-        area: `${land.size} ${land.unit?.symbol || ""}`,
-      }))
+      id: land._id,
+      farmer: land.farmer?.fullName || land.user?.fullName || "N/A",
+      contactNo:
+        land.farmer?.contactNo ||
+        land.farmer?.contact_no ||
+        land.user?.contact_no ||
+        "N/A",
+      address: land.address || land.location || "N/A",
+      area: `${land.size} ${land.unit?.symbol || ""}`,
+    }))
     : [];
 
   return (

@@ -22,12 +22,11 @@ import * as yup from "yup";
 import { getUserById, updateUserById } from "../../../../api/user.js";
 import { getLandById } from "../../../../api/land.js";
 
-// Use your helpers
 import {
   getWithExpiry,
   setWithExpiry,
 } from "../../../../utils/localStorageHelpers.js";
-import { saveFile, getAllFiles } from "../../../../utils/db.js"; // matches your db.js
+import { saveFile, getAllFiles } from "../../../../utils/db.js";
 
 const FILE_KEY = "landEditForm1_file";
 
@@ -79,7 +78,6 @@ const LandEdit1 = () => {
   const {
     control,
     handleSubmit,
-    getValues,
     reset,
     formState: { errors },
   } = useForm({
@@ -87,7 +85,6 @@ const LandEdit1 = () => {
     resolver: yupResolver(schema),
   });
 
-  // --- fetch land to get farmerId ---
   useEffect(() => {
     let mounted = true;
     const fetchLandData = async () => {
@@ -104,7 +101,6 @@ const LandEdit1 = () => {
     return () => (mounted = false);
   }, [landId]);
 
-  // --- load farmer data ---
   useEffect(() => {
     if (!farmerId) return;
     let mounted = true;
@@ -141,7 +137,6 @@ const LandEdit1 = () => {
     return () => (mounted = false);
   }, [farmerId, reset, file]);
 
-  // --- load file from IndexedDB ---
   useEffect(() => {
     let mounted = true;
     const loadFile = async () => {
@@ -164,14 +159,13 @@ const LandEdit1 = () => {
     return () => (mounted = false);
   }, []);
 
-  // --- protect snapshot & BFCache ---
   useEffect(() => {
     const ensureSnapshotMatches = () => {
       const stored = getWithExpiry("landEditForm1");
       if (stored?.farmerId && farmerId && stored.farmerId !== farmerId) {
         try {
           localStorage.removeItem("landEditForm1");
-        } catch {}
+        } catch { }
         reset(initialValuesRef.current || emptyDefaults);
         setFile(initialFileRef.current || null);
       }
@@ -185,7 +179,6 @@ const LandEdit1 = () => {
     };
   }, [farmerId, reset]);
 
-  // --- handle file upload ---
   const handleFileChange = async (fileObj) => {
     if (!fileObj) return;
     setFile(fileObj);
@@ -210,7 +203,6 @@ const LandEdit1 = () => {
     }
   };
 
-  // --- SAVE & NEXT ---
   const handleSaveAndNext = handleSubmit(async (data) => {
     setBusy(true);
     try {

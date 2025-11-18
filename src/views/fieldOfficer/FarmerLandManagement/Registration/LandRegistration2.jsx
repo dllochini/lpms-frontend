@@ -1,4 +1,3 @@
-// File: LandRegistration2.jsx
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -21,10 +20,7 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { getUnits } from "../../../../api/unit.js";
 import * as yup from "yup";
-import {
-  setWithExpiry,
-  getWithExpiry,
-} from "../../../../utils/localStorageHelpers.js";
+import { setWithExpiry, getWithExpiry } from "../../../../utils/localStorageHelpers.js";
 import { saveFile, getAllFiles } from "../../../../utils/db.js";
 import { getUserById } from "../../../../api/user.js";
 
@@ -35,7 +31,6 @@ const LandRegistration2 = () => {
   const [file, setFile] = useState(null);
   const [landUnits, setLandUnits] = useState([]);
 
-  // --- Validation schema ---
   const schema = yup.object({
     address: yup.string().required("Address is required"),
     landSize: yup
@@ -46,7 +41,6 @@ const LandRegistration2 = () => {
     date: yup.string().required("Date of registration is required"),
   });
 
-  // Read saved wrapper object { data: {...}, fileKey: 'land_image' }
   const savedWrapper = getWithExpiry("landRegForm2") || null;
 
   const fetchData = async () => {
@@ -76,19 +70,17 @@ const LandRegistration2 = () => {
         await saveFile(FILE_KEY, fileObj);
       }
 
-      // Update the stored form reference (preserve existing data if any)
       const existing = getWithExpiry("landRegForm2") || {};
       setWithExpiry(
         "landRegForm2",
         { ...(existing || {}), data: existing.data || {}, fileKey: FILE_KEY },
-        30 * 60 * 1000 // 30 min expiry
+        30 * 60 * 1000
       );
     } catch (err) {
       console.error("Failed to save file to IndexedDB:", err);
     }
   };
 
-  // --- Use react-hook-form ---
   const {
     control,
     handleSubmit,
@@ -103,7 +95,6 @@ const LandRegistration2 = () => {
     resolver: yupResolver(schema),
   });
 
-  // --- Prefill file if stored (load from IndexedDB using getAllFiles) ---
   useEffect(() => {
     const loadFile = async () => {
       try {
@@ -123,7 +114,6 @@ const LandRegistration2 = () => {
 
   const onSubmit = async (data) => {
     try {
-      // Get selected unit object
       const selectedUnit = landUnits.find((u) => u._id === data.landUnit);
 
       if (!selectedUnit) {
@@ -131,7 +121,6 @@ const LandRegistration2 = () => {
         return;
       }
 
-      // Get logged user
       const loggedUserId = localStorage.getItem("loggedUserId") || "";
       if (!loggedUserId) {
         console.error("No logged user ID found");
@@ -141,8 +130,6 @@ const LandRegistration2 = () => {
       const user = await getUserById(loggedUserId);
       const divisionId = user?.data?.division?._id;
 
-
-      // Build payload
       const payload = {
         ...data,
         landUnit: selectedUnit._id,

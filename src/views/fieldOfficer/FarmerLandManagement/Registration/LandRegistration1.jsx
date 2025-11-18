@@ -22,12 +22,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { getFarmers, getUserById, getUsers } from "../../../../api/user.js";
 
-// Use your helpers
-import {
-  getWithExpiry,
-  setWithExpiry,
-} from "../../../../utils/localStorageHelpers.js";
-import { saveFile, getAllFiles, deleteFile } from "../../../../utils/db.js"; // matches your db.js
+import { getWithExpiry, setWithExpiry } from "../../../../utils/localStorageHelpers.js";
+import { saveFile, getAllFiles, deleteFile } from "../../../../utils/db.js";
 
 const FILE_KEY = "landRegForm1_file";
 
@@ -45,7 +41,6 @@ const LandRegistration1 = () => {
     { value: "Rev", label: "Rev" },
   ];
 
-  // Validation schema
   const schema = yup.object({
     designation: yup.string().required("Choose a designation"),
     fullName: yup.string().required("Full name is required"),
@@ -60,7 +55,6 @@ const LandRegistration1 = () => {
     branch: yup.string().required("Branch is required"),
   });
 
-  // Use saved values if present (note: this must remain synchronous for useForm)
   const savedForm = getWithExpiry("landRegForm1") || null;
 
   const {
@@ -86,7 +80,6 @@ const LandRegistration1 = () => {
   useEffect(() => {
     const stored = getWithExpiry("landRegForm1");
     if (!stored) {
-      // clear react-hook-form state
       reset({
         designation: "",
         fullName: "",
@@ -97,21 +90,13 @@ const LandRegistration1 = () => {
         bank: "",
         branch: "",
       });
-      // clear uploaded file preview in UI
       setFile(null);
-
-      // optionally delete the stored indexedDB file key to be safe
-      // (no need to await, it's best-effort)
       if (typeof deleteFile === "function") {
         deleteFile(FILE_KEY).catch(() => {
-          /* ignore */
         });
       }
     }
-    // run once on mount
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  // Load previously uploaded file from IndexedDB (async) using getAllFiles()
   useEffect(() => {
     let mounted = true;
     const loadFile = async () => {
@@ -119,7 +104,7 @@ const LandRegistration1 = () => {
         const stored = getWithExpiry("landRegForm1");
         const desiredKey = stored?.fileKey || FILE_KEY;
         if (typeof getAllFiles === "function") {
-          const files = await getAllFiles(); // returns an object { key: file }
+          const files = await getAllFiles();
           const f = files[desiredKey] || files[FILE_KEY] || null;
           if (mounted && f) setFile(f);
         }
@@ -131,16 +116,13 @@ const LandRegistration1 = () => {
     return () => (mounted = false);
   }, []);
 
-  // If localStorage snapshot was removed, clear form + file state
-
-  // Fetch farmers
   useEffect(() => {
     let canceled = false;
     const fetchFarmers = async () => {
       setFarmersLoading(true);
       try {
         const res = await getFarmers();
-        console.log("Fetched farmers:", res.data);
+        // console.log("Fetched farmers:", res.data);
         if (!canceled) setFarmers(Array.isArray(res.data) ? res.data : []);
       } catch (err) {
         console.error("Failed to load farmers:", err);
@@ -152,7 +134,6 @@ const LandRegistration1 = () => {
     return () => (canceled = true);
   }, []);
 
-  // Handle farmer search
   const handleSearchFarmer = async () => {
     if (!selectedFarmer?._id) return;
     try {
@@ -170,8 +151,6 @@ const LandRegistration1 = () => {
       ];
       fields.forEach((f) => setValue(f, farmerData[f] ?? ""));
 
-      // Persist into your localStorage helper. We store the form data under a single key
-      // and keep the file in IndexedDB (referenced by fileKey) to avoid serializing binaries.
       setWithExpiry(
         "landRegForm1",
         {
@@ -190,7 +169,6 @@ const LandRegistration1 = () => {
     }
   };
 
-  // Save file to IndexedDB helper (and update local state + localStorage reference)
   const handleFileChange = async (fileObj) => {
     if (!fileObj) return;
     setFile(fileObj);
@@ -203,7 +181,6 @@ const LandRegistration1 = () => {
         );
       }
 
-      // Update the stored form reference (preserve existing data if any)
       const existing = getWithExpiry("landRegForm1") || {};
       setWithExpiry(
         "landRegForm1",
@@ -215,7 +192,6 @@ const LandRegistration1 = () => {
     }
   };
 
-  // Handle form submit
   const onSubmit = async (data) => {
     try {
       if (file && typeof saveFile === "function") {
@@ -227,11 +203,6 @@ const LandRegistration1 = () => {
         { data, fileKey: file ? FILE_KEY : undefined },
         30 * 60 * 1000
       );
-
-      // Clear file from IndexedDB after submission
-      // if (typeof deleteFile === "function") {
-      //   await deleteFile(FILE_KEY);
-      // }
 
       navigate("/fieldOfficer/landRegistration2");
     } catch (err) {

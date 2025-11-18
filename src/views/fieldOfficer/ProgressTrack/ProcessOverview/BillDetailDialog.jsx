@@ -14,7 +14,6 @@ const currency = (val) => Number(val ?? 0).toLocaleString(undefined, { minimumFr
 const formatDate = (iso) => { try { return iso ? new Date(iso).toLocaleDateString() : "-"; } catch { return "-"; } };
 
 const BillDetailDialog = ({ open, onClose, bill }) => {
-  // hooks always at top
   const [expanded, setExpanded] = useState({});
 
   const taskSubTotals = useMemo(
@@ -37,7 +36,6 @@ const BillDetailDialog = ({ open, onClose, bill }) => {
     return map;
   }, [workdoneList]);
 
-  // totals
   const subtotalSum = useMemo(
     () => taskSubTotals.reduce((s, t) => s + Number(t.subtotal ?? 0), 0),
     [taskSubTotals]
@@ -51,7 +49,6 @@ const BillDetailDialog = ({ open, onClose, bill }) => {
     setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   }, []);
 
-  // CSV export
   const handleExportCSV = useCallback(() => {
     const rows = [["Operation", "Resource", "Unit", "Unit Price", "WorkDone", "Subtotal (LKR)"]];
     taskSubTotals.forEach((t, idx) => {
@@ -64,7 +61,7 @@ const BillDetailDialog = ({ open, onClose, bill }) => {
       const workTotal = wdEntries.reduce((sum, wd) => sum + Number(wd.workDone?.newWork ?? 0), 0);
       rows.push([operationName, resource.name ?? "-", unit.name ?? unit.symbol ?? "-", currency(resource.unitPrice), workTotal, currency(t.subtotal)]);
     });
-    // generate CSV
+
     const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -77,7 +74,6 @@ const BillDetailDialog = ({ open, onClose, bill }) => {
     URL.revokeObjectURL(url);
   }, [taskSubTotals, workdoneMap, bill]);
 
-  // Print (simple): open new window with minimal content
   const handlePrint = useCallback(() => {
     const printWindow = window.open("", "_blank");
     if (!printWindow) return;
@@ -105,14 +101,12 @@ const BillDetailDialog = ({ open, onClose, bill }) => {
     printWindow.document.write(html);
     printWindow.document.close();
     printWindow.focus();
-    // give the new window a moment to render
+
     setTimeout(() => { printWindow.print(); printWindow.close(); }, 300);
   }, [taskSubTotals, workdoneMap, bill]);
 
-  // Dialog title id for aria
   const dialogTitleId = "bill-detail-dialog-title";
 
-  // If `bill` is missing, show a lightweight skeleton inside the same dialog
   const isLoading = !bill;
 
   const process = bill?.process ?? {};

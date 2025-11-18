@@ -1,7 +1,6 @@
 import { Typography, Box, Paper, Button, Breadcrumbs } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
-import { getUsers } from "../../../api/user.js";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
@@ -19,9 +18,9 @@ const LandRegistry = () => {
   }, []);
 
   const fetchData = async function () {
-    console.log("Fetching lands for Field Officer ID:", loggedUserId);
+    // console.log("Fetching lands for Field Officer ID:", loggedUserId);
     const response = await getLandsByFieldOfficerId(loggedUserId);
-    console.log("API lands:", response);
+    //console.log("API lands:", response);
     setResponseData(response ?? []);
   };
 

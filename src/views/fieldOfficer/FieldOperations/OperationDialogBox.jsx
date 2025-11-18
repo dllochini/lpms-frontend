@@ -32,7 +32,6 @@ export default function OperationDialog({
     severity: "success",
   });
 
-  // Reset form when data changes
   React.useEffect(() => {
     reset(
       initialData || {
@@ -44,7 +43,7 @@ export default function OperationDialog({
 
   const handleFormSubmit = async (data) => {
     try {
-      await onSubmit(data); // call parent submit function
+      await onSubmit(data);
       setSnackbar({
         open: true,
         message: initialData

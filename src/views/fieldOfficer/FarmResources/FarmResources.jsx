@@ -17,15 +17,10 @@ import { getUnits } from "../../../api/unit";
 import { useGetResources } from "../../../hooks/resource.hook";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-/**
- * Optional helper hook — if you already have a useGetUnits hook,
- * replace the call below with that.
- */
 const useGetUnits = () =>
   useQuery({
     queryKey: ["units"],
     queryFn: () => getUnits(),
-    // keep previous data etc. as desired
   });
 
 
@@ -34,19 +29,11 @@ export default function FarmResources() {
   const [formData, setFormData] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
 
-  // use your existing hook for resources
-  // NOTE: your hook's return shape may be either an array or an object { success, count, data }
   const { data: rawResources, isLoading: loadingResources, error: resourcesError } =
     useGetResources();
 
-  // units via useQuery (or useGetUnits)
   const { data: rawUnits, isLoading: loadingUnits, error: unitsError } = useGetUnits();
 
-  // Normalize resources into a flat array that your DataGrid expects
-  // We guard for multiple possible response shapes:
-  //  - array directly
-  //  - { data: [...] }
-  //  - { resources: [...] }
   const formattedResources = useMemo(() => {
     const arr =
       Array.isArray(rawResources)
@@ -57,25 +44,21 @@ export default function FarmResources() {
             ? rawResources.resources
             : [];
 
-    // map/flatten to the shape your DataGrid expects (example fields — adapt to your grid)
     return arr.map((r) => ({
       _id: r._id,
       name: r.name,
       category: r.category,
-      unit: r.unit, // may be id or populated object
+      unit: r.unit,
       qty: r.quantity ?? r.qty ?? 0,
-      // keep original full object if needed
       __raw: r,
     }));
   }, [rawResources]);
 
-  // categories derived from formattedResources
   const categories = useMemo(() => {
     const set = new Set(formattedResources.map((r) => r.category).filter(Boolean));
     return Array.from(set);
   }, [formattedResources]);
 
-  // Normalize units (guarding for possible response shapes)
   const units = useMemo(() => {
     const arr =
       Array.isArray(rawUnits)
@@ -88,7 +71,6 @@ export default function FarmResources() {
     return arr;
   }, [rawUnits]);
 
-  // Dialog handlers
   const handleOpenDialog = () => {
     setFormData({});
     setOpenDialog(true);
@@ -96,16 +78,14 @@ export default function FarmResources() {
   const handleCloseDialog = () => setOpenDialog(false);
 
   const handleDelete = (deletedId) => {
-    console.log("delete", deletedId);
+    // console.log("delete", deletedId);
   };
 
   const handleEditResource = (resource) => {
-    // resource can be the full raw object or formatted row
     setFormData(resource.__raw ?? resource);
     setOpenDialog(true);
   };
 
-  // Loading & error states
   const isLoading = loadingResources || loadingUnits;
   const isError = resourcesError || unitsError;
 

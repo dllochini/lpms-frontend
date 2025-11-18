@@ -22,11 +22,11 @@ const WorkDoneGrid = ({ workDones = [], onDeleteRow, loading = false, disableDel
       headerAlign: "center",
       renderCell: (params) => (
         <IconButton
-  onClick={() => onDeleteRow(row)}
-  disabled={disableDelete || loading} // disable if prop is true
->
-  <DeleteIcon />
-</IconButton>
+          onClick={() => onDeleteRow(row)}
+          disabled={disableDelete || loading}
+        >
+          <DeleteIcon />
+        </IconButton>
 
       ),
     },

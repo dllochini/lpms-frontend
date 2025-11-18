@@ -1,4 +1,3 @@
-// File: LandEdit2.jsx
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -22,10 +21,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { getUnits } from "../../../../api/unit.js";
 import { getLandById, updateLandById } from "../../../../api/land.js";
-import {
-  getWithExpiry,
-  setWithExpiry,
-} from "../../../../utils/localStorageHelpers.js";
+import { setWithExpiry } from "../../../../utils/localStorageHelpers.js";
 import { saveFile, getAllFiles } from "../../../../utils/db.js";
 
 const FILE_KEY = "landEdit2_file";
@@ -134,7 +130,7 @@ const LandEdit2 = () => {
         unit: selectedUnit._id,
       };
 
-      console.log("Submitting data:", payload);
+      // console.log("Submitting data:", payload);
 
       if (file) await saveFile(FILE_KEY, file);
 
