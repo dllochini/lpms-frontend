@@ -1,4 +1,3 @@
-// src/components/AddOperationDialog.jsx
 import React from "react";
 import PropTypes from "prop-types";
 import {
@@ -29,8 +28,8 @@ const AddOperationDialog = ({
   anySentForApproval,
 }) => {
 
-  console.log(resources)
-      
+  // console.log(resources)
+
   return (
     <Dialog
       open={open}

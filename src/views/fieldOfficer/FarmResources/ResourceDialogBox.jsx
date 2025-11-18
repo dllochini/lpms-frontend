@@ -23,14 +23,14 @@ export default function ResourceDialog({
   defaultValues,
   categories = [],
   units = [],
-  onSuccess, // callback to refresh parent
+  onSuccess,
 }) {
   const { control, handleSubmit, reset } = useForm({
     defaultValues: {
       name: "",
       category: "",
       unit: "",
-      unitPrice: "", // new
+      unitPrice: "",
       notes: "",
     },
   });
@@ -41,7 +41,6 @@ export default function ResourceDialog({
   const [formData, setFormData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Reset form when dialog opens or defaultValues changes
   useEffect(() => {
     if (open) {
       reset({
@@ -70,7 +69,6 @@ export default function ResourceDialog({
     setOpenConfirm(false);
     setSubmitError("");
     try {
-      // Ensure unitPrice is number
       const payload = {
         ...formData,
         unitPrice:
@@ -81,18 +79,14 @@ export default function ResourceDialog({
 
       let response;
       if (defaultValues?._id) {
-        // Editing
         response = await updateResourceById(defaultValues._id, payload);
       } else {
-        // Creating
         response = await createResource(payload);
       }
 
-      // success UI
       setOpenSnackbar(true);
       reset();
 
-      // notify parent to refresh data
       if (onSuccess) {
         try {
           await onSuccess();
@@ -101,7 +95,6 @@ export default function ResourceDialog({
         }
       }
 
-      // close dialog after success
       onClose();
     } catch (error) {
       console.error("Save failed:", error);

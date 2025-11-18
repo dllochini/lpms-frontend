@@ -4,7 +4,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import IconButton from "@mui/material/IconButton";
 import DeleteIcon from "@mui/icons-material/Delete";
 
-const WorkDoneGrid = ({ workDones = [], onDeleteRow, loading = false }) => {
+const WorkDoneGrid = ({ workDones = [], onDeleteRow, loading = false, disableDelete = false }) => {
   const columns = [
     { field: "id", headerName: "No", flex: 0.3, minWidth: 60, headerAlign: "center", align: "center" },
     { field: "startDate", headerName: "Started Time", flex: 0.8, minWidth: 130, headerAlign: "center", align: "center" },
@@ -22,13 +22,12 @@ const WorkDoneGrid = ({ workDones = [], onDeleteRow, loading = false }) => {
       headerAlign: "center",
       renderCell: (params) => (
         <IconButton
-          size="small"
-          onClick={() => onDeleteRow?.(params.row)}
-          disabled={loading}
-          aria-label="delete-workdone"
+          onClick={() => onDeleteRow(row)}
+          disabled={disableDelete || loading}
         >
-          <DeleteIcon fontSize="small" />
+          <DeleteIcon />
         </IconButton>
+
       ),
     },
   ];

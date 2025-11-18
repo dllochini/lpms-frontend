@@ -35,7 +35,7 @@ export default function Dashboard() {
 
       try {
         const userRes = await getUserById(loggedUserId);
-        console.log(userRes, "elllo")
+        // console.log(userRes, "user response");
         if (!userRes || !userRes.data) {
           console.warn("No user data returned");
           return;
@@ -44,8 +44,6 @@ export default function Dashboard() {
         const user = userRes.data;
         setUserName(user.fullName || "");
         setRole(user.role?.name || "");
-
-        // support user.division as object or id
         const divisionId = user.division?._id ?? user.division ?? "";
         setDivision(divisionId);
         if (!divisionId) return;
@@ -77,8 +75,8 @@ export default function Dashboard() {
         setRequests(data.recentRequests || []);
         setPayments(data.recentPayments || []);
 
-        console.log("received recentRequests:", data.recentRequests);
-        console.log("received recentPayments:", data.recentPayments);
+        // console.log("received recentRequests:", data.recentRequests);
+        // console.log("received recentPayments:", data.recentPayments);
       } catch (err) {
         console.error("Error fetching dashboard:", err.response?.data || err.message);
       }
@@ -89,7 +87,7 @@ export default function Dashboard() {
 
   const mappedRequests = (requests || []).map((req, idx) => {
 
-    console.log(requests, "requests fetched")
+    // console.log(requests, "requests fetched")
 
     const landObj = req.process?.land ?? null;
     const landId = (landObj && (landObj._id ?? landObj)) ?? "";
@@ -109,7 +107,7 @@ export default function Dashboard() {
     };
   });
 
-  console.log(payments, "oh yeah")
+  // console.log(payments, "payments fetched")
 
   const mappedPayments = (payments || []).map((p, idx) => ({
     id: p._id ?? idx,

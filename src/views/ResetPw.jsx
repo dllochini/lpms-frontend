@@ -1,4 +1,3 @@
-// src/pages/ResetPw.jsx
 import React, { useState } from "react";
 import {
   Box,
@@ -14,12 +13,11 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSearchParams } from "react-router-dom";
-import bgImage from "/images/sugar-cane.jpg";
-import companyLogo from "/images/ceylon-sugar-industries.png";
+import bgImage from "/images/Wallpaper.jpg";
+import companyLogo from "/images/CeylonSugarLogo.png";
 import { resetPassword } from "../api/auth";
-import resetPasswordSchema from "./validations/resetPasswordSchema.js"; // ✅ import schema
+import resetPasswordSchema from "../validations/resetPasswordSchema.js";
 
-// Local error mapper
 function getFriendlyErrorMessage(
   serverError,
   fallback = "Something went wrong. Please try again."
@@ -56,7 +54,7 @@ function getFriendlyErrorMessage(
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
-  const identifier = searchParams.get("identifier") || "Forgot"; // default
+  const identifier = searchParams.get("identifier") || "Forgot";
 
   const {
     control,
@@ -64,7 +62,7 @@ export default function ResetPasswordPage() {
     formState: { errors },
     reset,
   } = useForm({
-    resolver: yupResolver(resetPasswordSchema), // ✅ use imported schema
+    resolver: yupResolver(resetPasswordSchema),
     defaultValues: { password: "", confirmPassword: "" },
   });
 
@@ -79,34 +77,32 @@ export default function ResetPasswordPage() {
     err?.message ||
     null;
 
-  // ResetPw.jsx -> onSubmit
   const onSubmit = async (data) => {
-  setLoading(true);
-  setError("");
-  setMessage("");
+    setLoading(true);
+    setError("");
+    setMessage("");
 
-  if (!token) {
-    setError("Reset token missing. Please use the link from your email.");
-    setLoading(false);
-    return;
-  }
+    if (!token) {
+      setError("Reset token missing. Please use the link from your email.");
+      setLoading(false);
+      return;
+    }
 
-  try {
-    // Call API
-    const loggedUserId = localStorage.getItem("loggedUserId") || null;
+    try {
 
-    console.log("Input for reset", token, data.password, identifier, loggedUserId);
-    const response = await resetPassword(token, data.password, identifier, loggedUserId);
+      const loggedUserId = localStorage.getItem("loggedUserId") || null;
 
-    setSuccess(true);
-    setMessage(response.data?.message || "Password reset successful!");
-    reset(); // clear form
-  } catch (err) {
-    setError(getFriendlyErrorMessage(err?.response?.data?.error));
-  } finally {
-    setLoading(false);
-  }
-};
+      const response = await resetPassword(token, data.password, identifier, loggedUserId);
+
+      setSuccess(true);
+      setMessage(response.data?.message || "Password reset successful!");
+      reset();
+    } catch (err) {
+      setError(getFriendlyErrorMessage(err?.response?.data?.error));
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   return (

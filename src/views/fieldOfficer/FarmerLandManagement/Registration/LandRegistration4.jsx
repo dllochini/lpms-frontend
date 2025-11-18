@@ -1,4 +1,3 @@
-// File: LandRegistration4.jsx
 import { useState, useEffect } from "react";
 import {
   Box,
@@ -21,14 +20,11 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FormStepper from "../../../components/fieldOfficer/CreateLandFormStepper.jsx";
+import FormStepper from "../CreateLandFormStepper.jsx";
 import { useNavigate } from "react-router-dom";
-import { getAllFiles, deleteFile } from "../../../utils/db.js";
-import {
-  getWithExpiry,
-  setWithExpiry,
-} from "../../../utils/localStorageHelpers.js";
-import { createUserLand } from "../../../api/land.js";
+import { getAllFiles, deleteFile } from "../../../../utils/db.js";
+import { getWithExpiry } from "../../../../utils/localStorageHelpers.js";
+import { createUserLand } from "../../../../api/land.js";
 
 const LandRegistration4 = () => {
   const navigate = useNavigate();
@@ -40,7 +36,6 @@ const LandRegistration4 = () => {
   const [loading, setLoading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState({});
 
-  // Load previously saved files from IndexedDB
   useEffect(() => {
     const loadFiles = async () => {
       try {
@@ -53,31 +48,29 @@ const LandRegistration4 = () => {
     loadFiles();
   }, []);
 
-  // landRegForm1 and landForm2 may be stored as wrapper { data, fileKey }
-  const form1Wrapper = getWithExpiry("landRegForm1") || null; // Farmer info wrapper
-  const form2Wrapper = getWithExpiry("landRegForm2") || null; // Land info wrapper
+  const form1Wrapper = getWithExpiry("landRegForm1") || null;
+  const form2Wrapper = getWithExpiry("landRegForm2") || null;
 
   const form1 = form1Wrapper?.data || form1Wrapper || {};
-  const form2 = form2Wrapper?.data || form2Wrapper || {};
+  const form2 = form2Wrapper?.payload || {};
+
+  // console.log("Form2 data:", form2);
 
   const handleFinalSubmission = async () => {
     try {
       setLoading(true);
       const formData = new FormData();
 
-      // get logged userId
       const loggedUserId = localStorage.getItem("loggedUserId");
       if (loggedUserId) {
         formData.append("createdBy", loggedUserId);
         formData.append("updatedBy", loggedUserId);
       }
 
-      // --- Step 1 (farmer info) ---
-
       if (form1 && Object.keys(form1).length) {
         Object.entries(form1).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
-            formData.append(key, value); // <--- flatten
+            formData.append(key, value);
           }
         });
         if (form1Wrapper?.fileKey) {
@@ -86,11 +79,10 @@ const LandRegistration4 = () => {
         }
       }
 
-      // --- Step 2 (land info) ---
       if (form2 && Object.keys(form2).length) {
         Object.entries(form2).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
-            formData.append(key, value); // <--- flatten
+            formData.append(key, value);
           }
         });
         if (form2Wrapper?.fileKey) {
@@ -99,10 +91,8 @@ const LandRegistration4 = () => {
         }
       }
 
-      // --- Step 3 (uploaded documents) ---
       const form3Wrapper = getWithExpiry("landRegForm3") || {};
       const filesMap = form3Wrapper.files || {};
-      // GOOD: append every document as 'documents' (multiple values)
       for (const fileKey of Object.values(filesMap || {})) {
         const fileObj = uploadedFiles[fileKey];
         if (fileObj) {
@@ -110,28 +100,25 @@ const LandRegistration4 = () => {
         }
       }
 
-      // --- Signed agreement (final step) ---
       if (agreementFile) {
         formData.append("signedAgreement", agreementFile, agreementFile.name);
       }
 
-      // Debug log
-      for (let [k, v] of formData.entries()) {
-        console.log("formData entry:", k, v);
-      }
+      // for (let pair of formData.entries()) {
+      //   console.log(pair[0] + ": ", pair[1]);
+      // }
+      // console.log("FORMDATA CONTENTS:");
+      // for (let p of formData.entries()) console.log(p[0], p[1]);
 
       const res = await createUserLand(formData);
-      console.log("Submission response:", res.data);
+      // console.log("Submission response:", res.data);
 
       setOpenSnackbar(true);
 
-      // cleanup local storage and optionally delete saved files from IndexedDB
-      // cleanup local storage and delete files referenced in filesMap
       localStorage.removeItem("landRegForm1");
       localStorage.removeItem("landRegForm2");
       localStorage.removeItem("landRegForm3");
 
-      // delete saved files referenced in filesMap (and the farmer/land fileKeys)
       const allKeysToDelete = new Set([
         ...(form1Wrapper?.fileKey ? [form1Wrapper.fileKey] : []),
         ...(form2Wrapper?.fileKey ? [form2Wrapper.fileKey] : []),
@@ -146,7 +133,6 @@ const LandRegistration4 = () => {
         }
       }
 
-      // refresh local file list used on the submission page
       try {
         const remaining = await getAllFiles();
         setUploadedFiles(remaining || {});
@@ -154,10 +140,8 @@ const LandRegistration4 = () => {
         setUploadedFiles({});
       }
 
-      // optionally also clear any local states
       setAgreementFile(null);
 
-      // Now navigate (we keep small delay for UX if you want feedback toast)
       setTimeout(() => navigate("/fieldOfficer"), 1200);
     } catch (error) {
       console.error(error);

@@ -1,6 +1,5 @@
 import * as yup from "yup";
 
-// pass roles dynamically for division validation
 const getUserSchema = (roles, { isEdit = false } = {}) => {
   return yup.object({
     designation: yup.string().required("Choose a designation"),
@@ -13,7 +12,7 @@ const getUserSchema = (roles, { isEdit = false } = {}) => {
         if (!selectedRole) return true;
         if (["Admin", "Higher Management"].includes(selectedRole.name)) {
           return true;
-        }
+        } 
         return !!value;
       }),
     fullName: yup.string().required("Full name is required"),
@@ -31,8 +30,6 @@ const getUserSchema = (roles, { isEdit = false } = {}) => {
       .matches(/^[0-9]{10}$/, "Invalid format. Must be 10 digits")
       .nullable()
       .notRequired(),
-
-    // only require password fields when creating a new user
     ...(isEdit
       ? {
           password: yup

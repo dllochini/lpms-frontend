@@ -1,5 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createBill, getBillsByDiv, getBillByProcess, updateBillById } from "../api/bill.js";
+import {
+  createBill,
+  getBillsByDiv,
+  getBillByProcess,
+  updateBillById,
+} from "../api/bill.js";
 
 export const useCreateBill = (options = {}) => {
   const queryClient = useQueryClient();
@@ -23,24 +28,25 @@ export const useGetBillsByDiv = (userId, options = {}) =>
     ...options,
   });
 
-  export const useGetBillByProcess = (processId, options = {}) =>
+export const useGetBillByProcess = (processId, options = {}) =>
   useQuery({
     queryKey: ["pendingBills", processId],
     queryFn: () => getBillByProcess(processId),
     ...options,
   });
 
-  export const useUpdateBillById = (options = {}) => {
-    const queryClient = useQueryClient();
-    return useMutation({
-      mutationFn: ({ billId, updatedData }) => updateBillById(billId, updatedData),
-      onSuccess: (data) => {
-        queryClient.invalidateQueries(["bills"]);
-        if (options.onSuccess) options.onSuccess(data);
-      },
-      onError: (err) => {
-        if (options.onError) options.onError(err);
-      },
-      ...options,
-    });
-  };
+export const useUpdateBillById = (options = {}) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ billId, updatedData }) =>
+      updateBillById(billId, updatedData),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["bills"]);
+      if (options.onSuccess) options.onSuccess(data);
+    },
+    onError: (err) => {
+      if (options.onError) options.onError(err);
+    },
+    ...options,
+  });
+};
