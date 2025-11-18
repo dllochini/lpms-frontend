@@ -23,11 +23,9 @@ const PaymentApprovalDialog = ({ selectedPayment, expandedOps, toggleOp, onClose
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // ✅ Proper hook usage (no useMemo)
   const { mutateAsync: updateBill } = useUpdateBillById();
   const { mutateAsync: updateProcess } = useUpdateProcessById();
 
-  // ✅ Format currency nicely for LKR
   const currency = (val) =>
     Number(val || 0).toLocaleString("en-LK", {
       minimumFractionDigits: 2,
@@ -40,68 +38,62 @@ const PaymentApprovalDialog = ({ selectedPayment, expandedOps, toggleOp, onClose
     ? new Date(selectedPayment.process.endDate).toLocaleDateString()
     : "N/A";
 
-  // ✅ APPROVE HANDLER
-  // ✅ APPROVE HANDLER
-const handleConfirmSubmit = async () => {
-  try {
-    setIsSubmitting(true);
-    setSubmitError("");
+  const handleConfirmSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      setSubmitError("");
 
-    console.log(selectedPayment._id,"bill")
-    // 1️⃣ Update Bill status → Approved
-    await updateBill({
-      billId: selectedPayment._id, // 👈 changed key
-      updatedData: { status: "Approved", notes: approvalFeedback },
-    });
-
-    console.log(selectedPayment.process?._id,"process")
-    // 2️⃣ Update Process status → Approved
-    if (selectedPayment.process?._id) {
-      await updateProcess({
-        processId: selectedPayment.process._id,
-        updatedData: { status: "Approved" },
+      // console.log(selectedPayment._id,"bill")
+      await updateBill({
+        billId: selectedPayment._id, // 👈 changed key
+        updatedData: { status: "Approved", notes: approvalFeedback },
       });
+
+      // console.log(selectedPayment.process?._id,"process")
+      if (selectedPayment.process?._id) {
+        await updateProcess({
+          processId: selectedPayment.process._id,
+          updatedData: { status: "Approved" },
+        });
+      }
+
+      // console.log("Bill and Process approved successfully");
+      setOpenConfirm(false);
+      onClose();
+    } catch (err) {
+      console.error("Error approving bill:", err);
+      setSubmitError(err.message || "Something went wrong.");
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+  const handleFlagIssue = async () => {
+    try {
+      setIsSubmitting(true);
+      setSubmitError("");
 
-    console.log("✅ Bill and Process approved successfully");
-    setOpenConfirm(false);
-    onClose();
-  } catch (err) {
-    console.error("Error approving bill:", err);
-    setSubmitError(err.message || "Something went wrong.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
-// ⚠️ FLAG HANDLER (now updates backend)
-const handleFlagIssue = async () => {
-  try {
-    setIsSubmitting(true);
-    setSubmitError("");
-
-    await updateBill({
-      billId: selectedPayment._id, // 👈 changed key
-      data: { status: "Flagged", notes: flagText },
-    });
-
-    if (selectedPayment.process?._id) {
-      await updateProcess({
-        id: selectedPayment.process._id,
-        data: { status: "Flagged" },
+      await updateBill({
+        billId: selectedPayment._id,
+        data: { status: "Flagged", notes: flagText },
       });
-    }
 
-    console.log("⚠️ Bill flagged successfully");
-    setOpenFlagDialog(false);
-    onClose();
-  } catch (err) {
-    console.error("Error flagging bill:", err);
-    setSubmitError(err.message || "Something went wrong while flagging.");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      if (selectedPayment.process?._id) {
+        await updateProcess({
+          id: selectedPayment.process._id,
+          data: { status: "Flagged" },
+        });
+      }
+
+      // console.log("Bill flagged successfully");
+      setOpenFlagDialog(false);
+      onClose();
+    } catch (err) {
+      console.error("Error flagging bill:", err);
+      setSubmitError(err.message || "Something went wrong while flagging.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
 
   return (
@@ -142,7 +134,7 @@ const handleFlagIssue = async () => {
           </Box>
         </DialogContent>
 
-        {/* ✅ Actions */}
+        {/* Actions */}
         <DialogActions sx={{ gap: 1, px: 3, py: 2 }}>
           <Button
             variant="outlined"

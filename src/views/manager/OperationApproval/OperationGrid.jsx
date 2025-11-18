@@ -4,9 +4,9 @@ import Button from "@mui/material/Button";
 import { useState } from "react";
 import ConfirmDialog from "../../fieldOfficer/ProgressTrack/ConfirmDialog";
 
-const OperationGrid = ({ data, onDelete, onEdit, onView }) => {
+const OperationGrid = ({ data, onDelete, onView }) => {
 
-  console.log(data,"every task")
+  // console.log(data,"every task")
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
@@ -59,13 +59,13 @@ const OperationGrid = ({ data, onDelete, onEdit, onView }) => {
 
   const rows = Array.isArray(data)
     ? data.map((row) => ({
-        id: row._id ?? index,
-        landId: row.process?.land?._id ?? "-",
-        fieldOfficer: row.assignedTo?.fullName ?? "N/A",
-        operation: row.operation?.name ?? "N/A",
-        startDate: row.startDate ? new Date(row.startDate).toLocaleDateString() : "N/A",
-        completedDate: row.endDate ? new Date(row.endDate).toLocaleDateString() : "Pending",
-      }))
+      id: row._id ?? index,
+      landId: row.process?.land?._id ?? "-",
+      fieldOfficer: row.assignedTo?.fullName ?? "N/A",
+      operation: row.operation?.name ?? "N/A",
+      startDate: row.startDate ? new Date(row.startDate).toLocaleDateString() : "N/A",
+      completedDate: row.endDate ? new Date(row.endDate).toLocaleDateString() : "Pending",
+    }))
     : [];
 
   return (

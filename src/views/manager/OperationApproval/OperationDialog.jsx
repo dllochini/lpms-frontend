@@ -15,49 +15,39 @@ import { useUpdateTask } from "../../../hooks/task.hooks";
 export default function OperationDialog({
   open,
   onClose,
-  control, // kept for compatibility, not used here
   initialData,
   initialTask,
 }) {
-  // table rows for task.workDones
   const [taskRows, setTaskRows] = useState([]);
 
-  // confirm approve dialog
   const [openConfirm, setOpenConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // approval feedback
   const [approvalFeedback, setApprovalFeedback] = useState("");
 
-  // flag/issue dialog
   const [openFlagDialog, setOpenFlagDialog] = useState(false);
   const [flagText, setFlagText] = useState("");
 
-  // snackbars
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
-  // which action is being confirmed (only 'approve' used here)
   const [confirmAction, setConfirmAction] = useState(null);
 
-  // mutation hook
   const { mutate: updateTask, isLoading: updatingTask } = useUpdateTask();
 
-  // populate workDones table when initialTask changes
   useEffect(() => {
     const wds = initialTask?.workDones ?? [];
     const rows = Array.isArray(wds)
       ? wds.map((wd, index) => ({
-          id: wd._id ?? `${initialTask?._id ?? "t"}-${index}`,
-          date: wd.startDate ? new Date(wd.startDate).toLocaleDateString() : "N/A",
-          progress: wd.newWork ?? "N/A",
-          note: wd.notes ?? wd.note ?? "—",
-        }))
+        id: wd._id ?? `${initialTask?._id ?? "t"}-${index}`,
+        date: wd.startDate ? new Date(wd.startDate).toLocaleDateString() : "N/A",
+        progress: wd.newWork ?? "N/A",
+        note: wd.notes ?? wd.note ?? "—",
+      }))
       : [];
     setTaskRows(rows);
   }, [initialTask]);
 
-  // if parent didn't provide initialData (grid row), don't render dialog
   if (!initialData) return null;
 
   const columns = [
@@ -67,7 +57,6 @@ export default function OperationDialog({
     { field: "note", headerName: "Note", flex: 2 },
   ];
 
-  // centralized close handler that resets transient states
   const handleCloseAll = () => {
     setOpenConfirm(false);
     setOpenFlagDialog(false);
@@ -79,7 +68,6 @@ export default function OperationDialog({
     if (typeof onClose === "function") onClose();
   };
 
-  // Confirm (Approve) submit handler
   const handleConfirmSubmit = async () => {
     if (!initialTask?._id) {
       setSubmitError("No task selected");
@@ -118,7 +106,6 @@ export default function OperationDialog({
     );
   };
 
-  // Flag Issue handler (reports issue instead of reject)
   const handleFlagIssue = async () => {
     if (!initialTask?._id) {
       setSubmitError("No task selected");
@@ -133,7 +120,7 @@ export default function OperationDialog({
     setSubmitError("");
 
     const updatedData = {
-      status: "Issue", // adjust if your backend expects a different status
+      status: "Issue",
       issueNote: flagText.trim(),
     };
 
