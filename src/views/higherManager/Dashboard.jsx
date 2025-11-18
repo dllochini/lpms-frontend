@@ -1,4 +1,3 @@
-// src/pages/higherManager/Dashboard.jsx
 import React, { useEffect, useState } from "react";
 import {
   Typography,
@@ -12,9 +11,8 @@ import {
   Alert,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-
-import Graph from "../../components/higherManager/Graph";
-import TaskSummary from "../../components/higherManager/TaskSummary";
+import Graph from "./Graph";
+import TaskSummary from "./TaskSummary";
 import { getHigherManagerDashboardCardInfo } from "../../api/higherManager";
 import { getUserById } from "../../api/user";
 
@@ -55,7 +53,7 @@ export default function Dashboard() {
         setUserName(user.fullName || "");
         setRole(user.role?.name || "");
 
-        
+
         const divisionId = user.division?._id ?? user.division ?? null;
         setDivision(divisionId);
 

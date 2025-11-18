@@ -1,4 +1,3 @@
-// import React from "react";
 import { Typography, Box, Paper, Button, Breadcrumbs } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import HomeIcon from "@mui/icons-material/Home";
@@ -14,7 +13,7 @@ export default function Dashboard() {
 
   const fetchData = async function () {
     const response = await getUsers();
-    console.log("API users:", response.data);
+    // console.log("API users:", response.data);
     setResponseData(response?.data ?? []);
   };
 

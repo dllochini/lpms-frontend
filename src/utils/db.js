@@ -4,7 +4,6 @@ const DB_NAME = "landRegistrationDB";
 const STORE_NAME = "files";
 const DB_VERSION = 1;
 
-// Open database with store creation logic
 export const getDB = async () => {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
@@ -15,16 +14,14 @@ export const getDB = async () => {
   });
 };
 
-// db.js
 export const saveFile = async (key, file) => {
   const db = await getDB();
-  // store ArrayBuffer to avoid relying on File serialization across browsers
   const arrayBuffer = await file.arrayBuffer();
   const metadata = {
     name: file.name,
     type: file.type,
     lastModified: file.lastModified,
-    data: arrayBuffer, // store raw bytes
+    data: arrayBuffer,
   };
   await db.put(STORE_NAME, metadata, key);
 };
@@ -36,7 +33,6 @@ export const getAllFiles = async () => {
   for (const key of keys) {
     const metadata = await db.get(STORE_NAME, key);
     if (metadata) {
-      // Reconstruct File from stored ArrayBuffer
       const f = new File([metadata.data], metadata.name, {
         type: metadata.type,
         lastModified: metadata.lastModified,
@@ -47,9 +43,7 @@ export const getAllFiles = async () => {
   return files;
 };
 
-// Delete a file
 export const deleteFile = async (key) => {
   const db = await getDB();
-  // use idb helper for delete
   await db.delete(STORE_NAME, key);
 };

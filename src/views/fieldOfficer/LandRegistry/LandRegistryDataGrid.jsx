@@ -1,5 +1,5 @@
 import * as React from "react";
-import { DataGrid as MuiDataGrid, GridActionsCellItem } from "@mui/x-data-grid";
+import { DataGrid, GridActionsCellItem } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Dialog from "@mui/material/Dialog";
@@ -11,24 +11,21 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
 import { useState } from "react";
+import { deleteLandById } from "../../../api/land";
+import { useNavigate } from "react-router-dom";
 
-const BasicDataGrid = ({ data, onDelete, onEdit }) => {
-  // Delete dialog state
+const LandRegistryDataGrid = ({ data, onDelete }) => {
+  // console.log("Data in LandRegistryDataGrid:", data);
+  const navigate = useNavigate();
+
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-  const [selectedOperationName, setSelectedOperationName] = useState("");
 
-  // Snackbar state
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
-  // Delete handlers
   const handleDeleteClick = (id) => {
-    const operation = data.find((u) => u._id === id);
-    setSelectedOperationName(operation ? operation.name : "");
     setSelectedId(id);
     setOpenDialog(true);
   };
@@ -36,21 +33,18 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   const handleConfirmDelete = async () => {
     if (selectedId) {
       try {
+        await deleteLandById(selectedId);
         if (onDelete) {
-          await onDelete(selectedId); // Call parent handler
+          onDelete(selectedId);
         }
-        setSnackbar({
-          open: true,
-          message: `Operation "${selectedOperationName}" deleted successfully!`,
-          severity: "success",
-        });
+        setSnackbarMessage(`Land "${selectedId}" deleted successfully`);
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
       } catch (error) {
         console.error("Delete failed:", error);
-        setSnackbar({
-          open: true,
-          message: "Delete failed. Please try again.",
-          severity: "error",
-        });
+        setSnackbarMessage("Failed to delete land");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       }
     }
     setOpenDialog(false);
@@ -62,40 +56,43 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     setSelectedId(null);
   };
 
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
-
-  // Edit handler
   const handleEditClick = (id) => {
-    const row = data.find((u) => u._id === id);
-    if (onEdit && row) {
-      onEdit(row);
-    }
+    navigate(`/fieldOfficer/landEdit1/${id}`);
   };
 
-  // Columns config
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   const columns = [
-    { field: "_id", headerName: "Operation ID", flex: 4 },
+    { field: "id", headerName: "Land ID", flex: 3 },
     {
-      field: "name",
-      headerName: "Operation Name",
-      flex: 3,
+      field: "farmer",
+      headerName: "Farmer",
+      headerAlign: "left",
+      align: "left",
+      flex: 4,
     },
-    // {
-    //   field: "relatedMachines",
-    //   headerName: "Related Machines",
-    //   flex: 3,
-    // },
-    // {
-    //   field: "relatedImplements",
-    //   headerName: "Related Implements",
-    //   flex: 3,
-    // },
     {
-      field: "note",
-      headerName: "Note",
-      flex: 3,
+      field: "address",
+      headerName: "Address",
+      headerAlign: "left",
+      align: "left",
+      flex: 4,
+    },
+    {
+      field: "area",
+      headerName: "Area",
+      headerAlign: "left",
+      align: "left",
+      flex: 2,
+    },
+    {
+      field: "contactNo",
+      headerName: "Contact Number",
+      headerAlign: "left",
+      align: "left",
+      flex: 4,
     },
     {
       field: "actions",
@@ -122,16 +119,23 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   ];
 
   const rows = Array.isArray(data)
-    ? data.map((row) => ({
-        id: row._id,
-        ...row,
-      }))
+    ? data.map((land) => ({
+      id: land._id,
+      farmer: land.farmer?.fullName || land.user?.fullName || "N/A",
+      contactNo:
+        land.farmer?.contactNo ||
+        land.farmer?.contact_no ||
+        land.user?.contact_no ||
+        "N/A",
+      address: land.address || land.location || "N/A",
+      area: `${land.size} ${land.unit?.symbol || ""}`,
+    }))
     : [];
 
   return (
     <>
       <div style={{ width: "100%" }}>
-        <MuiDataGrid
+        <DataGrid
           autoHeight
           rows={rows}
           columns={columns}
@@ -147,12 +151,11 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
         />
       </div>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Confirmation Dialog */}
       <Dialog open={openDialog} onClose={handleCancelDelete}>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent>
-          Are you sure you want to delete{" "}
-          <strong>{selectedOperationName || "this operation"}</strong>?
+          Are you sure you want to delete <strong>{selectedId}</strong> land?
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete} color="primary">
@@ -164,23 +167,23 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar Notifications */}
+      {/* Snackbar to show the deletion success */}
       <Snackbar
-        open={snackbar.open}
+        open={snackbarOpen}
         autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
+        onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         <Alert
-          onClose={handleCloseSnackbar}
-          severity={snackbar.severity}
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
           sx={{ width: "100%" }}
         >
-          {snackbar.message}
+          {snackbarMessage}
         </Alert>
       </Snackbar>
     </>
   );
 };
 
-export default BasicDataGrid;
+export default LandRegistryDataGrid;

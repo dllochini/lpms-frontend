@@ -25,7 +25,7 @@ export default function ProgressTrack() {
     landId,
     {
       onSuccess: (data) => {
-        console.log("Lands for field officer:", data);
+        // console.log("Lands for field officer:", data);
       },
       onError: (error) => {
         console.error("Failed to fetch lands for field officer", error);
@@ -34,7 +34,7 @@ export default function ProgressTrack() {
   );
 
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
-  const [removingIds, setRemovingIds] = useState(new Set()); // optimistic hide set
+  const [removingIds, setRemovingIds] = useState(new Set());
 
   const { mutate: createProcess, isLoading: creatingProcess } = useCreateProcess(landId, {
     onSuccess: () => {
@@ -71,16 +71,11 @@ export default function ProgressTrack() {
       startedDate: new Date().toISOString(),
       endDate: null,
     };
-
-    // pass landId separately for query invalidation
     createProcess({ ...payload, landId });
   };
 
-
-  // Only enable the Add button when all existing processes are "approved"
   const allApproved = landProcesses.every((p) => (p.status || "").toLowerCase() === "approved");
 
-  // show processes sorted newest -> oldest, filtering out optimistic-removed IDs
   const visibleProcesses = [...landProcesses]
     .sort((a, b) => new Date(b.startedDate) - new Date(a.startedDate))
     .filter((p) => {

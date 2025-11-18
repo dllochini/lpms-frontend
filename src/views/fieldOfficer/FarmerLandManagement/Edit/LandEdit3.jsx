@@ -12,9 +12,9 @@ import {
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
-import FormStepper from "../../../components/fieldOfficer/CreateLandFormStepper.jsx";
+import FormStepper from "../CreateLandFormStepper.jsx";
 import { useNavigate, useParams } from "react-router-dom";
-import { getLandById, updateLandById } from "../../../api/land.js";
+import { getLandById, updateLandById } from "../../../../api/land.js";
 
 const documentFields = [
   { name: "titleDeed", label: "Title Deed* (Ownership Deed)" },
@@ -36,11 +36,10 @@ const LandEdit3 = () => {
   const navigate = useNavigate();
   const { landId } = useParams();
 
-  const [documents, setDocuments] = useState([]); // [{ filename, path }]
-  const [newFiles, setNewFiles] = useState({}); // temporary files for upload
+  const [documents, setDocuments] = useState([]);
+  const [newFiles, setNewFiles] = useState({});
   const [busy, setBusy] = useState(false);
 
-  // Load existing documents from backend
   useEffect(() => {
     if (!landId) return;
 
@@ -48,6 +47,7 @@ const LandEdit3 = () => {
       try {
         const res = await getLandById(landId);
         const landData = res?.data;
+        // console.log("Fetched land data:", landData);
         if (landData?.documents) {
           setDocuments(landData.documents);
         }
@@ -59,18 +59,15 @@ const LandEdit3 = () => {
     fetchLand();
   }, [landId]);
 
-  // handle new file selection
   const handleFileChange = (fieldName, file) => {
     if (!file) return;
     setNewFiles((prev) => ({ ...prev, [fieldName]: file }));
   };
 
-  // handle reset new uploads
   const handleReset = () => {
     setNewFiles({});
   };
 
-  // Save & Next
   const handleSaveNext = async () => {
     if (
       documents.length + Object.keys(newFiles).length <
@@ -83,17 +80,14 @@ const LandEdit3 = () => {
     setBusy(true);
 
     try {
-      // Prepare FormData
       const formData = new FormData();
       Object.entries(newFiles).forEach(([key, file]) => {
         formData.append("documents", file);
       });
 
-      // Append existing documents to keep them
       formData.append("existingDocuments", JSON.stringify(documents));
 
-      // call backend API to update land
-      await updateLandById(landId, formData); // your API should handle FormData & merge with existing documents
+      await updateLandById(landId, formData);
 
       navigate(`/fieldOfficer/landEdit4/${landId}`);
     } catch (err) {

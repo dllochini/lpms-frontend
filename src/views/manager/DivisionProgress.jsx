@@ -27,19 +27,17 @@ export default function DivisionProgress() {
 
   const loading = isLoadingLands || isLoadingTasks;
 
-  // Prepare rows: find most recent task per land
   const rows = useMemo(() => {
     if (!Array.isArray(divLand)) return [];
 
     return divLand.map((land, index) => {
       const tasksForLand = Array.isArray(taskData)
         ? taskData.filter((t) => {
-            const taskLand = t?.process?.land ?? (t?.process?.land?._id);
-            return String(taskLand) === String(land?._id);
-          })
+          const taskLand = t?.process?.land ?? (t?.process?.land?._id);
+          return String(taskLand) === String(land?._id);
+        })
         : [];
 
-      // sort descending by startDate (fallback to createdAt)
       tasksForLand.sort((a, b) => {
         const aDate = a?.startDate ? new Date(a.startDate) : a?.createdAt ? new Date(a.createdAt) : new Date(0);
         const bDate = b?.startDate ? new Date(b.startDate) : b?.createdAt ? new Date(b.createdAt) : new Date(0);
@@ -121,7 +119,6 @@ export default function DivisionProgress() {
           }}
         />
       </Paper>
-
     </Box>
   );
 }

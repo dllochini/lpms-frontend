@@ -8,13 +8,10 @@ import {
   Grid,
   Card,
   CardContent,
-  Button,
   LinearProgress,
 } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
-import { useNavigate } from "react-router-dom";
 
-// API functions
 import { getFieldOfficerDashboardCardInfo } from "../../api/fieldOfficer";
 import { getUserById } from "../../api/user";
 
@@ -33,27 +30,22 @@ export default function FieldOfficerDashboard() {
   });
   const [updates, setUpdates] = useState([]);
 
-  const navigate = useNavigate();
-
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
         const loggedUserId = localStorage.getItem("loggedUserId") || "";
         if (!loggedUserId) return;
 
-        // Fetch user info
         const userRes = await getUserById(loggedUserId);
         const user = userRes.data;
         setUserName(user.fullName || "");
 
-        // Get division ID
         const divisionId = user.division?._id || "";
         if (!divisionId) {
           console.warn("No division assigned");
           return;
         }
 
-        // Fetch Field Officer dashboard info by divisionId
         const res = await getFieldOfficerDashboardCardInfo(divisionId);
         const data = res.data;
 
@@ -95,33 +87,12 @@ export default function FieldOfficerDashboard() {
           </Typography>
         </Paper>
 
-        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2}}>
+        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", pl: 2 }}>
           <Typography color="text.primary">
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
             Home
           </Typography>
         </Breadcrumbs>
-      </Box>
-
-      {/* Add New Land Button */}
-      <Box
-        sx={{
-          maxWidth: mainCardWidth,
-          mx: "auto",
-          px: 2,
-          mb: 1,
-          display: "flex",
-          justifyContent: "flex-end",
-        }}
-      >
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() => navigate("/fieldOfficer/landRegistration1")}
-          sx={{ borderRadius: 20, px: 3, textTransform: "none" }}
-        >
-          Add New Land
-        </Button>
       </Box>
 
       {/* Stat Cards */}
@@ -167,110 +138,51 @@ export default function FieldOfficerDashboard() {
       </Paper>
 
       {/* Progress + Updates */}
-      <Box sx={{ maxWidth: mainCardWidth, mx: "auto", px: 1, mt: 2 }}>
-        <Grid container spacing={3}>
-          {/* Progress */}
-          <Grid item xs={12} md={15} sx={{ display: "flex" }}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                borderRadius: 3,
-                border: "1px solid #eee",
-                display: "flex",
-                flexDirection: "column",
-                width: "100%",
-              }}
-            >
-              <Typography variant="subtitle1" gutterBottom sx={{ fontSize: "1rem" }}>
-                Overall Progress — Assigned Lands
+      <Box
+        sx={{
+          maxWidth: mainCardWidth,
+          mx: "auto",
+          px: 1,
+          mt: 3,
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        {/* Progress Panel */}
+        <Paper
+          elevation={1}
+          sx={{
+            flexBasis: { xs: "100%", md: "100%" }, // full width on mobile, centered on desktop
+            minWidth: 300,
+            p: 3,
+            borderRadius: 3,
+            border: "1px solid #eee",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Typography variant="subtitle1" gutterBottom sx={{ fontSize: "1rem" }}>
+            Overall Progress — Assigned Lands
+          </Typography>
+
+          {["pending", "inProgress", "completed"].map((key) => (
+            <Box key={key} sx={{ mt: key === "pending" ? 1 : 1.5 }}>
+              <Typography variant="body2" color="text.secondary">
+                {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1")}
               </Typography>
-
-              {["pending", "inProgress", "completed"].map((key) => (
-                <Box key={key} sx={{ mt: key === "pending" ? 1 : 0 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1")}
-                  </Typography>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
-                    <LinearProgress
-                      variant="determinate"
-                      value={progress[key]}
-                      sx={{ flex: 1, height: 8, borderRadius: 4 }}
-                    />
-                    <Typography variant="body2" sx={{ minWidth: 36, textAlign: "right" }}>
-                      {progress[key]}%
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
-            </Paper>
-          </Grid>
-
-          {/* Updates */}
-          <Grid item xs={12} md={30} sx={{ display: "flex" }}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 1.25,
-                borderRadius: 3,
-                border: "1px solid #eee",
-                width: "100%",
-              }}
-            >
-              <Typography
-                variant="subtitle2"
-                gutterBottom
-                sx={{ fontSize: "0.95rem", fontWeight: 600 }}
-              >
-                Recent Updates
-              </Typography>
-
-              <Box sx={{ mt: 0.5, maxHeight: 200, overflowY: "auto" }}>
-                {updates.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-                    No updates yet.
-                  </Typography>
-                ) : (
-                  updates.map((u) => (
-                    <Box
-                      key={u.id}
-                      sx={{
-                        px: 0.5,
-                        py: 0.6,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        borderTop: "1px solid #f2f2f2",
-                      }}
-                    >
-                      <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: "0.875rem",
-                            lineHeight: 1.1,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                          title={u.title}
-                        >
-                          {u.title}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ flexShrink: 0, ml: 1 }}>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: 11 }}>
-                          {u.time}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ))
-                )}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 1 }}>
+                <LinearProgress
+                  variant="determinate"
+                  value={progress[key]}
+                  sx={{ flex: 1, height: 8, borderRadius: 4 }}
+                />
+                <Typography variant="body2" sx={{ minWidth: 36, textAlign: "right" }}>
+                  {progress[key]}%
+                </Typography>
               </Box>
-            </Paper>
-          </Grid>
-        </Grid>
+            </Box>
+          ))}
+        </Paper>
       </Box>
     </Box>
   );

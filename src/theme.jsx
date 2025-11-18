@@ -1,29 +1,28 @@
-// theme.js
 import { createTheme } from '@mui/material/styles';
-import '@fontsource/lato';  
+import '@fontsource/lato';
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#388e3c',   // Strong green (primary brand color)
+      main: '#388e3c',
       contrastText: '#ffffff',
     },
     secondary: {
-      main: '#8bc34a',   // Lighter green accent
+      main: '#8bc34a',
       contrastText: '#000000',
     },
     success: {
-      main: '#4caf50',   // Success green
+      main: '#4caf50',
     },
     warning: {
-      main: '#fbc02d',   // Warm yellow
+      main: '#fbc02d',
     },
     error: {
-      main: '#d32f2f',   // Error red
+      main: '#d32f2f',
     },
     background: {
-      default: '#f4f6f8', // Light gray background
-      paper: '#ffffff',   // Paper surfaces stay clean white
+      default: '#f4f6f8',
+      paper: '#ffffff',
     },
   },
   typography: {
@@ -36,7 +35,7 @@ const theme = createTheme({
       fontWeight: 600,
     },
     button: {
-      textTransform: 'none', // Prevent uppercase on buttons
+      textTransform: 'none',
       fontWeight: 500,
     },
   },

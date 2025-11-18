@@ -2,6 +2,8 @@ import axiosBackend from "../configs/axios-config";
 
 export const getUsers = () => axiosBackend.get("/users");
 
+export const getFarmers = () => axiosBackend.get("/users/farmers");
+
 export const createUser = (userData) => axiosBackend.post("/users", userData);
 
 export const getUserById = (userId) => axiosBackend.get(`/users/${userId}`);

@@ -1,17 +1,15 @@
-// src/components/Process/ViewProcessOverview.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Box, Paper, Stack, Typography, Button } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import TaskTable from "./ViewTaskTable/ViewTaskTable.jsx";
-import BillDetailDialog from "./BillDetailDialog.jsx"; // adjust path if different
+import BillDetailDialog from "./BillDetailDialog.jsx";
 import { useGetBillByProcess } from "../../../hooks/bill.hook";
 
 const ViewProcessOverview = ({ process }) => {
   const displayedTasks = useMemo(() => process?.tasks ?? [], [process]);
 
-  // Bill fetching state
   const { data: billFromServer, isLoading: loadingBill, refetch: refetchBill } = useGetBillByProcess(
     process?._id,
     { enabled: !!process?._id }
@@ -20,7 +18,6 @@ const ViewProcessOverview = ({ process }) => {
   const [currentBill, setCurrentBill] = useState(null);
   const [openBillPreview, setOpenBillPreview] = useState(false);
 
-  // pick approved bill or latest
   useEffect(() => {
     if (!billFromServer) {
       setCurrentBill(null);

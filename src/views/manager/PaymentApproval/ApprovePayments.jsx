@@ -16,7 +16,6 @@ export default function PaymentApproval() {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [expandedOps, setExpandedOps] = useState({});
 
-  // fetch bills via hook
   const { data: billData = [], isLoading } = useGetBillsByDiv(localStorage.getItem("loggedUserId"), {
     onSuccess: (data) => console.log("Pending bills:", data),
     onError: (error) => console.error("Failed to fetch pending bills", error),
@@ -24,9 +23,8 @@ export default function PaymentApproval() {
 
   const bills = useMemo(() => (Array.isArray(billData) ? billData : []), [billData]);
 
-  // When grid passes a bill, it will be the original bill object
   const handleViewDetails = (bill) => {
-    setExpandedOps({}); // reset expands
+    setExpandedOps({});
     setSelectedPayment(bill);
   };
 

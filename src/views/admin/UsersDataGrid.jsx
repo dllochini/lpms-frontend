@@ -17,12 +17,10 @@ import { useState } from "react";
 const BasicDataGrid = ({ data, onDelete }) => {
   const navigate = useNavigate();
 
-  // Dialog state
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [selectedUserName, setSelectedUserName] = useState("");
 
-  // Snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
@@ -124,20 +122,20 @@ const BasicDataGrid = ({ data, onDelete }) => {
 
   const rows = Array.isArray(data)
     ? data
-        .filter(
-          (row) =>
-            typeof row.role === "object" &&
-            row.role !== null &&
-            row.role.name?.toLowerCase() !== "farmer"
-        )
-        .map((row) => ({
-          id: row._id,
-          ...row,
-          role:
-            typeof row.role === "object" && row.role !== null
-              ? row.role.name
-              : row.role,
-        }))
+      .filter(
+        (row) =>
+          typeof row.role === "object" &&
+          row.role !== null &&
+          row.role.name?.toLowerCase() !== "farmer"
+      )
+      .map((row) => ({
+        id: row._id,
+        ...row,
+        role:
+          typeof row.role === "object" && row.role !== null
+            ? row.role.name
+            : row.role,
+      }))
     : [];
 
   return (
@@ -176,7 +174,6 @@ const BasicDataGrid = ({ data, onDelete }) => {
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar to show the deletion success */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}

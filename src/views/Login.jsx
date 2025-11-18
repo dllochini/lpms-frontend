@@ -1,4 +1,4 @@
-import setAuthToken from "../utils/setAuthToken"; // see next snippet
+import setAuthToken from "../utils/setAuthToken";
 import React, { useState } from "react";
 import {
   Box,
@@ -14,8 +14,8 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import bgImage from "/images/sugar-cane.jpg";
-import companyLogo from "/images/ceylon-sugar-industries.png";
+import bgImage from "/images/Wallpaper.jpg";
+import companyLogo from "/images/CeylonSugarLogo.png";
 import { loginUser, forgotPassword } from "../api/auth";
 import { redirectByRole } from "../utils/redirectByRole";
 import { useNavigate } from "react-router-dom";
@@ -56,15 +56,14 @@ export default function LoginPage() {
     reset: resetForgotForm,
   } = useForm({ resolver: yupResolver(forgotSchema) });
 
-  // Fixed Login handler
   const onLogin = async (data) => {
     setLoginLoading(true);
     setLoginError(null);
     setLoginSuccess(null);
 
     try {
-      const response = await loginUser(data); // axios POST /auth/login
-      console.log("Login response:", response);
+      const response = await loginUser(data);
+      // console.log("Login response:", response);
       const { loggedUserId, role, name, token } = response.data;
 
       if (!token || !role) {
@@ -72,29 +71,23 @@ export default function LoginPage() {
         return;
       }
 
-      // Save role + token
       localStorage.setItem("loggedUserId", loggedUserId);
       localStorage.setItem("role", role);
       localStorage.setItem("name", name);
       localStorage.setItem("token", token);
 
-      // set default Authorization header for axios
       setAuthToken(token);
 
       setLoginSuccess("Login successful!");
 
-      // redirect user
       const path = redirectByRole(role);
-      navigate(path, { replace: true }); // replace so user can’t go back to login
+      navigate(path, { replace: true });
     } catch (err) {
       setLoginError(err.response?.data?.error || "Login failed");
     } finally {
-      // always stop loading
       setLoginLoading(false);
     }
   };
-
-  // Forgot password handler (unchanged except proper finally already present)
   const onForgot = async (data) => {
     setForgotLoading(true);
     setForgotError(null);
@@ -103,11 +96,11 @@ export default function LoginPage() {
     try {
       const tempData = {
         data: {
-          ...data, // contains email
-          identifier: "Forgot", // moved inside data
+          ...data,
+          identifier: "Forgot",
         },
       };
-      console.log("sent data", tempData);
+      // console.log("sent data", tempData);
 
       const response = await forgotPassword(tempData);
       setForgotSuccess(response.data.message);
