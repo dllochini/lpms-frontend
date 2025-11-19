@@ -9,6 +9,7 @@ const LandDataGrid = ({ data }) => {
 
   const columns = [
     { field: "_id", headerName: "Land ID", flex: 1, minWidth: 130 },
+  
     {
       field: "address",
       headerName: "Address",

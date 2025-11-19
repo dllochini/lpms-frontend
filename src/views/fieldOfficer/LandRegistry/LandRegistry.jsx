@@ -20,8 +20,9 @@ const LandRegistry = () => {
   const fetchData = async function () {
     // console.log("Fetching lands for Field Officer ID:", loggedUserId);
     const response = await getLandsByFieldOfficerId(loggedUserId);
-    //console.log("API lands:", response);
+    // console.log("API lands:", response);
     setResponseData(response ?? []);
+    // console.log("response",responseData?.data)
   };
 
   useEffect(() => {

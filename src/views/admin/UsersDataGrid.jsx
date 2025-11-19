@@ -67,7 +67,7 @@ const BasicDataGrid = ({ data, onDelete }) => {
   };
 
   const columns = [
-    { field: "_id", headerName: "ID", flex: 3 },
+    { field: "userId", headerName: "ID", flex: 3 },
     {
       field: "designation",
       headerName: "Designation",
@@ -129,7 +129,7 @@ const BasicDataGrid = ({ data, onDelete }) => {
           row.role.name?.toLowerCase() !== "farmer"
       )
       .map((row) => ({
-        id: row._id,
+        id: row.userId,
         ...row,
         role:
           typeof row.role === "object" && row.role !== null
