@@ -196,6 +196,9 @@ const LandRegistration4 = () => {
               />
               Home
             </Link>
+            <Link underline="hover" color="inherit" href="/fieldOfficer/landRegistry">
+              Land Registry
+            </Link>
             <Typography color="text.primary">Add New Farmer & Land</Typography>
           </Breadcrumbs>
         </Box>
