@@ -1,4 +1,3 @@
-// PaymentDataGrid.jsx
 import * as React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import Snackbar from "@mui/material/Snackbar";
@@ -28,7 +27,7 @@ export default function PaymentDataGrid({ payments = [] }) {
           rows={rows}
           columns={columns}
           pageSizeOptions={[5, 10, 20]}
-          initialState={{ pagination: { paginationModel: { pageSize: 5} } }}
+          initialState={{ pagination: { paginationModel: { pageSize: 5 } } }}
           density="compact"
           disableColumnMenu
           disableRowSelectionOnClick
@@ -62,5 +61,3 @@ export default function PaymentDataGrid({ payments = [] }) {
     </>
   );
 }
-
-

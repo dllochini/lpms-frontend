@@ -24,7 +24,7 @@ import { createUser } from "../../api/user";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { getRoles } from "../../api/role";
 import { getDivisions } from "../../api/division";
-import getUserSchema from "../validations/userSchemas.js";
+import getUserSchema from "../../validations/userSchemas.js";
 
 const UserRegistration = () => {
   const [openConfirm, setOpenConfirm] = useState(false);
@@ -46,7 +46,6 @@ const UserRegistration = () => {
     { value: "Rev.", label: "Rev." },
   ];
 
-  // Fetch roles
   const fetchRoles = async () => {
     try {
       const response = await getRoles();
@@ -61,7 +60,6 @@ const UserRegistration = () => {
     }
   };
 
-  // Fetch divisions
   const fetchDivisions = async () => {
     try {
       const response = await getDivisions();
@@ -81,7 +79,6 @@ const UserRegistration = () => {
     fetchDivisions();
   }, []);
 
-  // Dynamic validation schema based on roles
   const schema = useMemo(() => {
     if (!roles || roles.length === 0) return null;
     return getUserSchema(roles, { isEdit: true });

@@ -19,9 +19,8 @@ import {
   TableRow,
 } from "@mui/material"; // <-- MODIFIED
 import HomeIcon from "@mui/icons-material/Home";
-
-import Graph from "../../components/higherManager/Graph";
-import TaskSummary from "../../components/higherManager/TaskSummary";
+import Graph from "./Graph";
+import TaskSummary from "./TaskSummary";
 import { getHigherManagerDashboardCardInfo } from "../../api/higherManager";
 import { getUserById } from "../../api/user";
 
@@ -68,6 +67,11 @@ export default function Dashboard() {
         // this manager oversees.
         // We assume the API backend is updated to handle this.
         const dashboardRes = await getHigherManagerDashboardCardInfo(); // <-- MODIFIED
+
+        const divisionId = user.division?._id ?? user.division ?? null;
+        setDivision(divisionId);
+
+        const dashboardRes = await getHigherManagerDashboardCardInfo(divisionId);
         const data = dashboardRes?.data;
         if (!data) {
           setError("No dashboard data returned");

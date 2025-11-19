@@ -18,12 +18,10 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
   const [selectedId, setSelectedId] = useState(null);
   const [selectedResourceName, setSelectedResourceName] = useState("");
 
-  // Snackbar states
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
-  // Open confirmation dialog
   const handleDeleteClick = (id) => {
     const resource = data.find((r) => r._id === id);
     setSelectedResourceName(resource ? resource.resource : "");
@@ -31,7 +29,6 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     setOpenDialog(true);
   };
 
-  // Confirm delete
   const handleConfirmDelete = async () => {
     if (selectedId) {
       try {
@@ -55,13 +52,11 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
     setSelectedId(null);
   };
 
-  // Cancel delete
   const handleCancelDelete = () => {
     setOpenDialog(false);
     setSelectedId(null);
   };
 
-  // Edit resource
   const handleEditClick = (id) => {
     const resource = data.find((r) => r._id === id);
     if (onEdit) onEdit(resource);
@@ -101,13 +96,13 @@ const BasicDataGrid = ({ data, onDelete, onEdit }) => {
 
   const rows = Array.isArray(data)
     ? data.map((row) => ({
-        id: row._id,
-        ...row,
-        unit:
-          typeof row.unit === "object" && row.unit !== null
-            ? row.unit.name
-            : row.unit,
-      }))
+      id: row._id,
+      ...row,
+      unit:
+        typeof row.unit === "object" && row.unit !== null
+          ? row.unit.name
+          : row.unit,
+    }))
     : [];
 
   return (

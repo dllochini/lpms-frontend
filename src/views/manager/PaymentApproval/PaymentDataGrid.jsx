@@ -4,10 +4,10 @@ import Button from "@mui/material/Button";
 
 const PaymentDataGrid = ({
   rows = [],
-  onViewDetails = () => {},
+  onViewDetails = () => { },
   loading = false,
 }) => {
-  // Build rows for the grid but keep the original bill object so the dialog gets the full data
+
   const formattedBills = rows.map((b) => ({
     _id: b._id,
     billId: b._id,
@@ -15,7 +15,7 @@ const PaymentDataGrid = ({
     fieldOfficer: b.process?.land?.createdBy?.fullName || "N/A",
     requestedDate: b.process?.endDate ? new Date(b.process.endDate).toLocaleDateString() : "N/A",
     totalAmount: b.totalAmount ?? 0,
-    originalBill: b, // keep full object
+    originalBill: b,
   }));
 
   const columns = [
@@ -29,7 +29,6 @@ const PaymentDataGrid = ({
       flex: 1.2,
       align: "right",
       headerAlign: "right",
-      // valueGetter: (params) => Number(params.row.totalAmount ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2 }),
     },
     {
       field: "action",
@@ -44,7 +43,6 @@ const PaymentDataGrid = ({
           size="small"
           onClick={(e) => {
             e.stopPropagation();
-            // pass the original bill object so the dialog has all nested data
             onViewDetails(params.row.originalBill || params.row);
           }}
         >

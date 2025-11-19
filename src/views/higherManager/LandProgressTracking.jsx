@@ -24,13 +24,11 @@ import { Link as RouterLink, useParams } from "react-router-dom";
 import { DataGrid } from "@mui/x-data-grid";
 
 export default function LandProgressTracking() {
-  const { landId } = useParams(); // Get landId from URL
+  const { landId } = useParams();
   const [tasks, setTasks] = useState([]);
   const [expandedTaskId, setExpandedTaskId] = useState(null);
 
-  // Fetch tasks dynamically (here we use sample data)
   useEffect(() => {
-    // Replace this with API call to fetch tasks for this landId
     setTasks([
       { id: 1, name: "Bush Clearing", progress: 100 },
       { id: 2, name: "Ploughing", progress: 50 },

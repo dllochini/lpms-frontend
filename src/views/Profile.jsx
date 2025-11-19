@@ -1,4 +1,3 @@
-// views/Profile.jsx
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -123,7 +122,6 @@ const Profile = () => {
         });
         setRoles(rolesRes.data);
         setDivisions(divisionsRes.data);
-        // setRole(user.role?.name || "");
       } catch (err) {
         console.error(err);
         showSnackbar("Failed to fetch profile data.", "error");
@@ -227,8 +225,8 @@ const Profile = () => {
         <Typography>
           {field.type === "select"
             ? field.options.find((opt) => opt._id === formState[field.field])?.[
-                field.displayKey
-              ] || "-"
+            field.displayKey
+            ] || "-"
             : field.value || "-"}
         </Typography>
       </Box>
@@ -344,7 +342,6 @@ const Profile = () => {
         </Paper>
       </Box>
 
-      {/* ✅ Single reusable Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={5000}

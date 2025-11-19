@@ -7,10 +7,11 @@ export const getAllWorkDone = async () => {
   return result.data;
 };
 
-export const createWorkDone = (workDoneData) => axiosBackend.post("/workdone", workDoneData);
+export const createWorkDone = (workDoneData) =>
+  axiosBackend.post("/workdone", workDoneData);
 
 export const deleteWorkDoneById = (workId) => {
-  console.log(workId, "input");
+  // console.log(workId, "input");
   return axiosBackend.delete(`/workdone/${workId}`);
 };
 

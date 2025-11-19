@@ -97,7 +97,7 @@ export default function LandProgress() {
       align: "center",
       display: "flex",
       renderCell: (params) => (
-        <Stack sx={{ width: "100%" , display: "flex"}} alignItems="center">
+        <Stack sx={{ width: "100%", display: "flex" }} alignItems="center">
           <LinearProgress
             variant="determinate"
             value={params.row.overallProgress}
@@ -109,7 +109,7 @@ export default function LandProgress() {
         </Stack>
       ),
     },
-  
+
     {
       field: "actions",
       headerName: "Action",
@@ -130,7 +130,7 @@ export default function LandProgress() {
         </Box>
       ),
     }
-    
+
   ];
 
   return (

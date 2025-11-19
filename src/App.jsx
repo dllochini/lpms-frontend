@@ -1,4 +1,3 @@
-// App.jsx
 import "./App.css";
 import {
   BrowserRouter,
@@ -27,27 +26,25 @@ import UserEdit from "./views/admin/UserEdit";
 
 // FieldOfficer
 import FieldOfficerDashboard from "./views/fieldOfficer/Dashboard";
-import FieldOperations from "./views/fieldOfficer/FieldOperations";
+import FieldOperations from "./views/fieldOfficer/FieldOperations/FieldOperations";
 import FarmResources from "./views/fieldOfficer/FarmResources/FarmResources";
-import LandRegistry from "./views/fieldOfficer/LandRegistry";
-import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress";
+import LandRegistry from "./views/fieldOfficer/LandRegistry/LandRegistry";
+import AssignedLandProgress from "./views/fieldOfficer/AssignedLandProgress/AssignedLandProgress";
 import LandProgressTracking from "./views/fieldOfficer/ProgressTrack/main/ProgressTrack";
 
-import LandRegistrationPage1 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration1";
-import LandRegistrationPage2 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration2";
-import LandRegistrationPage3 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration3";
-import LandRegistrationPage4 from "./views/fieldOfficer/FarmerLandRegistration/LandRegistration4";
+import LandRegistrationPage1 from "./views/fieldOfficer/FarmerLandManagement/Registration/LandRegistration1";
+import LandRegistrationPage2 from "./views/fieldOfficer/FarmerLandManagement/Registration/LandRegistration2";
+import LandRegistrationPage3 from "./views/fieldOfficer/FarmerLandManagement/Registration/LandRegistration3";
+import LandRegistrationPage4 from "./views/fieldOfficer/FarmerLandManagement/Registration/LandRegistration4";
 
-import LandEditPage1 from "./views/fieldOfficer/FarmerLandEdit/LandEdit1";
-import LandEditPage2 from "./views/fieldOfficer/FarmerLandEdit/LandEdit2";
-import LandEditPage3 from "./views/fieldOfficer/FarmerLandEdit/LandEdit3";
-import LandEditPage4 from "./views/fieldOfficer/FarmerLandEdit/LandEdit4";
+import LandEditPage1 from "./views/fieldOfficer/FarmerLandManagement/Edit/LandEdit1";
+import LandEditPage2 from "./views/fieldOfficer/FarmerLandManagement/Edit/LandEdit2";
+import LandEditPage3 from "./views/fieldOfficer/FarmerLandManagement/Edit/LandEdit3";
+import LandEditPage4 from "./views/fieldOfficer/FarmerLandManagement/Edit/LandEdit4";
 
 // Higher Manager
 import HigherManagerDashboard from "./views/higherManager/Dashboard";
 import HigherManagerLandProgress from "./views/higherManager/LandProgress";
-import HigherManagerLandProgressTracking from "./views/higherManager/LandProgressTracking";
-// import HigherManagerApprovePayments from "./views/higherManager/ApprovePayments";
 
 //Manager
 import Dashboard from "./views/manager/Dashboard/Dashboard";
@@ -68,7 +65,7 @@ const AppWrapper = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const publicPaths = ["/login", "/reset-password"];
+    const publicPaths = ["/login", "/resetPassword"];
     const bypassAuth = import.meta.env.VITE_BYPASS_AUTH === "true";
 
     if (!bypassAuth) {
