@@ -64,7 +64,7 @@ export default function DivisionProgress() {
   const columns = [
     { field: "landId", headerName: "Land ID", flex: 1, headerAlign: "center", align: "center" },
     { field: "fieldOfficer", headerName: "Field Officer", flex: 1.2, headerAlign: "center", align: "center" },
-    { field: "area", headerName: "Area (Acre)", flex: 1, headerAlign: "center", align: "center" },
+    { field: "area", headerName: "Area (hectare)", flex: 1, headerAlign: "center", align: "center" },
     { field: "currentStatus", headerName: "Current Status", flex: 1.2, headerAlign: "center", align: "center" },
     { field: "currentOperation", headerName: "Current Operation", flex: 1.5, headerAlign: "center", align: "center" },
     {
