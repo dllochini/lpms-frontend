@@ -66,6 +66,7 @@ const LandRegistryDataGrid = ({ data, onDelete }) => {
 
   const columns = [
     { field: "id", headerName: "Land ID", flex: 3 },
+    
     {
       field: "farmer",
       headerName: "Farmer",
@@ -120,7 +121,7 @@ const LandRegistryDataGrid = ({ data, onDelete }) => {
 
   const rows = Array.isArray(data)
     ? data.map((land) => ({
-      id: land._id,
+      id: land.registrationNo,
       farmer: land.farmer?.fullName || land.user?.fullName || "N/A",
       contactNo:
         land.farmer?.contactNo ||
