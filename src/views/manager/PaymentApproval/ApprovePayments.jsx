@@ -33,15 +33,15 @@ export default function PaymentApproval() {
   };
 
   return (
-    <Box sx={{ maxWidth: 1150, mx: "auto", p: 3 }}>
+    <Box sx={{ maxWidth: 1100, mx: "auto", p: 3, mb: 5 }}>
       <Typography variant="h5" gutterBottom>
         Pending Payment Approval
       </Typography>
 
-      <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", mb: 2 }}>
+      <Breadcrumbs aria-label="breadcrumb"  sx={{ fontSize: "0.9rem", mb: 2 }}>
         <Link
           component={RouterLink}
-          to="/"
+          to="/manager"
           underline="hover"
           color="inherit"
           sx={{ display: "flex", alignItems: "center" }}
@@ -51,7 +51,7 @@ export default function PaymentApproval() {
         <Typography color="text.primary">Payments Approval</Typography>
       </Breadcrumbs>
 
-      <Paper elevation={5} sx={{ p: 3, borderRadius: 3 }}>
+      <Paper elevation={5}  sx={{ maxWidth: 1100, mx: "auto", p: 3, borderRadius: 5 }}>
         <PendingPaymentDataGrid rows={bills} onViewDetails={handleViewDetails} loading={isLoading} />
       </Paper>
 

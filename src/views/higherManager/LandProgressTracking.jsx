@@ -61,10 +61,10 @@ export default function LandProgressTracking() {
         <Typography variant="h5" gutterBottom>
           {landId} Progress Overview
         </Typography>
-        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
+        <Breadcrumbs aria-label="breadcrumb" >
           <Link
             component={RouterLink}
-            to="/"
+            to="/manager"
             underline="hover"
             color="inherit"
             sx={{ display: "flex", alignItems: "center" }}

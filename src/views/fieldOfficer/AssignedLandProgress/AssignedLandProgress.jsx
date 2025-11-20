@@ -1,6 +1,7 @@
 // LandProgressTracking.jsx
 import React, { useState, useMemo } from "react";
-import { Typography, Box, Paper, Breadcrumbs, CircularProgress, Snackbar, Alert } from "@mui/material";
+import { Typography, Box, Paper, Breadcrumbs, CircularProgress, Snackbar, Alert ,Link} from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import LandDataGrid from "./LandDataGrid";
 import { useGetFieldOfficerLands } from "../../../hooks/land.hooks";
@@ -64,11 +65,17 @@ export default function AssignedLandProgress() {
         <Typography variant="h5" gutterBottom>
           Land Progress Tracking
         </Typography>
-        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
-          <Typography color="text.primary">
-            <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
+        <Breadcrumbs aria-label="breadcrumb" >
+          <Link
+            component={RouterLink}
+            to="/fieldOfficer"
+            underline="hover"
+            color="inherit"
+            sx={{ display: "flex", alignItems: "center" }}
+          >
+            <HomeIcon sx={{ mr: 0.5, fontSize: 18}} />
             Home
-          </Typography>
+          </Link>
           <Typography color="text.primary">Progress Tracking</Typography>
         </Breadcrumbs>
       </Box>

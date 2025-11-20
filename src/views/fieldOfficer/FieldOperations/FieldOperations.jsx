@@ -105,7 +105,7 @@ export default function FieldOperation() {
         <Typography variant="h5" gutterBottom>
           Operations
         </Typography>
-        <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem" }}>
+        <Breadcrumbs aria-label="breadcrumb">
           <Link
             component={RouterLink}
             to="/"

@@ -95,7 +95,7 @@ export default function DivisionProgress() {
       <Breadcrumbs aria-label="breadcrumb" sx={{ fontSize: "0.9rem", mb: 2 }}>
         <Link
           component={RouterLink}
-          to="/"
+          to="/manager"
           underline="hover"
           color="inherit"
           sx={{ display: "flex", alignItems: "center" }}

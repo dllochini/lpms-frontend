@@ -128,6 +128,9 @@ const LandRegistration3 = () => {
             <HomeIcon sx={{ mr: 0.5, fontSize: 18, verticalAlign: "middle" }} />
             Home
           </Link>
+          <Link underline="hover" color="inherit" href="/fieldOfficer/landRegistry">
+            Land Registry
+          </Link>
           <Typography color="text.primary">Add New Farmer & Land</Typography>
         </Breadcrumbs>
       </Box>
