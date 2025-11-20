@@ -10,7 +10,6 @@ import {
   CardContent,
   CircularProgress,
   Alert,
-  // --- ADDED Table Imports ---
   Table,
   TableBody,
   TableCell,
@@ -27,7 +26,7 @@ import { getUserById } from "../../api/user";
 export default function Dashboard() {
   const [userName, setUserName] = useState("");
   const [role, setRole] = useState("");
-  // const [division, setDivision] = useState(""); // <-- REMOVED (No longer needed for API call)
+  const [division, setDivision] = useState("");
   const [overview, setOverview] = useState({
     totalLands: 0,
     totalArea: 0,
@@ -66,7 +65,6 @@ export default function Dashboard() {
         // We no longer pass a specific divisionId. We want data for *all* divisions
         // this manager oversees.
         // We assume the API backend is updated to handle this.
-        const dashboardRes = await getHigherManagerDashboardCardInfo(); // <-- MODIFIED
 
         const divisionId = user.division?._id ?? user.division ?? null;
         setDivision(divisionId);
